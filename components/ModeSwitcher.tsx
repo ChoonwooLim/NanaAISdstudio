@@ -1,0 +1,36 @@
+import React from 'react';
+import { AppMode } from '../types';
+
+interface ModeSwitcherProps {
+    mode: AppMode;
+    setMode: (mode: AppMode) => void;
+}
+
+const ModeSwitcher: React.FC<ModeSwitcherProps> = ({ mode, setMode }) => {
+    const getButtonClass = (buttonMode: AppMode) => {
+        const baseClass = "w-full text-center px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300";
+        if (mode === buttonMode) {
+            return `${baseClass} bg-slate-700 text-white shadow-inner`;
+        }
+        return `${baseClass} bg-transparent text-slate-400 hover:bg-slate-800/50 hover:text-slate-200`;
+    };
+
+    return (
+        <div className="p-1 bg-slate-800/70 border border-slate-700 rounded-xl flex items-center space-x-1">
+            <button
+                onClick={() => setMode(AppMode.DESCRIPTION)}
+                className={getButtonClass(AppMode.DESCRIPTION)}
+            >
+                Product Description Generator
+            </button>
+            <button
+                onClick={() => setMode(AppMode.STORYBOARD)}
+                className={getButtonClass(AppMode.STORYBOARD)}
+            >
+                Storyboard Generator
+            </button>
+        </div>
+    );
+};
+
+export default ModeSwitcher;
