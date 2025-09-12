@@ -36,3 +36,11 @@ export const MOOD_OPTIONS: { value: Mood; label: string }[] = [
     { value: Mood.COMEDIC, label: 'Comedic & Lighthearted' },
     { value: Mood.EPIC, label: 'Epic & Grandiose' },
 ];
+
+export const DESCRIPTION_LANGUAGE_OPTIONS: { value: string; label: string }[] = [
+    { value: 'English', label: 'English' },
+    { value: 'Korean', label: '한국어' },
+    { value: 'Japanese', label: '日本語' },
+    { value: 'Spanish', label: 'Español' },
+    { value: 'French', label: 'Français' },
+];

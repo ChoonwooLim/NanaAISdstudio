@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type } from '@google/genai';
+import { GoogleGenAI, Type, GenerateContentResponse, GenerateImagesResponse } from '@google/genai';
 import { ProductDetails, Tone, StoryboardPanel, StoryboardConfig, AspectRatio, VisualStyle } from '../types';
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -40,6 +40,26 @@ const retryWithBackoff = async <T>(
     throw lastError || new Error('API call failed after all retries.');
 };
 
+export const translateText = async (text: string, targetLanguage: string, sourceLanguage?: string): Promise<string> => {
+    if (!text || text.trim() === '') return text;
+    const sourceLangInstruction = sourceLanguage ? ` from ${sourceLanguage}` : '';
+    const prompt = `Translate the following text${sourceLangInstruction} to ${targetLanguage}. Return ONLY the translated text, without any introductory phrases, explanations, or formatting like markdown or quotes.\n\nText to translate: "${text}"`;
+    
+    try {
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: prompt,
+            config: {
+                temperature: 0.1,
+            }
+        });
+        return response.text.trim();
+    } catch (error: any) {
+        console.error(`Error translating text to ${targetLanguage}:`, error);
+        throw new Error(`Failed to translate text. ${error.message}`);
+    }
+};
+
 
 const TONE_MAP: Record<Tone, string> = {
     [Tone.PROFESSIONAL]: 'professional, clear, and confident',
@@ -59,7 +79,8 @@ export const generateDescription = async (details: ProductDetails): Promise<stri
 The description should be engaging, highlight the key features as benefits, and be optimized for an e-commerce website. Do not use markdown. Return only the description text.`;
 
     try {
-        const response = await retryWithBackoff(() => ai.models.generateContent({
+        // FIX: Add GenerateContentResponse type to the response from Gemini API.
+        const response = await retryWithBackoff<GenerateContentResponse>(() => ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: prompt,
         }));
@@ -73,7 +94,8 @@ The description should be engaging, highlight the key features as benefits, and 
 
 const generateStoryboardScenes = async (prompt: string): Promise<{ description: string }[]> => {
      try {
-        const response = await retryWithBackoff(() => ai.models.generateContent({
+        // FIX: Add GenerateContentResponse type to the response from Gemini API.
+        const response = await retryWithBackoff<GenerateContentResponse>(() => ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: prompt,
             config: {
@@ -130,6 +152,8 @@ Creative Direction:
 
 For each of the ${config.sceneCount} scenes, provide a concise and vivid description that visually tells the story according to the specified mood and style.
 
+The "description" text for each scene MUST be in ${config.descriptionLanguage}.
+
 Return the result as a JSON array of objects, where each object has a "description" key.`;
     return generateStoryboardScenes(prompt);
 };
@@ -141,7 +165,8 @@ The image should be cinematic and high-quality.
 Scene description: "${description}"`;
 
     try {
-        const response = await retryWithBackoff(() => ai.models.generateImages({
+        // FIX: Add GenerateImagesResponse type to the response from Gemini API.
+        const response = await retryWithBackoff<GenerateImagesResponse>(() => ai.models.generateImages({
             model: 'imagen-4.0-generate-001',
             prompt: prompt,
             config: {
@@ -164,15 +189,16 @@ Scene description: "${description}"`;
 };
 
 
-export const expandSceneToDetailedPanels = async (sceneDescription: string): Promise<{ description: string }[]> => {
+export const expandSceneToDetailedPanels = async (sceneDescription: string, language: string): Promise<{ description: string }[]> => {
     const prompt = `Break down the following scene into 3 detailed shots for a storyboard. For each shot, provide a concise description focusing on camera angle, action, and subject.
 
 Original Scene: "${sceneDescription}"
 
-Return the result as a JSON array of objects, where each object has a "description" key.`;
+Return the result in ${language} as a JSON array of objects, where each object has a "description" key.`;
 
     try {
-        const response = await retryWithBackoff(() => ai.models.generateContent({
+        // FIX: Add GenerateContentResponse type to the response from Gemini API.
+        const response = await retryWithBackoff<GenerateContentResponse>(() => ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: prompt,
             config: {
@@ -210,6 +236,7 @@ export const generateVideoForPanel = async (description: string, imageBase64: st
     const prompt = `Generate a high-quality, cinematic video clip with a visual style of "${visualStyle}". The video must be exactly ${duration} seconds long. The scene is: "${description}"`;
 
     try {
+        // FIX: The 'VideosOperation' type is not exported by '@google/genai'. The operation's type is inferred from the API response.
         let operation = await retryWithBackoff(() => ai.models.generateVideos({
             model: 'veo-2.0-generate-001',
             prompt: prompt,
@@ -224,6 +251,7 @@ export const generateVideoForPanel = async (description: string, imageBase64: st
 
         while (!operation.done) {
             await new Promise(resolve => setTimeout(resolve, 10000)); // Poll every 10 seconds
+            // FIX: The 'VideosOperation' type is not exported by '@google/genai'. The operation's type is inferred from the API response.
             operation = await retryWithBackoff(() => ai.operations.getVideosOperation({ operation: operation }), 3, 1000);
         }
 

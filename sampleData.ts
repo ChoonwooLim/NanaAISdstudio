@@ -54,6 +54,7 @@ export const sampleStoryIdeas: SampleStory[] = [
             visualStyle: VisualStyle.ANIME,
             videoLength: VideoLength.SHORT,
             mood: Mood.COMEDIC,
+            descriptionLanguage: 'English',
         }
     },
     {
@@ -64,6 +65,7 @@ export const sampleStoryIdeas: SampleStory[] = [
             visualStyle: VisualStyle.CLAYMATION,
             videoLength: VideoLength.MEDIUM,
             mood: Mood.EMOTIONAL,
+            descriptionLanguage: 'English',
         }
     },
     {
@@ -74,6 +76,7 @@ export const sampleStoryIdeas: SampleStory[] = [
             visualStyle: VisualStyle.CINEMATIC,
             videoLength: VideoLength.LONG,
             mood: Mood.MYSTERIOUS,
+            descriptionLanguage: 'English',
         }
     },
      {
@@ -84,6 +87,7 @@ export const sampleStoryIdeas: SampleStory[] = [
             visualStyle: VisualStyle.WATERCOLOR,
             videoLength: VideoLength.MEDIUM,
             mood: Mood.EMOTIONAL,
+            descriptionLanguage: 'English',
         }
     },
      {
@@ -94,6 +98,7 @@ export const sampleStoryIdeas: SampleStory[] = [
             visualStyle: VisualStyle.PHOTOREALISTIC,
             videoLength: VideoLength.SHORT,
             mood: Mood.FAST_PACED,
+            descriptionLanguage: 'English',
         }
     }
 ];

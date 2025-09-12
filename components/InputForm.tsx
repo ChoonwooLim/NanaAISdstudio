@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Tone } from '../types';
 import { TONE_OPTIONS } from '../constants';
@@ -15,6 +14,9 @@ interface InputFormProps {
     setTone: (value: Tone) => void;
     onSubmit: () => void;
     isLoading: boolean;
+    productNameIsKorean: boolean;
+    keyFeaturesIsKorean: boolean;
+    targetAudienceIsKorean: boolean;
 }
 
 const InputForm: React.FC<InputFormProps> = ({
@@ -28,6 +30,9 @@ const InputForm: React.FC<InputFormProps> = ({
     setTone,
     onSubmit,
     isLoading,
+    productNameIsKorean,
+    keyFeaturesIsKorean,
+    targetAudienceIsKorean,
 }) => {
     return (
         <form onSubmit={(e) => { e.preventDefault(); onSubmit(); }} className="space-y-6">
@@ -45,6 +50,7 @@ const InputForm: React.FC<InputFormProps> = ({
                         required
                         className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                     />
+                    {productNameIsKorean && <p className="text-xs text-cyan-400 mt-1">🇰🇷 Korean detected. This will be automatically translated to English.</p>}
                 </div>
                  <div>
                     <label htmlFor="tone" className="block text-sm font-medium text-slate-300 mb-2">
@@ -78,6 +84,7 @@ const InputForm: React.FC<InputFormProps> = ({
                     required
                     className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                 ></textarea>
+                 {keyFeaturesIsKorean && <p className="text-xs text-cyan-400 mt-1">🇰🇷 Korean detected. This will be automatically translated to English.</p>}
                 <p className="text-xs text-slate-500 mt-1">Separate features with commas.</p>
             </div>
             
@@ -93,6 +100,7 @@ const InputForm: React.FC<InputFormProps> = ({
                     placeholder="e.g., Remote workers, gamers, students"
                     className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                 />
+                 {targetAudienceIsKorean && <p className="text-xs text-cyan-400 mt-1">🇰🇷 Korean detected. This will be automatically translated to English.</p>}
             </div>
             
             <div className="pt-2">

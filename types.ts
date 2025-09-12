@@ -55,6 +55,7 @@ export interface StoryboardConfig {
     visualStyle: VisualStyle;
     videoLength: VideoLength;
     mood: Mood;
+    descriptionLanguage: string;
 }
 
 export interface StoryboardPanel {

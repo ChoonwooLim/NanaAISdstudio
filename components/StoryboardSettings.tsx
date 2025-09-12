@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { StoryboardConfig, AspectRatio, VisualStyle, VideoLength, Mood } from '../types';
-import { ASPECT_RATIO_OPTIONS, VISUAL_STYLE_OPTIONS, VIDEO_LENGTH_OPTIONS, MOOD_OPTIONS } from '../constants';
+import { ASPECT_RATIO_OPTIONS, VISUAL_STYLE_OPTIONS, VIDEO_LENGTH_OPTIONS, MOOD_OPTIONS, DESCRIPTION_LANGUAGE_OPTIONS } from '../constants';
 
 interface StoryboardSettingsProps {
     config: StoryboardConfig;
@@ -29,7 +28,7 @@ const StoryboardSettings: React.FC<StoryboardSettingsProps> = ({ config, setConf
     return (
         <fieldset>
             <legend className="block text-sm font-medium text-slate-300 mb-2">Creative Direction</legend>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-4 border border-slate-700 rounded-lg bg-slate-900/30">
+            <div className="grid grid-cols-2 gap-4 p-4 border border-slate-700 rounded-lg bg-slate-900/30">
                  <div>
                     <label htmlFor="sceneCount" className="block text-xs font-medium text-slate-400 mb-1">
                        Scenes
@@ -83,7 +82,7 @@ const StoryboardSettings: React.FC<StoryboardSettingsProps> = ({ config, setConf
                         {VIDEO_LENGTH_OPTIONS.map(o => <option key={o.value} value={o.value} className="bg-slate-800">{o.label}</option>)}
                     </select>
                 </div>
-                 <div className="col-span-2 md:col-span-2">
+                 <div>
                     <label htmlFor="mood" className="block text-xs font-medium text-slate-400 mb-1">
                        Mood & Pacing
                     </label>
@@ -94,6 +93,19 @@ const StoryboardSettings: React.FC<StoryboardSettingsProps> = ({ config, setConf
                         className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
                         {MOOD_OPTIONS.map(o => <option key={o.value} value={o.value} className="bg-slate-800">{o.label}</option>)}
+                    </select>
+                </div>
+                <div>
+                    <label htmlFor="descriptionLanguage" className="block text-xs font-medium text-slate-400 mb-1">
+                        Description Language
+                    </label>
+                    <select
+                        id="descriptionLanguage"
+                        value={config.descriptionLanguage}
+                        onChange={(e) => handleConfigChange('descriptionLanguage', e.target.value)}
+                        className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                        {DESCRIPTION_LANGUAGE_OPTIONS.map(o => <option key={o.value} value={o.value} className="bg-slate-800">{o.label}</option>)}
                     </select>
                 </div>
             </div>

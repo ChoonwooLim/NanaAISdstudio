@@ -1,4 +1,3 @@
-
 import React from 'react';
 import LoadingSpinner from './LoadingSpinner';
 import { StoryboardConfig } from '../types';
@@ -11,6 +10,7 @@ interface StoryboardInputFormProps {
     setConfig: (config: StoryboardConfig) => void;
     onSubmit: () => void;
     isLoading: boolean;
+    storyIdeaIsKorean: boolean;
 }
 
 const StoryboardInputForm: React.FC<StoryboardInputFormProps> = ({
@@ -20,6 +20,7 @@ const StoryboardInputForm: React.FC<StoryboardInputFormProps> = ({
     setConfig,
     onSubmit,
     isLoading,
+    storyIdeaIsKorean,
 }) => {
     return (
         <form onSubmit={(e) => { e.preventDefault(); onSubmit(); }} className="space-y-6">
@@ -36,6 +37,7 @@ const StoryboardInputForm: React.FC<StoryboardInputFormProps> = ({
                     required
                     className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                 ></textarea>
+                 {storyIdeaIsKorean && <p className="text-xs text-cyan-400 mt-1">🇰🇷 Korean detected. Your idea will be automatically translated to English for the AI.</p>}
                 <p className="text-xs text-slate-500 mt-1">Describe the story you want to visualize.</p>
             </div>
             

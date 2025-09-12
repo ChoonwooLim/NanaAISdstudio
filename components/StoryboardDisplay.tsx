@@ -1,16 +1,39 @@
+
 import React from 'react';
 import { StoryboardPanel } from '../types';
 import LoadingSpinner from './LoadingSpinner';
 import RefreshIcon from './icons/RefreshIcon';
+
+const DeleteIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        {...props}
+    >
+        <path d="M3 6h18" />
+        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+        <line x1="10" y1="11" x2="10" y2="17" />
+        <line x1="14" y1="11" x2="14" y2="17" />
+    </svg>
+);
 
 interface StoryboardDisplayProps {
     panels: StoryboardPanel[];
     onExpandScene: (sceneDescription: string, index: number) => void;
     onSceneDurationChange: (index: number, duration: number) => void;
     onRegenerateVideo: (index: number) => void;
+    onRegenerateImage: (index: number) => void;
+    onDeletePanel: (index: number) => void;
 }
 
-const StoryboardDisplay: React.FC<StoryboardDisplayProps> = ({ panels, onExpandScene, onSceneDurationChange, onRegenerateVideo }) => {
+const StoryboardDisplay: React.FC<StoryboardDisplayProps> = ({ panels, onExpandScene, onSceneDurationChange, onRegenerateVideo, onRegenerateImage, onDeletePanel }) => {
     return (
         <div className="mt-8">
             <h2 className="text-xl font-semibold text-slate-200 mb-4">Generated Storyboard</h2>
@@ -28,9 +51,29 @@ const StoryboardDisplay: React.FC<StoryboardDisplayProps> = ({ panels, onExpandS
                                 <img src={panel.imageUrl} alt={`Storyboard panel ${index + 1}: ${panel.description}`} className="w-full h-full object-cover" />
                             )}
                             {panel.imageUrl === 'error' && (
-                                 <div className="text-red-400 text-center p-4">
-                                    <p className="font-semibold">Oops!</p>
-                                    <p className="text-xs">Could not generate image for this panel.</p>
+                                 <div className="text-red-400 text-center p-4 flex flex-col items-center justify-center h-full">
+                                    <div>
+                                        <p className="font-semibold">Oops!</p>
+                                        <p className="text-xs">Could not generate image.</p>
+                                    </div>
+                                    <div className="mt-4 flex space-x-2">
+                                        <button
+                                            onClick={() => onRegenerateImage(index)}
+                                            className="flex items-center text-xs font-medium bg-yellow-600/50 hover:bg-yellow-600/80 text-yellow-200 py-1 px-2 rounded-md transition-colors"
+                                            title="Regenerate image"
+                                        >
+                                            <RefreshIcon className="w-3 h-3" />
+                                            <span className="ml-1.5">Regenerate</span>
+                                        </button>
+                                        <button
+                                            onClick={() => onDeletePanel(index)}
+                                            className="flex items-center text-xs font-medium bg-red-600/50 hover:bg-red-600/80 text-red-200 py-1 px-2 rounded-md transition-colors"
+                                            title="Delete panel"
+                                        >
+                                            <DeleteIcon className="w-3 h-3" />
+                                            <span className="ml-1.5">Delete</span>
+                                        </button>
+                                    </div>
                                  </div>
                             )}
                         </div>

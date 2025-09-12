@@ -18,6 +18,7 @@ import {
     generateImageForPanel,
     expandSceneToDetailedPanels,
     generateVideoForPanel,
+    translateText,
 } from './services/geminiService';
 import { getProjects, saveProject, deleteProject, getProject } from './services/db';
 
@@ -35,6 +36,7 @@ import GalleryModal from './components/GalleryModal';
 
 import { sampleProducts, sampleStoryIdeas } from './sampleData';
 
+const isKorean = (text: string): boolean => /[\u3131-\uD79D]/.test(text);
 
 const initialStoryboardConfig: StoryboardConfig = {
     sceneCount: 4,
@@ -42,6 +44,7 @@ const initialStoryboardConfig: StoryboardConfig = {
     visualStyle: VisualStyle.CINEMATIC,
     videoLength: VideoLength.MEDIUM,
     mood: Mood.EPIC,
+    descriptionLanguage: 'English',
 };
 
 const App: React.FC = () => {
@@ -166,7 +169,26 @@ const App: React.FC = () => {
         setDescription('');
 
         try {
-            const result = await generateDescription({ productName, keyFeatures, targetAudience, tone });
+            let finalProductName = productName;
+            let finalKeyFeatures = keyFeatures;
+            let finalTargetAudience = targetAudience;
+
+            if (isKorean(productName)) {
+                finalProductName = await translateText(productName, 'English');
+            }
+            if (isKorean(keyFeatures)) {
+                finalKeyFeatures = await translateText(keyFeatures, 'English');
+            }
+            if (targetAudience && isKorean(targetAudience)) {
+                finalTargetAudience = await translateText(targetAudience, 'English');
+            }
+
+            const result = await generateDescription({ 
+                productName: finalProductName, 
+                keyFeatures: finalKeyFeatures, 
+                targetAudience: finalTargetAudience, 
+                tone 
+            });
             setDescription(result);
         } catch (err: any) {
             setError(err.message || 'An unknown error occurred.');
@@ -191,7 +213,11 @@ const App: React.FC = () => {
         setStoryboardPanels([]);
 
         try {
-            const scenes = await generateStoryboardFromIdea(storyIdea, storyboardConfig);
+            let finalStoryIdea = storyIdea;
+            if (isKorean(storyIdea)) {
+                finalStoryIdea = await translateText(storyIdea, 'English');
+            }
+            const scenes = await generateStoryboardFromIdea(finalStoryIdea, storyboardConfig);
             const panels: StoryboardPanel[] = scenes.map(scene => ({
                 description: scene.description,
                 imageUrl: '',
@@ -235,6 +261,29 @@ const App: React.FC = () => {
         generateImages();
     }, [storyboardPanels, storyboardConfig.visualStyle, storyboardConfig.aspectRatio]);
 
+    const handleRegenerateImage = (indexToRegenerate: number) => {
+        setStoryboardPanels(prevPanels =>
+            prevPanels.map((panel, index) => {
+                if (index === indexToRegenerate) {
+                    return {
+                        ...panel,
+                        imageUrl: '', // Reset image URL
+                        isLoadingImage: true, // Set loading state to true
+                    };
+                }
+                return panel;
+            })
+        );
+    };
+
+    const handleDeletePanel = (indexToDelete: number) => {
+        if (window.confirm(`Are you sure you want to delete Panel ${indexToDelete + 1}?`)) {
+            setStoryboardPanels(prevPanels =>
+                prevPanels.filter((_, index) => index !== indexToDelete)
+            );
+        }
+    };
+
     const handleExpandScene = async (sceneDescription: string, index: number) => {
         setExpandingSceneIndex(index);
         setIsModalOpen(true);
@@ -243,7 +292,7 @@ const App: React.FC = () => {
         setModalPanels([]);
 
         try {
-            const detailedScenes = await expandSceneToDetailedPanels(sceneDescription);
+            const detailedScenes = await expandSceneToDetailedPanels(sceneDescription, storyboardConfig.descriptionLanguage);
             const initialModalPanels: DetailedStoryboardPanel[] = detailedScenes.map(scene => ({
                 description: scene.description,
                 imageUrl: '',
@@ -338,6 +387,11 @@ const App: React.FC = () => {
     const canGenerateVideos = storyboardPanels.length > 0 && storyboardPanels.every(p => p.imageUrl && p.imageUrl !== 'error');
     const hasVideos = storyboardPanels.some(p => p.videoUrl && p.videoUrl !== 'error');
 
+    const productNameIsKorean = isKorean(productName);
+    const keyFeaturesIsKorean = isKorean(keyFeatures);
+    const targetAudienceIsKorean = isKorean(targetAudience);
+    const storyIdeaIsKorean = isKorean(storyIdea);
+
     return (
         <div className="bg-slate-900 text-white min-h-screen font-sans">
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -366,6 +420,9 @@ const App: React.FC = () => {
                                 setTone={setTone}
                                 onSubmit={handleGenerateDescription}
                                 isLoading={isLoading}
+                                productNameIsKorean={productNameIsKorean}
+                                keyFeaturesIsKorean={keyFeaturesIsKorean}
+                                targetAudienceIsKorean={targetAudienceIsKorean}
                             />
                         </>
                     ) : (
@@ -382,6 +439,7 @@ const App: React.FC = () => {
                                 setConfig={setStoryboardConfig}
                                 onSubmit={handleGenerateStoryboard}
                                 isLoading={isLoading}
+                                storyIdeaIsKorean={storyIdeaIsKorean}
                             />
                         </>
                     )}
@@ -421,6 +479,8 @@ const App: React.FC = () => {
                             onExpandScene={handleExpandScene} 
                             onSceneDurationChange={handleSceneDurationChange}
                             onRegenerateVideo={handleRegenerateVideo}
+                            onRegenerateImage={handleRegenerateImage}
+                            onDeletePanel={handleDeletePanel}
                         />
                          <div className="mt-6 flex justify-center items-center gap-4">
                             <button
