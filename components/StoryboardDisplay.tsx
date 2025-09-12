@@ -1,14 +1,16 @@
 import React from 'react';
 import { StoryboardPanel } from '../types';
 import LoadingSpinner from './LoadingSpinner';
+import RefreshIcon from './icons/RefreshIcon';
 
 interface StoryboardDisplayProps {
     panels: StoryboardPanel[];
     onExpandScene: (sceneDescription: string, index: number) => void;
     onSceneDurationChange: (index: number, duration: number) => void;
+    onRegenerateVideo: (index: number) => void;
 }
 
-const StoryboardDisplay: React.FC<StoryboardDisplayProps> = ({ panels, onExpandScene, onSceneDurationChange }) => {
+const StoryboardDisplay: React.FC<StoryboardDisplayProps> = ({ panels, onExpandScene, onSceneDurationChange, onRegenerateVideo }) => {
     return (
         <div className="mt-8">
             <h2 className="text-xl font-semibold text-slate-200 mb-4">Generated Storyboard</h2>
@@ -61,9 +63,22 @@ const StoryboardDisplay: React.FC<StoryboardDisplayProps> = ({ panels, onExpandS
                         </div>
                          {(panel.isLoadingVideo || panel.videoUrl) && (
                             <div className="border-t border-slate-700 p-3 bg-slate-900/50">
-                                <h4 className="text-xs font-semibold text-slate-400 mb-2">Video Clip</h4>
+                                <div className="flex justify-between items-center mb-2">
+                                    <h4 className="text-xs font-semibold text-slate-400">Video Clip</h4>
+                                    {panel.videoUrl && (
+                                        <button
+                                            onClick={() => onRegenerateVideo(index)}
+                                            disabled={panel.isLoadingVideo}
+                                            className="flex items-center text-xs font-medium bg-cyan-600/50 hover:bg-cyan-600/80 text-cyan-200 py-1 px-2 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                            title="Regenerate this video clip"
+                                        >
+                                            <RefreshIcon className={`w-3 h-3 ${panel.isLoadingVideo ? 'animate-spin' : ''}`} />
+                                            <span className="ml-1.5">{panel.isLoadingVideo ? 'Generating...' : 'Regenerate'}</span>
+                                        </button>
+                                    )}
+                                </div>
                                 <div className="aspect-video bg-slate-800 rounded-md flex items-center justify-center">
-                                    {panel.isLoadingVideo && (
+                                    {panel.isLoadingVideo && !panel.videoUrl && (
                                         <div className="flex items-center text-slate-400">
                                             <LoadingSpinner />
                                             <p className="text-xs ml-2">Generating clip...</p>

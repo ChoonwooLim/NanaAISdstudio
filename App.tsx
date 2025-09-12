@@ -287,25 +287,36 @@ const App: React.FC = () => {
     const handleSceneDurationChange = (index: number, duration: number) => {
         setStoryboardPanels(prev => prev.map((p, i) => i === index ? { ...p, sceneDuration: duration } : p));
     };
+
+    const generateVideoForSinglePanel = (index: number) => {
+        const panel = storyboardPanels[index];
+        if (panel && panel.imageUrl && panel.imageUrl.startsWith('data:image')) {
+            setStoryboardPanels(prev => prev.map((p, i) => i === index ? { ...p, isLoadingVideo: true, videoUrl: undefined } : p));
+            
+            const imageBase64 = panel.imageUrl.split(',')[1];
+            generateVideoForPanel(panel.description, imageBase64, storyboardConfig.visualStyle, panel.sceneDuration || 4)
+                .then(videoUrl => {
+                    setStoryboardPanels(prev => prev.map((p, i) => i === index ? { ...p, videoUrl, isLoadingVideo: false } : p));
+                })
+                .catch(err => {
+                    console.error(`Failed to generate video for panel ${index}:`, err);
+                    setStoryboardPanels(prev => prev.map((p, i) => i === index ? { ...p, videoUrl: 'error', isLoadingVideo: false } : p));
+                });
+        }
+    }
     
     const handleGenerateAllVideos = () => {
         storyboardPanels.forEach((panel, index) => {
             if (panel.imageUrl && panel.imageUrl.startsWith('data:image') && !panel.videoUrl) {
-                setStoryboardPanels(prev => prev.map((p, i) => i === index ? { ...p, isLoadingVideo: true } : p));
-                
-                const imageBase64 = panel.imageUrl.split(',')[1];
-                generateVideoForPanel(panel.description, imageBase64, storyboardConfig.visualStyle, panel.sceneDuration || 4)
-                    .then(videoUrl => {
-                        setStoryboardPanels(prev => prev.map((p, i) => i === index ? { ...p, videoUrl, isLoadingVideo: false } : p));
-                    })
-                    .catch(err => {
-                        console.error(`Failed to generate video for panel ${index}:`, err);
-                        setStoryboardPanels(prev => prev.map((p, i) => i === index ? { ...p, videoUrl: 'error', isLoadingVideo: false } : p));
-                    });
+                generateVideoForSinglePanel(index);
             }
         });
     };
     
+    const handleRegenerateVideo = (index: number) => {
+        generateVideoForSinglePanel(index);
+    };
+
     const loadSampleProduct = () => {
         const sample = sampleProducts[Math.floor(Math.random() * sampleProducts.length)];
         setProductName(sample.productName);
@@ -409,6 +420,7 @@ const App: React.FC = () => {
                             panels={storyboardPanels} 
                             onExpandScene={handleExpandScene} 
                             onSceneDurationChange={handleSceneDurationChange}
+                            onRegenerateVideo={handleRegenerateVideo}
                         />
                          <div className="mt-6 flex justify-center items-center gap-4">
                             <button
