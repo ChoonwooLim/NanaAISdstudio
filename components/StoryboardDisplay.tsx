@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { StoryboardPanel } from '../types';
 import LoadingSpinner from './LoadingSpinner';
@@ -6,9 +5,10 @@ import LoadingSpinner from './LoadingSpinner';
 interface StoryboardDisplayProps {
     panels: StoryboardPanel[];
     onExpandScene: (sceneDescription: string, index: number) => void;
+    onSceneDurationChange: (index: number, duration: number) => void;
 }
 
-const StoryboardDisplay: React.FC<StoryboardDisplayProps> = ({ panels, onExpandScene }) => {
+const StoryboardDisplay: React.FC<StoryboardDisplayProps> = ({ panels, onExpandScene, onSceneDurationChange }) => {
     return (
         <div className="mt-8">
             <h2 className="text-xl font-semibold text-slate-200 mb-4">Generated Storyboard</h2>
@@ -34,7 +34,22 @@ const StoryboardDisplay: React.FC<StoryboardDisplayProps> = ({ panels, onExpandS
                         </div>
                         <div className="p-4 flex-grow flex flex-col bg-slate-800/40">
                             <p className="text-sm text-slate-300 leading-relaxed flex-grow">{panel.description}</p>
-                            <div className="mt-4 text-right">
+                            
+                            <div className="mt-4 flex justify-between items-center gap-4">
+                                {!panel.isLoadingImage && panel.imageUrl && panel.imageUrl !== 'error' ? (
+                                    <div className="flex items-center space-x-2">
+                                        <label htmlFor={`duration-${index}`} className="text-xs text-slate-400 flex-shrink-0">Duration (s):</label>
+                                        <input
+                                            id={`duration-${index}`}
+                                            type="number"
+                                            min="2"
+                                            max="10"
+                                            value={panel.sceneDuration || 4}
+                                            onChange={(e) => onSceneDurationChange(index, parseInt(e.target.value, 10))}
+                                            className="w-16 bg-slate-700/50 border border-slate-600 rounded-md px-2 py-1 text-xs text-white focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
+                                        />
+                                    </div>
+                                ) : <div />}
                                 <button
                                     onClick={() => onExpandScene(panel.description, index)}
                                     className="bg-teal-600/50 hover:bg-teal-600/80 border border-teal-500/60 text-teal-200 text-xs font-semibold py-1.5 px-3 rounded-md transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"

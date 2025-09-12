@@ -206,8 +206,8 @@ Return the result as a JSON array of objects, where each object has a "descripti
     }
 };
 
-export const generateVideoForPanel = async (description: string, imageBase64: string, visualStyle: VisualStyle): Promise<string> => {
-    const prompt = `Create a very short video clip, approximately 3-5 seconds long, for a single storyboard scene. The visual style must be ${visualStyle}. Scene: "${description}"`;
+export const generateVideoForPanel = async (description: string, imageBase64: string, visualStyle: VisualStyle, duration: number): Promise<string> => {
+    const prompt = `Create a video clip, approximately ${duration} seconds long, for a single storyboard scene. The visual style must be ${visualStyle}. Scene: "${description}"`;
 
     try {
         let operation = await retryWithBackoff(() => ai.models.generateVideos({

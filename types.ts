@@ -1,4 +1,4 @@
-
+// FIX: Removed circular dependency import of AppState, as it is defined within this file.
 
 export enum Tone {
     PROFESSIONAL = 'PROFESSIONAL',
@@ -63,6 +63,7 @@ export interface StoryboardPanel {
     isLoadingImage: boolean;
     videoUrl?: string; // Can be a blob URL, 'error', or undefined
     isLoadingVideo?: boolean;
+    sceneDuration?: number; // Duration in seconds for the video clip
 }
 
 export interface DetailedStoryboardPanel {
@@ -71,6 +72,7 @@ export interface DetailedStoryboardPanel {
     isLoadingImage: boolean;
     videoUrl?: string;
     isLoadingVideo?: boolean;
+    sceneDuration?: number; // Duration in seconds for the video clip
 }
 
 // App state structure for saving/loading

@@ -1,79 +1,95 @@
 import React, { useState, useEffect } from 'react';
+import {
+    AppMode,
+    Tone,
+    StoryboardConfig,
+    StoryboardPanel,
+    AspectRatio,
+    VisualStyle,
+    VideoLength,
+    Mood,
+    DetailedStoryboardPanel,
+    Project,
+    AppState
+} from './types';
+import {
+    generateDescription,
+    generateStoryboardFromIdea,
+    generateImageForPanel,
+    expandSceneToDetailedPanels,
+    generateVideoForPanel,
+} from './services/geminiService';
+import { getProjects, saveProject, deleteProject, getProject } from './services/db';
+
 import Header from './components/Header';
 import InputForm from './components/InputForm';
-import StoryboardInputForm from './components/StoryboardInputForm';
-import ModeSwitcher from './components/ModeSwitcher';
 import DescriptionDisplay from './components/DescriptionDisplay';
+import LoadingSpinner from './components/LoadingSpinner';
+import ApiKeyInstructions from './components/ApiKeyInstructions';
+import ModeSwitcher from './components/ModeSwitcher';
+import StoryboardInputForm from './components/StoryboardInputForm';
 import StoryboardDisplay from './components/StoryboardDisplay';
 import DetailedStoryboardModal from './components/DetailedStoryboardModal';
 import VideoDisplay from './components/VideoDisplay';
-import ApiKeyInstructions from './components/ApiKeyInstructions';
-import StoryboardSettings from './components/StoryboardSettings';
-import LoadingSpinner from './components/LoadingSpinner';
 import GalleryModal from './components/GalleryModal';
-import { Tone, StoryboardPanel, DetailedStoryboardPanel, AppMode, StoryboardConfig, AspectRatio, VisualStyle, VideoLength, Mood, Project, AppState } from './types';
-import * as geminiService from './services/geminiService';
-import * as dbService from './services/db';
+
 import { sampleProducts, sampleStoryIdeas } from './sampleData';
 
-const App: React.FC = () => {
-    // Check for API Key before rendering the main app
-    if (!process.env.API_KEY) {
-        return <ApiKeyInstructions />;
-    }
 
-    // App mode state
+const initialStoryboardConfig: StoryboardConfig = {
+    sceneCount: 4,
+    aspectRatio: AspectRatio.LANDSCAPE,
+    visualStyle: VisualStyle.CINEMATIC,
+    videoLength: VideoLength.MEDIUM,
+    mood: Mood.EPIC,
+};
+
+const App: React.FC = () => {
+    // App State
     const [mode, setMode] = useState<AppMode>(AppMode.DESCRIPTION);
-    
-    // Form state
     const [productName, setProductName] = useState('');
     const [keyFeatures, setKeyFeatures] = useState('');
     const [targetAudience, setTargetAudience] = useState('');
     const [tone, setTone] = useState<Tone>(Tone.PROFESSIONAL);
-    const [storyIdea, setStoryIdea] = useState('');
-    const [storyboardConfig, setStoryboardConfig] = useState<StoryboardConfig>({
-        sceneCount: 4,
-        aspectRatio: AspectRatio.LANDSCAPE,
-        visualStyle: VisualStyle.CINEMATIC,
-        videoLength: VideoLength.SHORT,
-        mood: Mood.FAST_PACED,
-    });
-
-    // Generation state
-    const [isLoadingDescription, setIsLoadingDescription] = useState(false);
-    const [isLoadingStoryboard, setIsLoadingStoryboard] = useState(false);
-    const [error, setError] = useState<string | null>(null);
     const [description, setDescription] = useState('');
+    const [storyIdea, setStoryIdea] = useState('');
+    const [storyboardConfig, setStoryboardConfig] = useState<StoryboardConfig>(initialStoryboardConfig);
     const [storyboardPanels, setStoryboardPanels] = useState<StoryboardPanel[]>([]);
+    
+    // UI State
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    // Detailed view modal state
+    // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [detailedPanels, setDetailedPanels] = useState<DetailedStoryboardPanel[]>([]);
+    const [modalPanels, setModalPanels] = useState<DetailedStoryboardPanel[]>([]);
     const [isModalLoading, setIsModalLoading] = useState(false);
     const [modalError, setModalError] = useState<string | null>(null);
-    const [originalSceneDescription, setOriginalSceneDescription] = useState<string>();
     const [expandingSceneIndex, setExpandingSceneIndex] = useState<number | null>(null);
-
-    // Video generation state
-    const [isBatchGenerating, setIsBatchGenerating] = useState(false);
-    const [generationProgress, setGenerationProgress] = useState({ current: 0, total: 0 });
     
     // Gallery State
     const [isGalleryOpen, setIsGalleryOpen] = useState(false);
     const [projects, setProjects] = useState<Project[]>([]);
-    const [isSaving, setIsSaving] = useState(false);
 
+    const apiKey = process.env.API_KEY;
+
+    // Load projects on mount
     useEffect(() => {
-        // Initialize DB on component mount
-        dbService.initDB();
-        loadProjectsForGallery();
-    }, []);
-
-    const loadProjectsForGallery = async () => {
-        const savedProjects = await dbService.getProjects();
-        setProjects(savedProjects);
-    };
+        if (apiKey) {
+            loadProjects();
+        }
+    }, [apiKey]);
     
+    const loadProjects = async () => {
+        try {
+            const savedProjects = await getProjects();
+            setProjects(savedProjects);
+        } catch (err) {
+            console.error("Failed to load projects:", err);
+            setError("Could not load saved projects from the database.");
+        }
+    };
+
     const applyState = (loadedState: AppState) => {
         setMode(loadedState.mode);
         setProductName(loadedState.productName);
@@ -84,423 +100,358 @@ const App: React.FC = () => {
         setStoryboardConfig(loadedState.storyboardConfig);
         setDescription(loadedState.description);
         setStoryboardPanels(loadedState.storyboardPanels);
-
-        // Reset transient states
-        setError(null);
-        setIsLoadingDescription(false);
-        setIsLoadingStoryboard(false);
-        setIsBatchGenerating(false);
-        setGenerationProgress({ current: 0, total: 0 });
-    };
-
-    const handleLoadProject = async (projectId: string) => {
-        try {
-            const projectState = await dbService.getProjectState(projectId);
-            if (projectState) {
-                applyState(projectState);
-                setIsGalleryOpen(false);
-            } else {
-                console.error("Project state not found");
-                setError("Could not load the project. It might have been deleted.");
-            }
-        } catch (err: any) {
-            console.error("Failed to load project:", err);
-            setError(`Failed to load project: ${err.message}`);
-        }
-    };
-
-    const handleSaveProject = async () => {
-        const title = mode === AppMode.DESCRIPTION ? productName : storyIdea;
-        if (!title.trim()) {
-            alert("Please provide a product name or story idea to save the project.");
-            return;
-        }
-
-        setIsSaving(true);
-        const currentState: AppState = {
-            mode,
-            productName,
-            keyFeatures,
-            targetAudience,
-            tone,
-            storyIdea,
-            storyboardConfig,
-            description,
-            storyboardPanels,
-        };
-        
-        try {
-            await dbService.saveProject(currentState);
-            await loadProjectsForGallery(); // Refresh gallery list
-        } catch (err: any) {
-            setError(`Failed to save project: ${err.message}`);
-        } finally {
-            setIsSaving(false);
-        }
     };
     
-    const handleDeleteProject = async (projectId: string) => {
-        if (window.confirm("Are you sure you want to delete this project? This action cannot be undone.")) {
-            try {
-                await dbService.deleteProject(projectId);
-                await loadProjectsForGallery(); // Refresh gallery
-            } catch (err: any) {
-                 setError(`Failed to delete project: ${err.message}`);
-            }
+    const handleLoadProject = async (id: string) => {
+        const project = await getProject(id);
+        if (project) {
+            applyState(project.appState);
+            setIsGalleryOpen(false);
+            setError(null);
+        } else {
+            setError("Failed to load the selected project.");
         }
     };
 
-
-    const resetState = (isModeChange: boolean = false) => {
-        setIsLoadingDescription(false);
-        setIsLoadingStoryboard(false);
-        setError(null);
-        setDescription('');
-        setStoryboardPanels([]);
-        setIsModalOpen(false);
-        setDetailedPanels([]);
-        setIsModalLoading(false);
-        setModalError(null);
-        setExpandingSceneIndex(null);
-        setIsBatchGenerating(false);
-        setGenerationProgress({ current: 0, total: 0 });
-        if (isModeChange) {
-            setProductName('');
-            setKeyFeatures('');
-            setTargetAudience('');
-            setTone(Tone.PROFESSIONAL);
-            setStoryIdea('');
-            setStoryboardConfig({
-                sceneCount: 4,
-                aspectRatio: AspectRatio.LANDSCAPE,
-                visualStyle: VisualStyle.CINEMATIC,
-                videoLength: VideoLength.SHORT,
-                mood: Mood.FAST_PACED,
-            });
+    const handleDeleteProject = async (id: string) => {
+        if (window.confirm("Are you sure you want to delete this project?")) {
+            await deleteProject(id);
+            await loadProjects(); // Refresh the list
         }
     };
 
-    const handleModeChange = (newMode: AppMode) => {
-        if (newMode !== mode) {
-            setMode(newMode);
-            resetState(true);
-        }
-    };
+    const getAppState = (): AppState => ({
+        mode,
+        productName,
+        keyFeatures,
+        targetAudience,
+        tone,
+        storyIdea,
+        storyboardConfig,
+        description,
+        storyboardPanels,
+    });
 
-    const generateImagesForPanels = async (panelsData: {description: string}[], config: StoryboardConfig) => {
-        const initialPanels: StoryboardPanel[] = panelsData.map(p => ({
-            description: p.description,
-            imageUrl: '',
-            isLoadingImage: true
-        }));
-        setStoryboardPanels(initialPanels);
+    const handleSaveProject = async () => {
+        const title = productName || storyIdea || 'Untitled Project';
+        const timestamp = Date.now();
+        const id = timestamp.toString();
+        const thumbnailUrl = storyboardPanels.find(p => p.imageUrl && p.imageUrl !== 'error')?.imageUrl || '';
 
-        // Generate images sequentially with a delay to respect API rate limits
-        for (let i = 0; i < initialPanels.length; i++) {
-            const panel = initialPanels[i];
-            try {
-                const imageUrl = await geminiService.generateImageForPanel(panel.description, config.visualStyle, config.aspectRatio);
-                setStoryboardPanels(prev => prev.map((p, index) => index === i ? { ...p, imageUrl, isLoadingImage: false } : p));
-            } catch (err) {
-                console.error(`Failed to generate image for panel ${i}:`, err);
-                setStoryboardPanels(prev => prev.map((p, index) => index === i ? { ...p, imageUrl: 'error', isLoadingImage: false } : p));
-            }
-            
-            // Add a delay between requests to avoid hitting rate limits.
-            if (i < initialPanels.length - 1) {
-                await new Promise(resolve => setTimeout(resolve, 5000)); // 5 second delay
-            }
+        const project: Project = {
+            id,
+            title,
+            timestamp,
+            thumbnailUrl,
+            appState: getAppState(),
+        };
+
+        try {
+            await saveProject(project);
+            await loadProjects(); // Refresh gallery list
+            alert(`Project "${title}" saved!`);
+        } catch (err) {
+            console.error("Failed to save project:", err);
+            setError("Failed to save the project.");
         }
     };
 
     const handleGenerateDescription = async () => {
-        resetState();
-        setIsLoadingDescription(true);
-        try {
-            const generatedDesc = await geminiService.generateDescription({
-                productName,
-                keyFeatures,
-                targetAudience,
-                tone,
-            });
-            setDescription(generatedDesc);
-        } catch (err: any) {
-            setError(err.message || 'An unexpected error occurred.');
-        } finally {
-            setIsLoadingDescription(false);
-        }
-    };
-    
-    const handleGenerateStoryboardFromDesc = async () => {
-        if (!description) {
-            setError("No description available to generate a storyboard from.");
+        if (!productName || !keyFeatures) {
+            setError('Product Name and Key Features are required.');
             return;
         }
-        setIsLoadingStoryboard(true);
-        setStoryboardPanels([]);
+        setIsLoading(true);
         setError(null);
+        setDescription('');
+
         try {
-            const panelsData = await geminiService.generateStoryboardFromDescription(description, storyboardConfig.sceneCount);
-            await generateImagesForPanels(panelsData, storyboardConfig);
+            const result = await generateDescription({ productName, keyFeatures, targetAudience, tone });
+            setDescription(result);
         } catch (err: any) {
-            setError(err.message || 'An unexpected error occurred while generating the storyboard.');
+            setError(err.message || 'An unknown error occurred.');
         } finally {
-            setIsLoadingStoryboard(false);
+            setIsLoading(false);
         }
     };
 
-     const handleGenerateStoryboardFromIdea = async () => {
-        resetState(false); // keep settings but clear results
-        setIsLoadingStoryboard(true);
+    const handleProceedToStoryboard = () => {
+        setMode(AppMode.STORYBOARD);
+        setStoryIdea(`Create a short video ad for ${productName}. The ad should highlight its key features: ${keyFeatures}. The tone should be ${tone}. Here is the product description for inspiration: "${description}"`);
+        setStoryboardPanels([]); // Clear previous storyboard
+    };
+
+    const handleGenerateStoryboard = async () => {
+        if (!storyIdea) {
+            setError('Story Idea is required.');
+            return;
+        }
+        setIsLoading(true);
+        setError(null);
+        setStoryboardPanels([]);
+
         try {
-            const panelsData = await geminiService.generateStoryboardFromIdea(storyIdea, storyboardConfig);
-            await generateImagesForPanels(panelsData, storyboardConfig);
+            const scenes = await generateStoryboardFromIdea(storyIdea, storyboardConfig);
+            const panels: StoryboardPanel[] = scenes.map(scene => ({
+                description: scene.description,
+                imageUrl: '',
+                isLoadingImage: true,
+                sceneDuration: 4,
+            }));
+            setStoryboardPanels(panels);
         } catch (err: any) {
-            setError(err.message || 'An unexpected error occurred.');
+            setError(err.message || 'Failed to generate storyboard scenes.');
+            setIsLoading(false); // Stop loading if scene generation fails
         } finally {
-            setIsLoadingStoryboard(false);
+            // The main loading spinner stops, but panel spinners will continue
+            setIsLoading(false);
         }
     };
-    
+
+    // Effect to generate images when panels are created/updated
+    useEffect(() => {
+        const generateImages = async () => {
+            const imagePromises = storyboardPanels.map((panel, index) => {
+                if (panel.isLoadingImage && !panel.imageUrl) {
+                    return generateImageForPanel(panel.description, storyboardConfig.visualStyle, storyboardConfig.aspectRatio)
+                        .then(imageUrl => ({ index, imageUrl, status: 'success' }))
+                        .catch(error => {
+                            console.error(`Failed to generate image for panel ${index}:`, error);
+                            return { index, imageUrl: 'error', status: 'error' };
+                        });
+                }
+                return null;
+            }).filter(Boolean);
+
+            for (const promise of imagePromises) {
+                 const result = await promise;
+                 if (result) {
+                    setStoryboardPanels(prevPanels =>
+                        prevPanels.map((p, i) => i === result.index ? { ...p, imageUrl: result.imageUrl, isLoadingImage: false } : p)
+                    );
+                 }
+            }
+        };
+        generateImages();
+    }, [storyboardPanels, storyboardConfig.visualStyle, storyboardConfig.aspectRatio]);
+
     const handleExpandScene = async (sceneDescription: string, index: number) => {
+        setExpandingSceneIndex(index);
         setIsModalOpen(true);
         setIsModalLoading(true);
         setModalError(null);
-        setDetailedPanels([]);
-        setOriginalSceneDescription(sceneDescription);
-        setExpandingSceneIndex(index);
+        setModalPanels([]);
 
         try {
-            const detailedPanelsData = await geminiService.expandSceneToDetailedPanels(sceneDescription);
-            const initialDetailedPanels: DetailedStoryboardPanel[] = detailedPanelsData.map(p => ({
-                description: p.description,
+            const detailedScenes = await expandSceneToDetailedPanels(sceneDescription);
+            const initialModalPanels: DetailedStoryboardPanel[] = detailedScenes.map(scene => ({
+                description: scene.description,
                 imageUrl: '',
                 isLoadingImage: true,
             }));
-            setDetailedPanels(initialDetailedPanels);
-            setIsModalLoading(false);
-
-            // Also generate these images sequentially with a delay
-            for (let i = 0; i < initialDetailedPanels.length; i++) {
-                const panel = initialDetailedPanels[i];
+            setModalPanels(initialModalPanels);
+            
+            const generatedPanels = await Promise.all(initialModalPanels.map(async (panel) => {
                 try {
-                    const imageUrl = await geminiService.generateImageForPanel(panel.description, storyboardConfig.visualStyle, storyboardConfig.aspectRatio);
-                    setDetailedPanels(prev => prev.map((p, idx) => idx === i ? { ...p, imageUrl, isLoadingImage: false } : p));
+                    const imageUrl = await generateImageForPanel(panel.description, storyboardConfig.visualStyle, storyboardConfig.aspectRatio);
+                    return { ...panel, imageUrl, isLoadingImage: false };
                 } catch (err) {
-                    setDetailedPanels(prev => prev.map((p, idx) => idx === i ? { ...p, imageUrl: 'error', isLoadingImage: false } : p));
+                    console.error(`Failed to generate modal image for "${panel.description}":`, err);
+                    return { ...panel, imageUrl: 'error', isLoadingImage: false };
                 }
-                
-                // Add a delay between requests to avoid hitting rate limits.
-                if (i < initialDetailedPanels.length - 1) {
-                    await new Promise(resolve => setTimeout(resolve, 5000)); // 5 second delay
-                }
-            }
+            }));
+            setModalPanels(generatedPanels);
 
         } catch (err: any) {
             setModalError(err.message || 'Failed to expand scene.');
+        } finally {
             setIsModalLoading(false);
         }
     };
 
     const handleSaveChangesFromModal = (editedPanels: DetailedStoryboardPanel[]) => {
-        if (expandingSceneIndex === null) return;
-
-        const newStoryboardPanels = [...storyboardPanels];
-        newStoryboardPanels.splice(expandingSceneIndex, 1, ...editedPanels as StoryboardPanel[]);
-        
-        setStoryboardPanels(newStoryboardPanels);
+        if (expandingSceneIndex !== null) {
+            const newPanels = [...storyboardPanels];
+            const panelsToInsert = editedPanels.map(p => ({
+                description: p.description,
+                imageUrl: p.imageUrl,
+                isLoadingImage: false,
+                sceneDuration: 4, 
+            }));
+            newPanels.splice(expandingSceneIndex, 1, ...panelsToInsert);
+            setStoryboardPanels(newPanels);
+        }
         setIsModalOpen(false);
-        setExpandingSceneIndex(null);
     };
 
-    const handleGenerateVideo = async () => {
-        const panelsToProcess = storyboardPanels.filter(p => p.imageUrl && p.imageUrl !== 'error');
-        if (panelsToProcess.length === 0) return;
-
-        setIsBatchGenerating(true);
-        setGenerationProgress({ current: 0, total: panelsToProcess.length });
-        
-        const processingDescriptions = new Set(panelsToProcess.map(p => p.description));
-        setStoryboardPanels(prev => 
-            prev.map(p => processingDescriptions.has(p.description) ? { ...p, isLoadingVideo: true, videoUrl: undefined } : p)
-        );
-
-        let currentCount = 0;
-        for (const panel of panelsToProcess) {
-            try {
-                // The imageUrl is a base64 or blob URL, which needs to be converted to base64 string for the API.
-                const imageBase64 = await dbService.urlToBase64(panel.imageUrl);
-                const videoUrl = await geminiService.generateVideoForPanel(panel.description, imageBase64, storyboardConfig.visualStyle);
-                
-                setStoryboardPanels(prev => 
-                    prev.map(p => p.description === panel.description ? { ...p, videoUrl, isLoadingVideo: false } : p)
-                );
-            } catch (error) {
-                console.error(`Failed to generate video for panel: ${panel.description}`, error);
-                setStoryboardPanels(prev => 
-                    prev.map(p => p.description === panel.description ? { ...p, isLoadingVideo: false, videoUrl: 'error' } : p)
-                );
-            }
-            currentCount++;
-            setGenerationProgress(prev => ({ ...prev, current: currentCount }));
-        }
-        
-        setIsBatchGenerating(false);
+    const handleSceneDurationChange = (index: number, duration: number) => {
+        setStoryboardPanels(prev => prev.map((p, i) => i === index ? { ...p, sceneDuration: duration } : p));
     };
-
-    const handleTrySample = () => {
-        resetState();
-        if (mode === AppMode.DESCRIPTION) {
-            const sample = sampleProducts[Math.floor(Math.random() * sampleProducts.length)];
-            setProductName(sample.productName);
-            setKeyFeatures(sample.keyFeatures);
-            setTargetAudience(sample.targetAudience);
-            setTone(sample.tone);
-        } else {
-            const sample = sampleStoryIdeas[Math.floor(Math.random() * sampleStoryIdeas.length)];
-            setStoryIdea(sample.idea);
-            setStoryboardConfig(sample.config);
-        }
-    };
-
-    const isGenerateVideoDisabled = isBatchGenerating || storyboardPanels.length === 0 || storyboardPanels.some(p => p.isLoadingImage) || !storyboardPanels.some(p => p.imageUrl && p.imageUrl !== 'error');
     
-    const panelsWithClips = storyboardPanels.filter(p => p.videoUrl && p.videoUrl !== 'error');
-    const totalPanelsForClips = storyboardPanels.filter(p => p.imageUrl && p.imageUrl !== 'error').length;
-    const allClipsGenerated = !isBatchGenerating && panelsWithClips.length > 0 && panelsWithClips.length === totalPanelsForClips;
+    const handleGenerateAllVideos = () => {
+        storyboardPanels.forEach((panel, index) => {
+            if (panel.imageUrl && panel.imageUrl.startsWith('data:image') && !panel.videoUrl) {
+                setStoryboardPanels(prev => prev.map((p, i) => i === index ? { ...p, isLoadingVideo: true } : p));
+                
+                const imageBase64 = panel.imageUrl.split(',')[1];
+                generateVideoForPanel(panel.description, imageBase64, storyboardConfig.visualStyle, panel.sceneDuration || 4)
+                    .then(videoUrl => {
+                        setStoryboardPanels(prev => prev.map((p, i) => i === index ? { ...p, videoUrl, isLoadingVideo: false } : p));
+                    })
+                    .catch(err => {
+                        console.error(`Failed to generate video for panel ${index}:`, err);
+                        setStoryboardPanels(prev => prev.map((p, i) => i === index ? { ...p, videoUrl: 'error', isLoadingVideo: false } : p));
+                    });
+            }
+        });
+    };
+    
+    const loadSampleProduct = () => {
+        const sample = sampleProducts[Math.floor(Math.random() * sampleProducts.length)];
+        setProductName(sample.productName);
+        setKeyFeatures(sample.keyFeatures);
+        setTargetAudience(sample.targetAudience);
+        setTone(sample.tone);
+    };
+
+    const loadSampleStory = () => {
+        const sample = sampleStoryIdeas[Math.floor(Math.random() * sampleStoryIdeas.length)];
+        setStoryIdea(sample.idea);
+        setStoryboardConfig(sample.config);
+    };
+
+    if (!apiKey) {
+        return <ApiKeyInstructions />;
+    }
+
+    const canGenerateVideos = storyboardPanels.length > 0 && storyboardPanels.every(p => p.imageUrl && p.imageUrl !== 'error');
+    const hasVideos = storyboardPanels.some(p => p.videoUrl && p.videoUrl !== 'error');
 
     return (
-        <div className="bg-slate-900 min-h-screen text-white font-sans">
-            <main className="container mx-auto px-4 py-8 sm:py-16">
+        <div className="bg-slate-900 text-white min-h-screen font-sans">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <Header mode={mode} onOpenGallery={() => setIsGalleryOpen(true)} />
-                <div className="mt-8 max-w-3xl mx-auto">
-                    <ModeSwitcher mode={mode} setMode={handleModeChange} />
-                </div>
-                <div className="mt-4 text-center">
-                    <button onClick={handleTrySample} disabled={isLoadingDescription || isLoadingStoryboard || isBatchGenerating} className="bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-600 font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50">
-                        ✨ Try a Sample
-                    </button>
-                </div>
-                <div className="mt-6 max-w-3xl mx-auto bg-slate-800/50 border border-slate-700 rounded-2xl p-6 sm:p-8 shadow-2xl">
-                    {mode === AppMode.DESCRIPTION ? (
-                        <InputForm
-                            productName={productName}
-                            setProductName={setProductName}
-                            keyFeatures={keyFeatures}
-                            setKeyFeatures={setKeyFeatures}
-                            targetAudience={targetAudience}
-                            setTargetAudience={setTargetAudience}
-                            tone={tone}
-                            setTone={setTone}
-                            onSubmit={handleGenerateDescription}
-                            isLoading={isLoadingDescription}
-                        />
-                    ) : (
-                        <StoryboardInputForm
-                            storyIdea={storyIdea}
-                            setStoryIdea={setStoryIdea}
-                            config={storyboardConfig}
-                            setConfig={setStoryboardConfig}
-                            onSubmit={handleGenerateStoryboardFromIdea}
-                            isLoading={isLoadingStoryboard}
-                        />
-                    )}
+
+                <div className="mt-8 max-w-lg mx-auto">
+                    <ModeSwitcher mode={mode} setMode={setMode} />
                 </div>
 
-                {error && !isLoadingDescription && !isLoadingStoryboard && (
-                    <div className="mt-8 max-w-3xl mx-auto p-4 bg-red-500/20 text-red-300 border border-red-500/30 rounded-lg">
+                <div className="mt-8 max-w-4xl mx-auto p-8 bg-slate-800/50 border border-slate-700 rounded-2xl shadow-xl">
+                    {mode === AppMode.DESCRIPTION ? (
+                        <>
+                            <div className="flex justify-end mb-4 -mt-2">
+                                <button onClick={loadSampleProduct} className="text-xs text-blue-400 hover:underline">
+                                    Load Sample Product
+                                </button>
+                            </div>
+                            <InputForm
+                                productName={productName}
+                                setProductName={setProductName}
+                                keyFeatures={keyFeatures}
+                                setKeyFeatures={setKeyFeatures}
+                                targetAudience={targetAudience}
+                                setTargetAudience={setTargetAudience}
+                                tone={tone}
+                                setTone={setTone}
+                                onSubmit={handleGenerateDescription}
+                                isLoading={isLoading}
+                            />
+                        </>
+                    ) : (
+                         <>
+                            <div className="flex justify-end mb-4 -mt-2">
+                                <button onClick={loadSampleStory} className="text-xs text-blue-400 hover:underline">
+                                    Load Sample Story
+                                </button>
+                            </div>
+                            <StoryboardInputForm
+                                storyIdea={storyIdea}
+                                setStoryIdea={setStoryIdea}
+                                config={storyboardConfig}
+                                setConfig={setStoryboardConfig}
+                                onSubmit={handleGenerateStoryboard}
+                                isLoading={isLoading}
+                            />
+                        </>
+                    )}
+                </div>
+                
+                {error && (
+                    <div className="mt-6 max-w-4xl mx-auto p-4 bg-red-500/20 text-red-300 border border-red-500/30 rounded-lg">
                         <p><span className="font-bold">Error:</span> {error}</p>
                     </div>
                 )}
 
-                {description && (
-                    <div className="mt-8 max-w-3xl mx-auto animate-fade-in">
+                {isLoading && mode === AppMode.DESCRIPTION && (
+                    <div className="text-center mt-8">
+                        <LoadingSpinner />
+                        <p className="mt-2 text-slate-400">Generating your compelling description...</p>
+                    </div>
+                )}
+                
+                {description && mode === AppMode.DESCRIPTION && (
+                    <div className="mt-8 max-w-4xl mx-auto">
                         <DescriptionDisplay description={description} />
+                        <div className="mt-6 text-center">
+                            <button
+                                onClick={handleProceedToStoryboard}
+                                className="bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white font-semibold py-3 px-8 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105"
+                            >
+                                🚀 Create Storyboard from Description
+                            </button>
+                        </div>
                     </div>
                 )}
 
-                {mode === AppMode.DESCRIPTION && description && storyboardPanels.length === 0 && (
-                     <div className="mt-8 max-w-3xl mx-auto bg-slate-800/50 border border-slate-700 rounded-2xl p-6 sm:p-8 shadow-2xl animate-slide-up">
-                        <h3 className="text-lg font-semibold text-slate-200 mb-4">Generate Storyboard from Description</h3>
-                        <div className="space-y-6">
-                            <StoryboardSettings config={storyboardConfig} setConfig={setStoryboardConfig} />
-                            <div className="pt-2">
-                                <button
-                                    onClick={handleGenerateStoryboardFromDesc}
-                                    disabled={isLoadingDescription || isLoadingStoryboard}
-                                    className="w-full flex items-center justify-center bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
-                                >
-                                    {isLoadingStoryboard ? (
-                                        <>
-                                            <LoadingSpinner />
-                                            <span className="ml-2">Generating Storyboard...</span>
-                                        </>
-                                    ) : (
-                                        '🎨 Generate Storyboard'
-                                    )}
-                                </button>
-                            </div>
+                {storyboardPanels.length > 0 && (
+                     <div className="mt-8 max-w-7xl mx-auto">
+                        <StoryboardDisplay 
+                            panels={storyboardPanels} 
+                            onExpandScene={handleExpandScene} 
+                            onSceneDurationChange={handleSceneDurationChange}
+                        />
+                         <div className="mt-6 flex justify-center items-center gap-4">
+                            <button
+                                onClick={handleGenerateAllVideos}
+                                disabled={!canGenerateVideos || storyboardPanels.some(p => p.isLoadingVideo)}
+                                className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-3 px-8 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                               🎬 Generate All Video Clips
+                            </button>
+                             <button
+                                onClick={handleSaveProject}
+                                disabled={!canGenerateVideos}
+                                className="bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-600 font-medium py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                💾 Save Project
+                            </button>
                         </div>
                     </div>
                 )}
                 
-                {storyboardPanels.length > 0 && (
-                    <div className="mt-8 max-w-5xl mx-auto">
-                        <StoryboardDisplay panels={storyboardPanels} onExpandScene={handleExpandScene} />
-                         <div className="mt-6 text-center">
-                            <button
-                                onClick={handleGenerateVideo}
-                                disabled={isGenerateVideoDisabled}
-                                className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-3 px-8 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
-                            >
-                                {isBatchGenerating ? `🎬 Generating Clips (${generationProgress.current}/${generationProgress.total})...` : '🎥 Generate All Video Clips'}
-                            </button>
-                         </div>
-                    </div>
+                {hasVideos && (
+                    <VideoDisplay panels={storyboardPanels} />
                 )}
 
-                {allClipsGenerated && (
-                     <div className="mt-8 max-w-5xl mx-auto animate-fade-in space-y-6">
-                        <VideoDisplay panels={storyboardPanels} />
-                        <div className="text-center">
-                            <button
-                                onClick={handleSaveProject}
-                                disabled={isSaving}
-                                className="bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white font-semibold py-3 px-8 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
-                            >
-                               {isSaving ? '💾 Saving...' : '💾 Save to Gallery'}
-                            </button>
-                        </div>
-                        <div className="text-center">
-                            <button
-                                disabled={true}
-                                className="bg-gradient-to-r from-orange-500 to-amber-600 text-white font-semibold py-3 px-8 rounded-lg shadow-lg transition-all duration-300 opacity-50 cursor-not-allowed"
-                            >
-                                🎵 Generate Audio Track
-                            </button>
-                            <p className="text-xs text-slate-500 mt-2">BGM & Sound Effect generation is coming soon!</p>
-                        </div>
-                    </div>
-                )}
-
-                <DetailedStoryboardModal 
-                    isOpen={isModalOpen}
-                    onClose={() => setIsModalOpen(false)}
-                    panels={detailedPanels}
-                    isLoading={isModalLoading}
-                    error={modalError}
-                    originalSceneDescription={originalSceneDescription}
-                    onSaveChanges={handleSaveChangesFromModal}
-                />
-
-                <GalleryModal 
-                    isOpen={isGalleryOpen}
-                    onClose={() => setIsGalleryOpen(false)}
-                    projects={projects}
-                    onLoad={handleLoadProject}
-                    onDelete={handleDeleteProject}
-                />
             </main>
+            
+            <DetailedStoryboardModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                panels={modalPanels}
+                isLoading={isModalLoading}
+                error={modalError}
+                originalSceneDescription={expandingSceneIndex !== null ? storyboardPanels[expandingSceneIndex]?.description : ''}
+                onSaveChanges={handleSaveChangesFromModal}
+            />
+
+            <GalleryModal
+                isOpen={isGalleryOpen}
+                onClose={() => setIsGalleryOpen(false)}
+                projects={projects}
+                onLoad={handleLoadProject}
+                onDelete={handleDeleteProject}
+            />
         </div>
     );
 };
