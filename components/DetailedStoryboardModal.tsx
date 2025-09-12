@@ -95,13 +95,20 @@ const DetailedStoryboardModal: React.FC<DetailedStoryboardModalProps> = ({
                                                 <p className="text-xs mt-2">Drawing shot {index + 1}...</p>
                                             </div>
                                         )}
-                                        {panel.imageUrl && panel.imageUrl !== 'error' && (
+                                        {panel.imageUrl && panel.imageUrl !== 'error' && panel.imageUrl !== 'quota_error' && (
                                             <img src={panel.imageUrl} alt={`Detailed panel ${index + 1}: ${panel.description}`} className="w-full h-full object-cover" />
                                         )}
                                         {panel.imageUrl === 'error' && (
                                             <div className="text-red-400 text-center p-4">
                                                 <p className="font-semibold">Oops!</p>
                                                 <p className="text-xs">Could not generate image.</p>
+                                            </div>
+                                        )}
+                                        {panel.imageUrl === 'quota_error' && (
+                                            <div className="text-yellow-400 text-center p-4">
+                                                <p className="font-semibold">Quota Exceeded</p>
+                                                <p className="text-xs mt-1">Cannot generate image.</p>
+                                                <p className="text-xs mt-1 text-slate-400">Please check your API plan.</p>
                                             </div>
                                         )}
                                     </div>

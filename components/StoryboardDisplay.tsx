@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { StoryboardPanel } from '../types';
 import LoadingSpinner from './LoadingSpinner';
@@ -31,9 +30,12 @@ interface StoryboardDisplayProps {
     onRegenerateVideo: (index: number) => void;
     onRegenerateImage: (index: number) => void;
     onDeletePanel: (index: number) => void;
+    isGeneratingImages: boolean;
 }
 
-const StoryboardDisplay: React.FC<StoryboardDisplayProps> = ({ panels, onExpandScene, onSceneDurationChange, onRegenerateVideo, onRegenerateImage, onDeletePanel }) => {
+const StoryboardDisplay: React.FC<StoryboardDisplayProps> = ({ panels, onExpandScene, onSceneDurationChange, onRegenerateVideo, onRegenerateImage, onDeletePanel, isGeneratingImages }) => {
+    const currentlyGeneratingIndex = panels.findIndex(p => p.isLoadingImage && !p.imageUrl);
+    
     return (
         <div className="mt-8">
             <h2 className="text-xl font-semibold text-slate-200 mb-4">Generated Storyboard</h2>
@@ -42,12 +44,18 @@ const StoryboardDisplay: React.FC<StoryboardDisplayProps> = ({ panels, onExpandS
                     <div key={index} className="bg-slate-900/70 border border-slate-700 rounded-lg overflow-hidden flex flex-col shadow-lg">
                         <div className="aspect-video bg-slate-800 flex items-center justify-center relative">
                             {panel.isLoadingImage && (
-                                <div className="flex flex-col items-center text-slate-400">
-                                    <LoadingSpinner />
-                                    <p className="text-xs mt-2">Drawing panel {index + 1}...</p>
+                                 <div className="flex flex-col items-center text-slate-400">
+                                    {isGeneratingImages && currentlyGeneratingIndex === index ? (
+                                        <>
+                                            <LoadingSpinner />
+                                            <p className="text-xs mt-2">Drawing panel {index + 1}...</p>
+                                        </>
+                                    ) : (
+                                         <p className="text-xs">Queued...</p>
+                                    )}
                                 </div>
                             )}
-                            {panel.imageUrl && panel.imageUrl !== 'error' && (
+                            {panel.imageUrl && panel.imageUrl !== 'error' && panel.imageUrl !== 'quota_error' && (
                                 <img src={panel.imageUrl} alt={`Storyboard panel ${index + 1}: ${panel.description}`} className="w-full h-full object-cover" />
                             )}
                             {panel.imageUrl === 'error' && (
@@ -76,6 +84,38 @@ const StoryboardDisplay: React.FC<StoryboardDisplayProps> = ({ panels, onExpandS
                                     </div>
                                  </div>
                             )}
+                             {panel.imageUrl === 'quota_error' && (
+                                <div className="text-yellow-400 text-center p-4 flex flex-col items-center justify-center h-full">
+                                    <div>
+                                        <p className="font-semibold">Quota Exceeded</p>
+                                        <p className="text-xs mt-1">You have exceeded your Gemini API quota.</p>
+                                        <p className="text-xs mt-2 text-slate-400">
+                                            Check your plan on the{' '}
+                                            <a href="https://ai.google.dev/gemini-api/docs/rate-limits" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+                                                Google AI Studio
+                                            </a> page.
+                                        </p>
+                                    </div>
+                                     <div className="mt-4 flex space-x-2">
+                                        <button
+                                            onClick={() => onRegenerateImage(index)}
+                                            className="flex items-center text-xs font-medium bg-yellow-600/50 hover:bg-yellow-600/80 text-yellow-200 py-1 px-2 rounded-md transition-colors"
+                                            title="Regenerate image"
+                                        >
+                                            <RefreshIcon className="w-3 h-3" />
+                                            <span className="ml-1.5">Regenerate</span>
+                                        </button>
+                                        <button
+                                            onClick={() => onDeletePanel(index)}
+                                            className="flex items-center text-xs font-medium bg-red-600/50 hover:bg-red-600/80 text-red-200 py-1 px-2 rounded-md transition-colors"
+                                            title="Delete panel"
+                                        >
+                                            <DeleteIcon className="w-3 h-3" />
+                                            <span className="ml-1.5">Delete</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                         <div className="p-4 flex-grow flex flex-col bg-slate-800/40">
                             <p className="text-sm text-slate-300 leading-relaxed flex-grow">{panel.description}</p>
@@ -98,7 +138,7 @@ const StoryboardDisplay: React.FC<StoryboardDisplayProps> = ({ panels, onExpandS
                                 <button
                                     onClick={() => onExpandScene(panel.description, index)}
                                     className="bg-teal-600/50 hover:bg-teal-600/80 border border-teal-500/60 text-teal-200 text-xs font-semibold py-1.5 px-3 rounded-md transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    disabled={!panel.imageUrl || panel.imageUrl === 'error'}
+                                    disabled={!panel.imageUrl || panel.imageUrl === 'error' || panel.imageUrl === 'quota_error'}
                                 >
                                    🎬 Expand Scene
                                 </button>

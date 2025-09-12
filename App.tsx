@@ -62,6 +62,8 @@ const App: React.FC = () => {
     // UI State
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [isGeneratingImages, setIsGeneratingImages] = useState(false);
+
 
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -139,7 +141,7 @@ const App: React.FC = () => {
         const title = productName || storyIdea || 'Untitled Project';
         const timestamp = Date.now();
         const id = timestamp.toString();
-        const thumbnailUrl = storyboardPanels.find(p => p.imageUrl && p.imageUrl !== 'error')?.imageUrl || '';
+        const thumbnailUrl = storyboardPanels.find(p => p.imageUrl && p.imageUrl !== 'error' && p.imageUrl !== 'quota_error')?.imageUrl || '';
 
         const project: Project = {
             id,
@@ -236,30 +238,53 @@ const App: React.FC = () => {
 
     // Effect to generate images when panels are created/updated
     useEffect(() => {
-        const generateImages = async () => {
-            const imagePromises = storyboardPanels.map((panel, index) => {
-                if (panel.isLoadingImage && !panel.imageUrl) {
-                    return generateImageForPanel(panel.description, storyboardConfig.visualStyle, storyboardConfig.aspectRatio)
-                        .then(imageUrl => ({ index, imageUrl, status: 'success' }))
-                        .catch(error => {
-                            console.error(`Failed to generate image for panel ${index}:`, error);
-                            return { index, imageUrl: 'error', status: 'error' };
-                        });
-                }
-                return null;
-            }).filter(Boolean);
+        const processImageQueue = async () => {
+            const panelToProcessIndex = storyboardPanels.findIndex(
+                (p) => p.isLoadingImage && !p.imageUrl
+            );
 
-            for (const promise of imagePromises) {
-                 const result = await promise;
-                 if (result) {
-                    setStoryboardPanels(prevPanels =>
-                        prevPanels.map((p, i) => i === result.index ? { ...p, imageUrl: result.imageUrl, isLoadingImage: false } : p)
-                    );
-                 }
+            if (panelToProcessIndex === -1 || isGeneratingImages) {
+                if(panelToProcessIndex === -1) {
+                    setIsGeneratingImages(false); 
+                }
+                return;
+            }
+
+            setIsGeneratingImages(true);
+            
+            const panel = storyboardPanels[panelToProcessIndex];
+
+            try {
+                const imageUrl = await generateImageForPanel(
+                    panel.description,
+                    storyboardConfig.visualStyle,
+                    storyboardConfig.aspectRatio
+                );
+                setStoryboardPanels((prevPanels) =>
+                    prevPanels.map((p, i) =>
+                        i === panelToProcessIndex
+                            ? { ...p, imageUrl, isLoadingImage: false }
+                            : p
+                    )
+                );
+            } catch (error: any) {
+                console.error(`Failed to generate image for panel ${panelToProcessIndex}:`, error);
+                const errorMessage = (error.message || '').includes('quota') ? 'quota_error' : 'error';
+                setStoryboardPanels((prevPanels) =>
+                    prevPanels.map((p, i) =>
+                        i === panelToProcessIndex
+                            ? { ...p, imageUrl: errorMessage, isLoadingImage: false }
+                            : p
+                    )
+                );
+            } finally {
+                setIsGeneratingImages(false);
             }
         };
-        generateImages();
-    }, [storyboardPanels, storyboardConfig.visualStyle, storyboardConfig.aspectRatio]);
+
+        processImageQueue();
+
+    }, [storyboardPanels, isGeneratingImages, storyboardConfig.visualStyle, storyboardConfig.aspectRatio]);
 
     const handleRegenerateImage = (indexToRegenerate: number) => {
         setStoryboardPanels(prevPanels =>
@@ -304,9 +329,10 @@ const App: React.FC = () => {
                 try {
                     const imageUrl = await generateImageForPanel(panel.description, storyboardConfig.visualStyle, storyboardConfig.aspectRatio);
                     return { ...panel, imageUrl, isLoadingImage: false };
-                } catch (err) {
+                } catch (err: any) {
                     console.error(`Failed to generate modal image for "${panel.description}":`, err);
-                    return { ...panel, imageUrl: 'error', isLoadingImage: false };
+                    const errorMessage = (err.message || '').includes('quota') ? 'quota_error' : 'error';
+                    return { ...panel, imageUrl: errorMessage, isLoadingImage: false };
                 }
             }));
             setModalPanels(generatedPanels);
@@ -384,7 +410,7 @@ const App: React.FC = () => {
         return <ApiKeyInstructions />;
     }
 
-    const canGenerateVideos = storyboardPanels.length > 0 && storyboardPanels.every(p => p.imageUrl && p.imageUrl !== 'error');
+    const canGenerateVideos = storyboardPanels.length > 0 && storyboardPanels.every(p => p.imageUrl && p.imageUrl !== 'error' && p.imageUrl !== 'quota_error');
     const hasVideos = storyboardPanels.some(p => p.videoUrl && p.videoUrl !== 'error');
 
     const productNameIsKorean = isKorean(productName);
@@ -481,6 +507,7 @@ const App: React.FC = () => {
                             onRegenerateVideo={handleRegenerateVideo}
                             onRegenerateImage={handleRegenerateImage}
                             onDeletePanel={handleDeletePanel}
+                            isGeneratingImages={isGeneratingImages}
                         />
                          <div className="mt-6 flex justify-center items-center gap-4">
                             <button

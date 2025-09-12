@@ -17,13 +17,21 @@ const retryWithBackoff = async <T>(
     delay = 2000,
     backoffFactor = 2
 ): Promise<T> => {
-    let lastError: Error | undefined;
+    let lastError: any;
 
     for (let i = 0; i < retries; i++) {
         try {
             return await fn();
         } catch (error: any) {
             lastError = error;
+
+            // Check for a specific quota error to avoid pointless retries.
+            const errorMessage = (error.message || '').toLowerCase();
+            if (errorMessage.includes('resource_exhausted') || errorMessage.includes('quota')) {
+                console.error('API Quota Exceeded. Aborting retries.', error);
+                throw new Error('You have exceeded your API quota. Please check your plan and billing details. For more information, visit https://ai.google.dev/gemini-api/docs/rate-limits');
+            }
+
             if (i < retries - 1) {
                 const waitTime = delay * Math.pow(backoffFactor, i);
                 console.warn(`API call failed. Retrying in ${waitTime}ms... (Attempt ${i + 1}/${retries})`, error.message);
@@ -34,7 +42,6 @@ const retryWithBackoff = async <T>(
     
     console.error('API call failed after all retries.', lastError);
     if (lastError) {
-        // Enhance the error message for better context in the UI.
         lastError.message = `API call failed after ${retries} attempts. Please try again later. Last error: ${lastError.message}`;
     }
     throw lastError || new Error('API call failed after all retries.');
@@ -79,7 +86,6 @@ export const generateDescription = async (details: ProductDetails): Promise<stri
 The description should be engaging, highlight the key features as benefits, and be optimized for an e-commerce website. Do not use markdown. Return only the description text.`;
 
     try {
-        // FIX: Add GenerateContentResponse type to the response from Gemini API.
         const response = await retryWithBackoff<GenerateContentResponse>(() => ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: prompt,
@@ -88,13 +94,13 @@ The description should be engaging, highlight the key features as benefits, and 
         return response.text.trim();
     } catch (error: any) {
         console.error('Error generating description:', error);
+        if ((error.message || '').includes('quota')) throw error;
         throw new Error(`Failed to generate product description. ${error.message}`);
     }
 };
 
 const generateStoryboardScenes = async (prompt: string): Promise<{ description: string }[]> => {
      try {
-        // FIX: Add GenerateContentResponse type to the response from Gemini API.
         const response = await retryWithBackoff<GenerateContentResponse>(() => ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: prompt,
@@ -126,6 +132,7 @@ const generateStoryboardScenes = async (prompt: string): Promise<{ description: 
         }
     } catch (error: any) {
         console.error('Error generating storyboard scenes:', error);
+        if ((error.message || '').includes('quota')) throw error;
         throw new Error(`Failed to generate storyboard scenes. ${error.message}`);
     }
 }
@@ -165,7 +172,6 @@ The image should be cinematic and high-quality.
 Scene description: "${description}"`;
 
     try {
-        // FIX: Add GenerateImagesResponse type to the response from Gemini API.
         const response = await retryWithBackoff<GenerateImagesResponse>(() => ai.models.generateImages({
             model: 'imagen-4.0-generate-001',
             prompt: prompt,
@@ -184,7 +190,8 @@ Scene description: "${description}"`;
         }
     } catch (error: any) {
         console.error('Error generating image for panel:', error);
-        throw new Error(`Failed to generate image for the panel. ${error.message}`);
+        // Re-throw the original error to preserve specific messages (e.g., QuotaError)
+        throw error;
     }
 };
 
@@ -197,7 +204,6 @@ Original Scene: "${sceneDescription}"
 Return the result in ${language} as a JSON array of objects, where each object has a "description" key.`;
 
     try {
-        // FIX: Add GenerateContentResponse type to the response from Gemini API.
         const response = await retryWithBackoff<GenerateContentResponse>(() => ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: prompt,
@@ -228,6 +234,7 @@ Return the result in ${language} as a JSON array of objects, where each object h
         }
     } catch (error: any) {
         console.error('Error expanding scene:', error);
+        if ((error.message || '').includes('quota')) throw error;
         throw new Error(`Failed to expand scene. ${error.message}`);
     }
 };
@@ -236,7 +243,6 @@ export const generateVideoForPanel = async (description: string, imageBase64: st
     const prompt = `Generate a high-quality, cinematic video clip with a visual style of "${visualStyle}". The video must be exactly ${duration} seconds long. The scene is: "${description}"`;
 
     try {
-        // FIX: The 'VideosOperation' type is not exported by '@google/genai'. The operation's type is inferred from the API response.
         let operation = await retryWithBackoff(() => ai.models.generateVideos({
             model: 'veo-2.0-generate-001',
             prompt: prompt,
@@ -251,7 +257,6 @@ export const generateVideoForPanel = async (description: string, imageBase64: st
 
         while (!operation.done) {
             await new Promise(resolve => setTimeout(resolve, 10000)); // Poll every 10 seconds
-            // FIX: The 'VideosOperation' type is not exported by '@google/genai'. The operation's type is inferred from the API response.
             operation = await retryWithBackoff(() => ai.operations.getVideosOperation({ operation: operation }), 3, 1000);
         }
 
@@ -269,6 +274,7 @@ export const generateVideoForPanel = async (description: string, imageBase64: st
 
     } catch (error: any) {
         console.error('Error generating video for panel:', error);
+        if ((error.message || '').includes('quota')) throw error;
         throw new Error(`Failed to generate video for panel. ${error.message}`);
     }
 };
