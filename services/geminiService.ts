@@ -1,8 +1,6 @@
-// FIX: Import GenerateVideosResponse for use with Operation type.
-import { GoogleGenAI, Type, Operation, GenerateVideosResponse } from '@google/genai';
+import { GoogleGenAI, Type } from '@google/genai';
 import { ProductDetails, Tone, StoryboardPanel, StoryboardConfig, AspectRatio, VisualStyle } from '../types';
 
-// FIX: Initialize GoogleGenAI with apiKey from environment variables.
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 /**
@@ -61,13 +59,11 @@ export const generateDescription = async (details: ProductDetails): Promise<stri
 The description should be engaging, highlight the key features as benefits, and be optimized for an e-commerce website. Do not use markdown. Return only the description text.`;
 
     try {
-        // FIX: Use ai.models.generateContent for text generation.
         const response = await retryWithBackoff(() => ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: prompt,
         }));
 
-        // FIX: Extract text directly from response.text property.
         return response.text.trim();
     } catch (error: any) {
         console.error('Error generating description:', error);
@@ -77,7 +73,6 @@ The description should be engaging, highlight the key features as benefits, and 
 
 const generateStoryboardScenes = async (prompt: string): Promise<{ description: string }[]> => {
      try {
-        // FIX: Use responseSchema for structured JSON output.
         const response = await retryWithBackoff(() => ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: prompt,
@@ -99,7 +94,6 @@ const generateStoryboardScenes = async (prompt: string): Promise<{ description: 
             }
         }));
 
-        // FIX: Extract text directly from response.text property and parse JSON.
         const jsonText = response.text.trim();
         const panels = JSON.parse(jsonText);
         // Ensure it's an array of objects with a description property
@@ -115,8 +109,8 @@ const generateStoryboardScenes = async (prompt: string): Promise<{ description: 
 }
 
 
-export const generateStoryboardFromDescription = async (productDescription: string): Promise<{ description: string }[]> => {
-    const prompt = `Based on the following product description, create a 4-panel storyboard for a short video ad. For each panel, provide a concise scene description.
+export const generateStoryboardFromDescription = async (productDescription: string, sceneCount: number): Promise<{ description: string }[]> => {
+    const prompt = `Based on the following product description, create a ${sceneCount}-panel storyboard for a short video ad. For each panel, provide a concise scene description.
 
 Product Description: "${productDescription}"
 
@@ -147,7 +141,6 @@ The image should be cinematic and high-quality.
 Scene description: "${description}"`;
 
     try {
-        // FIX: Use ai.models.generateImages for image generation.
         const response = await retryWithBackoff(() => ai.models.generateImages({
             model: 'imagen-4.0-generate-001',
             prompt: prompt,
@@ -158,7 +151,6 @@ Scene description: "${description}"`;
             },
         }));
 
-        // FIX: Correctly access the generated image data.
         if (response.generatedImages && response.generatedImages.length > 0) {
             const base64ImageBytes = response.generatedImages[0].image.imageBytes;
             return `data:image/jpeg;base64,${base64ImageBytes}`;
@@ -180,7 +172,6 @@ Original Scene: "${sceneDescription}"
 Return the result as a JSON array of objects, where each object has a "description" key.`;
 
     try {
-        // FIX: Use responseSchema for structured JSON output.
         const response = await retryWithBackoff(() => ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: prompt,
@@ -202,7 +193,6 @@ Return the result as a JSON array of objects, where each object has a "descripti
             }
         }));
 
-        // FIX: Extract text directly from response.text property and parse JSON.
         const jsonText = response.text.trim();
         const panels = JSON.parse(jsonText);
         if (Array.isArray(panels) && panels.every(p => typeof p.description === 'string')) {
@@ -216,32 +206,15 @@ Return the result as a JSON array of objects, where each object has a "descripti
     }
 };
 
-
-export const generateVideoFromStoryboard = async (panels: StoryboardPanel[]): Promise<string> => {
-    // Note: VEO API currently takes text and/or a single image.
-    // This is a conceptual implementation: we'll use the first panel's image and a combined prompt.
-    if (panels.length === 0 || !panels[0].imageUrl || panels[0].imageUrl === 'error') {
-        throw new Error('Cannot generate video without at least one valid image and description.');
-    }
-
-    const combinedPrompt = panels.map((p, i) => `Scene ${i+1}: ${p.description}`).join('\n');
-    const firstImageBase64 = panels[0].imageUrl.split(',')[1]; // remove data:image/jpeg;base64,
-
-    const prompt = `Create a short, dynamic video ad based on the following storyboard.
-    
-Storyboard:
-${combinedPrompt}
-    
-The video should transition smoothly between the described scenes, maintaining a modern and engaging feel.`;
+export const generateVideoForPanel = async (description: string, imageBase64: string, visualStyle: VisualStyle): Promise<string> => {
+    const prompt = `Create a very short video clip, approximately 3-5 seconds long, for a single storyboard scene. The visual style must be ${visualStyle}. Scene: "${description}"`;
 
     try {
-        // FIX: Use ai.models.generateVideos for video generation.
-        // FIX: Correctly type the 'operation' variable with the generic 'Operation' type.
-        let operation: Operation<GenerateVideosResponse> = await retryWithBackoff(() => ai.models.generateVideos({
+        let operation = await retryWithBackoff(() => ai.models.generateVideos({
             model: 'veo-2.0-generate-001',
             prompt: prompt,
             image: {
-                imageBytes: firstImageBase64,
+                imageBytes: imageBase64,
                 mimeType: 'image/jpeg',
             },
             config: {
@@ -249,7 +222,6 @@ The video should transition smoothly between the described scenes, maintaining a
             }
         }));
 
-        // FIX: Poll for video operation completion.
         while (!operation.done) {
             await new Promise(resolve => setTimeout(resolve, 10000)); // Poll every 10 seconds
             operation = await retryWithBackoff(() => ai.operations.getVideosOperation({ operation: operation }), 3, 1000);
@@ -260,7 +232,6 @@ The video should transition smoothly between the described scenes, maintaining a
             throw new Error('Video generation completed, but no download link was found.');
         }
 
-        // FIX: Fetch video data and create a blob URL.
         const videoResponse = await fetch(`${downloadLink}&key=${process.env.API_KEY}`);
         if (!videoResponse.ok) {
             throw new Error(`Failed to download video file: ${videoResponse.statusText}`);
@@ -269,7 +240,7 @@ The video should transition smoothly between the described scenes, maintaining a
         return URL.createObjectURL(videoBlob);
 
     } catch (error: any) {
-        console.error('Error generating video:', error);
-        throw new Error(`Failed to generate video. ${error.message}`);
+        console.error('Error generating video for panel:', error);
+        throw new Error(`Failed to generate video for panel. ${error.message}`);
     }
 };

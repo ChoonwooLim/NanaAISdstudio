@@ -1,4 +1,4 @@
-import { Operation } from '@google/genai';
+
 
 export enum Tone {
     PROFESSIONAL = 'PROFESSIONAL',
@@ -59,14 +59,38 @@ export interface StoryboardConfig {
 
 export interface StoryboardPanel {
     description: string;
-    imageUrl: string; // Can be a base64 data URL, 'error', or empty string
+    imageUrl: string; // Can be a base64 data URL, blob URL, 'error', or empty string
     isLoadingImage: boolean;
+    videoUrl?: string; // Can be a blob URL, 'error', or undefined
+    isLoadingVideo?: boolean;
 }
 
 export interface DetailedStoryboardPanel {
     description: string;
-    imageUrl: string; // Can be a base64 data URL, 'error', or empty string
+    imageUrl: string; // Can be a base64 data URL, blob URL, 'error', or empty string
     isLoadingImage: boolean;
+    videoUrl?: string;
+    isLoadingVideo?: boolean;
 }
 
-export { Operation };
+// App state structure for saving/loading
+export interface AppState {
+    mode: AppMode;
+    productName: string;
+    keyFeatures: string;
+    targetAudience: string;
+    tone: Tone;
+    storyIdea: string;
+    storyboardConfig: StoryboardConfig;
+    description: string;
+    storyboardPanels: StoryboardPanel[];
+}
+
+// Structure for a saved project in the gallery
+export interface Project {
+    id: string; // Unique ID, e.g., timestamp
+    title: string;
+    timestamp: number;
+    thumbnailUrl: string; // First panel's image as a blob URL for quick preview
+    appState: AppState;
+}
