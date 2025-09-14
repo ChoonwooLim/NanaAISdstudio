@@ -8,7 +8,7 @@ const DeleteIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
         xmlns="http://www.w3.org/2000/svg"
         width="24"
         height="24"
-        viewBox="0 0 24 24"
+        viewBox="0 0 24"
         fill="none"
         stroke="currentColor"
         strokeWidth="2"
@@ -40,146 +40,152 @@ const StoryboardDisplay: React.FC<StoryboardDisplayProps> = ({ panels, onExpandS
         <div className="mt-8">
             <h2 className="text-xl font-semibold text-slate-200 mb-4">Generated Storyboard</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {panels.map((panel, index) => (
-                    <div key={index} className="bg-slate-900/70 border border-slate-700 rounded-lg overflow-hidden flex flex-col shadow-lg">
-                        <div className="aspect-video bg-slate-800 flex items-center justify-center relative">
-                            {panel.isLoadingImage && (
-                                 <div className="flex flex-col items-center text-slate-400">
-                                    {isGeneratingImages && currentlyGeneratingIndex === index ? (
-                                        <>
-                                            <LoadingSpinner />
-                                            <p className="text-xs mt-2">Drawing panel {index + 1}...</p>
-                                        </>
-                                    ) : (
-                                         <p className="text-xs">Queued...</p>
-                                    )}
+                {panels.map((panel, index) => {
+                    const canGenerateVideo = !panel.isLoadingImage && panel.imageUrl && panel.imageUrl.startsWith('data:image');
+
+                    return (
+                        <div key={index} className="bg-slate-900/70 border border-slate-700 rounded-lg overflow-hidden flex flex-col shadow-lg">
+                            <div className="aspect-video bg-slate-800 flex items-center justify-center relative">
+                                {panel.isLoadingImage && (
+                                     <div className="flex flex-col items-center text-slate-400">
+                                        {isGeneratingImages && currentlyGeneratingIndex === index ? (
+                                            <>
+                                                <LoadingSpinner />
+                                                <p className="text-xs mt-2">Drawing panel {index + 1}...</p>
+                                            </>
+                                        ) : (
+                                             <p className="text-xs">Queued...</p>
+                                        )}
+                                    </div>
+                                )}
+                                {panel.imageUrl && panel.imageUrl !== 'error' && panel.imageUrl !== 'quota_error' && (
+                                    <img src={panel.imageUrl} alt={`Storyboard panel ${index + 1}: ${panel.description}`} className="w-full h-full object-cover" />
+                                )}
+                                {panel.imageUrl === 'error' && (
+                                     <div className="text-red-400 text-center p-4 flex flex-col items-center justify-center h-full">
+                                        <div>
+                                            <p className="font-semibold">Oops!</p>
+                                            <p className="text-xs">Could not generate image.</p>
+                                        </div>
+                                     </div>
+                                )}
+                                 {panel.imageUrl === 'quota_error' && (
+                                    <div className="text-yellow-400 text-center p-4 flex flex-col items-center justify-center h-full">
+                                        <div>
+                                            <p className="font-semibold">Quota Exceeded</p>
+                                            <p className="text-xs mt-1">You have exceeded your Gemini API quota.</p>
+                                            <p className="text-xs mt-2 text-slate-400">
+                                                Check your plan on the{' '}
+                                                <a href="https://ai.google.dev/gemini-api/docs/rate-limits" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+                                                    Google AI Studio
+                                                </a> page.
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="p-4 flex-grow flex flex-col bg-slate-800/40 relative">
+                                {!panel.isLoadingImage && (
+                                    <div className="absolute top-3 right-3 flex space-x-2 z-10">
+                                        <button
+                                            onClick={() => onRegenerateImage(index)}
+                                            className="p-1.5 bg-slate-700/50 hover:bg-slate-700 rounded-full transition-colors"
+                                            title="Regenerate image"
+                                        >
+                                            <RefreshIcon className="w-4 h-4 text-slate-300" />
+                                        </button>
+                                        <button
+                                            onClick={() => onDeletePanel(index)}
+                                            className="p-1.5 bg-slate-700/50 hover:bg-slate-700 rounded-full transition-colors"
+                                            title="Delete panel"
+                                        >
+                                            <DeleteIcon className="w-4 h-4 text-slate-300 hover:text-red-400" />
+                                        </button>
+                                    </div>
+                                )}
+                                <p className="text-sm text-slate-300 leading-relaxed flex-grow pr-16">{panel.description}</p>
+                                
+                                <div className="mt-4 flex justify-between items-center gap-4">
+                                    {canGenerateVideo ? (
+                                        <div className="flex items-center space-x-2">
+                                            <label htmlFor={`duration-${index}`} className="text-xs text-slate-400 flex-shrink-0">Duration (s):</label>
+                                            <input
+                                                id={`duration-${index}`}
+                                                type="number"
+                                                min="2"
+                                                max="10"
+                                                value={panel.sceneDuration || 4}
+                                                onChange={(e) => onSceneDurationChange(index, parseInt(e.target.value, 10))}
+                                                className="w-16 bg-slate-700/50 border border-slate-600 rounded-md px-2 py-1 text-xs text-white focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
+                                            />
+                                        </div>
+                                    ) : <div />}
+                                    <button
+                                        onClick={() => onExpandScene(panel.description, index)}
+                                        className="bg-teal-600/50 hover:bg-teal-600/80 border border-teal-500/60 text-teal-200 text-xs font-semibold py-1.5 px-3 rounded-md transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        disabled={!canGenerateVideo}
+                                    >
+                                       🎬 Expand Scene
+                                    </button>
                                 </div>
-                            )}
-                            {panel.imageUrl && panel.imageUrl !== 'error' && panel.imageUrl !== 'quota_error' && (
-                                <img src={panel.imageUrl} alt={`Storyboard panel ${index + 1}: ${panel.description}`} className="w-full h-full object-cover" />
-                            )}
-                            {panel.imageUrl === 'error' && (
-                                 <div className="text-red-400 text-center p-4 flex flex-col items-center justify-center h-full">
-                                    <div>
-                                        <p className="font-semibold">Oops!</p>
-                                        <p className="text-xs">Could not generate image.</p>
+                            </div>
+                             {canGenerateVideo && (
+                                <div className="border-t border-slate-700 p-3 bg-slate-900/50">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <h4 className="text-xs font-semibold text-slate-400">Video Clip</h4>
+                                        
+                                        {!panel.isLoadingVideo && !panel.videoUrl && (
+                                            <button
+                                                onClick={() => onRegenerateVideo(index)}
+                                                className="flex items-center text-xs font-medium bg-green-600/50 hover:bg-green-600/80 text-green-200 py-1 px-2 rounded-md transition-colors"
+                                                title="Generate video for this panel"
+                                            >
+                                                🎬
+                                                <span className="ml-1.5">Generate Clip</span>
+                                            </button>
+                                        )}
+
+                                        {panel.videoUrl && (
+                                            <button
+                                                onClick={() => onRegenerateVideo(index)}
+                                                disabled={panel.isLoadingVideo}
+                                                className="flex items-center text-xs font-medium bg-cyan-600/50 hover:bg-cyan-600/80 text-cyan-200 py-1 px-2 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                title="Regenerate this video clip"
+                                            >
+                                                <RefreshIcon className={`w-3 h-3 ${panel.isLoadingVideo ? 'animate-spin' : ''}`} />
+                                                <span className="ml-1.5">{panel.isLoadingVideo ? 'Generating...' : 'Regenerate'}</span>
+                                            </button>
+                                        )}
                                     </div>
-                                    <div className="mt-4 flex space-x-2">
-                                        <button
-                                            onClick={() => onRegenerateImage(index)}
-                                            className="flex items-center text-xs font-medium bg-yellow-600/50 hover:bg-yellow-600/80 text-yellow-200 py-1 px-2 rounded-md transition-colors"
-                                            title="Regenerate image"
-                                        >
-                                            <RefreshIcon className="w-3 h-3" />
-                                            <span className="ml-1.5">Regenerate</span>
-                                        </button>
-                                        <button
-                                            onClick={() => onDeletePanel(index)}
-                                            className="flex items-center text-xs font-medium bg-red-600/50 hover:bg-red-600/80 text-red-200 py-1 px-2 rounded-md transition-colors"
-                                            title="Delete panel"
-                                        >
-                                            <DeleteIcon className="w-3 h-3" />
-                                            <span className="ml-1.5">Delete</span>
-                                        </button>
-                                    </div>
-                                 </div>
-                            )}
-                             {panel.imageUrl === 'quota_error' && (
-                                <div className="text-yellow-400 text-center p-4 flex flex-col items-center justify-center h-full">
-                                    <div>
-                                        <p className="font-semibold">Quota Exceeded</p>
-                                        <p className="text-xs mt-1">You have exceeded your Gemini API quota.</p>
-                                        <p className="text-xs mt-2 text-slate-400">
-                                            Check your plan on the{' '}
-                                            <a href="https://ai.google.dev/gemini-api/docs/rate-limits" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
-                                                Google AI Studio
-                                            </a> page.
-                                        </p>
-                                    </div>
-                                     <div className="mt-4 flex space-x-2">
-                                        <button
-                                            onClick={() => onRegenerateImage(index)}
-                                            className="flex items-center text-xs font-medium bg-yellow-600/50 hover:bg-yellow-600/80 text-yellow-200 py-1 px-2 rounded-md transition-colors"
-                                            title="Regenerate image"
-                                        >
-                                            <RefreshIcon className="w-3 h-3" />
-                                            <span className="ml-1.5">Regenerate</span>
-                                        </button>
-                                        <button
-                                            onClick={() => onDeletePanel(index)}
-                                            className="flex items-center text-xs font-medium bg-red-600/50 hover:bg-red-600/80 text-red-200 py-1 px-2 rounded-md transition-colors"
-                                            title="Delete panel"
-                                        >
-                                            <DeleteIcon className="w-3 h-3" />
-                                            <span className="ml-1.5">Delete</span>
-                                        </button>
+                                    <div className="aspect-video bg-slate-800 rounded-md flex items-center justify-center text-center">
+                                        {panel.isLoadingVideo && (
+                                            <div className="text-slate-400">
+                                                <div className="inline-block">
+                                                    <LoadingSpinner />
+                                                </div>
+                                                <p className="text-xs mt-2">Generating clip...</p>
+                                                <p className="text-xs text-slate-500">(this may take a minute)</p>
+                                            </div>
+                                        )}
+                                        {!panel.isLoadingVideo && panel.videoUrl === 'error' && (
+                                            <div className="text-red-400">
+                                                <p className="text-xs font-semibold">Clip generation failed.</p>
+                                            </div>
+                                        )}
+                                        {!panel.isLoadingVideo && panel.videoUrl && panel.videoUrl !== 'error' && (
+                                            <video controls src={panel.videoUrl} className="w-full h-full rounded-md" />
+                                        )}
+                                        {!panel.isLoadingVideo && !panel.videoUrl && (
+                                            <div className="text-slate-500 text-xs">
+                                                Click "Generate Clip" to create a video.
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             )}
                         </div>
-                        <div className="p-4 flex-grow flex flex-col bg-slate-800/40">
-                            <p className="text-sm text-slate-300 leading-relaxed flex-grow">{panel.description}</p>
-                            
-                            <div className="mt-4 flex justify-between items-center gap-4">
-                                {!panel.isLoadingImage && panel.imageUrl && panel.imageUrl !== 'error' ? (
-                                    <div className="flex items-center space-x-2">
-                                        <label htmlFor={`duration-${index}`} className="text-xs text-slate-400 flex-shrink-0">Duration (s):</label>
-                                        <input
-                                            id={`duration-${index}`}
-                                            type="number"
-                                            min="2"
-                                            max="10"
-                                            value={panel.sceneDuration || 4}
-                                            onChange={(e) => onSceneDurationChange(index, parseInt(e.target.value, 10))}
-                                            className="w-16 bg-slate-700/50 border border-slate-600 rounded-md px-2 py-1 text-xs text-white focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
-                                        />
-                                    </div>
-                                ) : <div />}
-                                <button
-                                    onClick={() => onExpandScene(panel.description, index)}
-                                    className="bg-teal-600/50 hover:bg-teal-600/80 border border-teal-500/60 text-teal-200 text-xs font-semibold py-1.5 px-3 rounded-md transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    disabled={!panel.imageUrl || panel.imageUrl === 'error' || panel.imageUrl === 'quota_error'}
-                                >
-                                   🎬 Expand Scene
-                                </button>
-                            </div>
-                        </div>
-                         {(panel.isLoadingVideo || panel.videoUrl) && (
-                            <div className="border-t border-slate-700 p-3 bg-slate-900/50">
-                                <div className="flex justify-between items-center mb-2">
-                                    <h4 className="text-xs font-semibold text-slate-400">Video Clip</h4>
-                                    {panel.videoUrl && (
-                                        <button
-                                            onClick={() => onRegenerateVideo(index)}
-                                            disabled={panel.isLoadingVideo}
-                                            className="flex items-center text-xs font-medium bg-cyan-600/50 hover:bg-cyan-600/80 text-cyan-200 py-1 px-2 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                            title="Regenerate this video clip"
-                                        >
-                                            <RefreshIcon className={`w-3 h-3 ${panel.isLoadingVideo ? 'animate-spin' : ''}`} />
-                                            <span className="ml-1.5">{panel.isLoadingVideo ? 'Generating...' : 'Regenerate'}</span>
-                                        </button>
-                                    )}
-                                </div>
-                                <div className="aspect-video bg-slate-800 rounded-md flex items-center justify-center">
-                                    {panel.isLoadingVideo && !panel.videoUrl && (
-                                        <div className="flex items-center text-slate-400">
-                                            <LoadingSpinner />
-                                            <p className="text-xs ml-2">Generating clip...</p>
-                                        </div>
-                                    )}
-                                    {panel.videoUrl && panel.videoUrl === 'error' && (
-                                        <div className="text-red-400 text-center">
-                                            <p className="text-xs font-semibold">Clip generation failed.</p>
-                                        </div>
-                                    )}
-                                     {panel.videoUrl && panel.videoUrl !== 'error' && (
-                                        <video controls src={panel.videoUrl} className="w-full h-full rounded-md" />
-                                    )}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                ))}
+                    );
+                })}
             </div>
         </div>
     );

@@ -55,6 +55,8 @@ export const sampleStoryIdeas: SampleStory[] = [
             videoLength: VideoLength.SHORT,
             mood: Mood.COMEDIC,
             descriptionLanguage: 'English',
+            textModel: 'gemini-2.5-flash',
+            imageModel: 'imagen-4.0-generate-001',
         }
     },
     {
@@ -66,6 +68,8 @@ export const sampleStoryIdeas: SampleStory[] = [
             videoLength: VideoLength.MEDIUM,
             mood: Mood.EMOTIONAL,
             descriptionLanguage: 'English',
+            textModel: 'gemini-2.5-flash',
+            imageModel: 'imagen-4.0-generate-001',
         }
     },
     {
@@ -77,6 +81,8 @@ export const sampleStoryIdeas: SampleStory[] = [
             videoLength: VideoLength.LONG,
             mood: Mood.MYSTERIOUS,
             descriptionLanguage: 'English',
+            textModel: 'gemini-2.5-flash',
+            imageModel: 'imagen-4.0-generate-001',
         }
     },
      {
@@ -88,6 +94,8 @@ export const sampleStoryIdeas: SampleStory[] = [
             videoLength: VideoLength.MEDIUM,
             mood: Mood.EMOTIONAL,
             descriptionLanguage: 'English',
+            textModel: 'gemini-2.5-flash',
+            imageModel: 'imagen-4.0-generate-001',
         }
     },
      {
@@ -99,6 +107,8 @@ export const sampleStoryIdeas: SampleStory[] = [
             videoLength: VideoLength.SHORT,
             mood: Mood.FAST_PACED,
             descriptionLanguage: 'English',
+            textModel: 'gemini-2.5-flash',
+            imageModel: 'imagen-4.0-generate-001',
         }
     }
 ];

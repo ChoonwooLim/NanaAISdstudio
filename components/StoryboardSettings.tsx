@@ -1,6 +1,14 @@
 import React from 'react';
 import { StoryboardConfig, AspectRatio, VisualStyle, VideoLength, Mood } from '../types';
-import { ASPECT_RATIO_OPTIONS, VISUAL_STYLE_OPTIONS, VIDEO_LENGTH_OPTIONS, MOOD_OPTIONS, DESCRIPTION_LANGUAGE_OPTIONS } from '../constants';
+import { 
+    ASPECT_RATIO_OPTIONS, 
+    VISUAL_STYLE_OPTIONS, 
+    VIDEO_LENGTH_OPTIONS, 
+    MOOD_OPTIONS, 
+    DESCRIPTION_LANGUAGE_OPTIONS,
+    TEXT_MODEL_OPTIONS,
+    IMAGE_MODEL_OPTIONS
+} from '../constants';
 
 interface StoryboardSettingsProps {
     config: StoryboardConfig;
@@ -106,6 +114,32 @@ const StoryboardSettings: React.FC<StoryboardSettingsProps> = ({ config, setConf
                         className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
                         {DESCRIPTION_LANGUAGE_OPTIONS.map(o => <option key={o.value} value={o.value} className="bg-slate-800">{o.label}</option>)}
+                    </select>
+                </div>
+                 <div>
+                    <label htmlFor="textModel" className="block text-xs font-medium text-slate-400 mb-1">
+                        Text Model
+                    </label>
+                    <select
+                        id="textModel"
+                        value={config.textModel}
+                        onChange={(e) => handleConfigChange('textModel', e.target.value)}
+                        className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                        {TEXT_MODEL_OPTIONS.map(o => <option key={o.value} value={o.value} className="bg-slate-800">{o.label}</option>)}
+                    </select>
+                </div>
+                 <div>
+                    <label htmlFor="imageModel" className="block text-xs font-medium text-slate-400 mb-1">
+                        Image Model
+                    </label>
+                    <select
+                        id="imageModel"
+                        value={config.imageModel}
+                        onChange={(e) => handleConfigChange('imageModel', e.target.value)}
+                        className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                        {IMAGE_MODEL_OPTIONS.map(o => <option key={o.value} value={o.value} className="bg-slate-800">{o.label}</option>)}
                     </select>
                 </div>
             </div>

@@ -45,6 +45,8 @@ const initialStoryboardConfig: StoryboardConfig = {
     videoLength: VideoLength.MEDIUM,
     mood: Mood.EPIC,
     descriptionLanguage: 'English',
+    textModel: 'gemini-2.5-flash',
+    imageModel: 'imagen-4.0-generate-001',
 };
 
 const App: React.FC = () => {
@@ -54,6 +56,8 @@ const App: React.FC = () => {
     const [keyFeatures, setKeyFeatures] = useState('');
     const [targetAudience, setTargetAudience] = useState('');
     const [tone, setTone] = useState<Tone>(Tone.PROFESSIONAL);
+    const [descriptionLanguage, setDescriptionLanguage] = useState('English');
+    const [descriptionModel, setDescriptionModel] = useState('gemini-2.5-flash');
     const [description, setDescription] = useState('');
     const [storyIdea, setStoryIdea] = useState('');
     const [storyboardConfig, setStoryboardConfig] = useState<StoryboardConfig>(initialStoryboardConfig);
@@ -101,6 +105,8 @@ const App: React.FC = () => {
         setKeyFeatures(loadedState.keyFeatures);
         setTargetAudience(loadedState.targetAudience);
         setTone(loadedState.tone);
+        setDescriptionLanguage(loadedState.descriptionLanguage || 'English');
+        setDescriptionModel(loadedState.descriptionModel || 'gemini-2.5-flash');
         setStoryIdea(loadedState.storyIdea);
         setStoryboardConfig(loadedState.storyboardConfig);
         setDescription(loadedState.description);
@@ -131,6 +137,8 @@ const App: React.FC = () => {
         keyFeatures,
         targetAudience,
         tone,
+        descriptionLanguage,
+        descriptionModel,
         storyIdea,
         storyboardConfig,
         description,
@@ -189,8 +197,9 @@ const App: React.FC = () => {
                 productName: finalProductName, 
                 keyFeatures: finalKeyFeatures, 
                 targetAudience: finalTargetAudience, 
-                tone 
-            });
+                tone,
+                language: descriptionLanguage,
+            }, descriptionModel);
             setDescription(result);
         } catch (err: any) {
             setError(err.message || 'An unknown error occurred.');
@@ -258,7 +267,8 @@ const App: React.FC = () => {
                 const imageUrl = await generateImageForPanel(
                     panel.description,
                     storyboardConfig.visualStyle,
-                    storyboardConfig.aspectRatio
+                    storyboardConfig.aspectRatio,
+                    storyboardConfig.imageModel,
                 );
                 setStoryboardPanels((prevPanels) =>
                     prevPanels.map((p, i) =>
@@ -284,7 +294,7 @@ const App: React.FC = () => {
 
         processImageQueue();
 
-    }, [storyboardPanels, isGeneratingImages, storyboardConfig.visualStyle, storyboardConfig.aspectRatio]);
+    }, [storyboardPanels, isGeneratingImages, storyboardConfig.visualStyle, storyboardConfig.aspectRatio, storyboardConfig.imageModel]);
 
     const handleRegenerateImage = (indexToRegenerate: number) => {
         setStoryboardPanels(prevPanels =>
@@ -317,7 +327,7 @@ const App: React.FC = () => {
         setModalPanels([]);
 
         try {
-            const detailedScenes = await expandSceneToDetailedPanels(sceneDescription, storyboardConfig.descriptionLanguage);
+            const detailedScenes = await expandSceneToDetailedPanels(sceneDescription, storyboardConfig.descriptionLanguage, storyboardConfig.textModel);
             const initialModalPanels: DetailedStoryboardPanel[] = detailedScenes.map(scene => ({
                 description: scene.description,
                 imageUrl: '',
@@ -327,7 +337,7 @@ const App: React.FC = () => {
             
             const generatedPanels = await Promise.all(initialModalPanels.map(async (panel) => {
                 try {
-                    const imageUrl = await generateImageForPanel(panel.description, storyboardConfig.visualStyle, storyboardConfig.aspectRatio);
+                    const imageUrl = await generateImageForPanel(panel.description, storyboardConfig.visualStyle, storyboardConfig.aspectRatio, storyboardConfig.imageModel);
                     return { ...panel, imageUrl, isLoadingImage: false };
                 } catch (err: any) {
                     console.error(`Failed to generate modal image for "${panel.description}":`, err);
@@ -406,6 +416,68 @@ const App: React.FC = () => {
         setStoryboardConfig(sample.config);
     };
 
+    const handleExportProjects = async () => {
+        try {
+            const allProjects = await getProjects();
+            if (allProjects.length === 0) {
+                alert("There are no projects to export.");
+                return;
+            }
+            const jsonString = JSON.stringify(allProjects, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `artifex-ai-studio-pro-projects-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error("Failed to export projects:", err);
+            setError("Could not export projects.");
+        }
+    };
+
+    const handleImportProjects = () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'application/json';
+        input.onchange = async (event) => {
+            const file = (event.target as HTMLInputElement).files?.[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const text = e.target?.result;
+                    if (typeof text !== 'string') {
+                        throw new Error("File could not be read.");
+                    }
+                    const importedProjects = JSON.parse(text) as Project[];
+                    
+                    if (!Array.isArray(importedProjects) || importedProjects.some(p => !p.id || !p.title || !p.appState)) {
+                         throw new Error("Invalid project file format.");
+                    }
+
+                    if (window.confirm(`This will import ${importedProjects.length} projects. Existing projects with the same ID will be overwritten. Continue?`)) {
+                        await Promise.all(importedProjects.map(project => saveProject(project)));
+                        await loadProjects();
+                        alert("Projects imported successfully!");
+                    }
+                } catch (err: any) {
+                    console.error("Failed to import projects:", err);
+                    setError(`Failed to import projects: ${err.message}`);
+                }
+            };
+            reader.onerror = () => {
+                setError("Error reading the project file.");
+            };
+            reader.readAsText(file);
+        };
+        input.click();
+    };
+
     if (!apiKey) {
         return <ApiKeyInstructions />;
     }
@@ -421,7 +493,7 @@ const App: React.FC = () => {
     return (
         <div className="bg-slate-900 text-white min-h-screen font-sans">
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <Header mode={mode} onOpenGallery={() => setIsGalleryOpen(true)} />
+                <Header onOpenGallery={() => setIsGalleryOpen(true)} />
 
                 <div className="mt-8 max-w-lg mx-auto">
                     <ModeSwitcher mode={mode} setMode={setMode} />
@@ -444,6 +516,10 @@ const App: React.FC = () => {
                                 setTargetAudience={setTargetAudience}
                                 tone={tone}
                                 setTone={setTone}
+                                descriptionLanguage={descriptionLanguage}
+                                setDescriptionLanguage={setDescriptionLanguage}
+                                descriptionModel={descriptionModel}
+                                setDescriptionModel={setDescriptionModel}
                                 onSubmit={handleGenerateDescription}
                                 isLoading={isLoading}
                                 productNameIsKorean={productNameIsKorean}
@@ -550,6 +626,8 @@ const App: React.FC = () => {
                 projects={projects}
                 onLoad={handleLoadProject}
                 onDelete={handleDeleteProject}
+                onExport={handleExportProjects}
+                onImport={handleImportProjects}
             />
         </div>
     );

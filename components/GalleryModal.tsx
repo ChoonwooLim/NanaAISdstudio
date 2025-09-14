@@ -7,9 +7,11 @@ interface GalleryModalProps {
     projects: Project[];
     onLoad: (id: string) => void;
     onDelete: (id: string) => void;
+    onExport: () => void;
+    onImport: () => void;
 }
 
-const GalleryModal: React.FC<GalleryModalProps> = ({ isOpen, onClose, projects, onLoad, onDelete }) => {
+const GalleryModal: React.FC<GalleryModalProps> = ({ isOpen, onClose, projects, onLoad, onDelete, onExport, onImport }) => {
     if (!isOpen) return null;
 
     return (
@@ -23,7 +25,22 @@ const GalleryModal: React.FC<GalleryModalProps> = ({ isOpen, onClose, projects, 
             >
                 <header className="p-4 border-b border-slate-700 flex justify-between items-center flex-shrink-0">
                     <h2 className="text-lg font-bold text-white">My Gallery</h2>
-                    <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors text-2xl font-bold">&times;</button>
+                    <div className="flex items-center space-x-2">
+                         <button 
+                            onClick={onImport} 
+                            className="text-xs font-medium bg-green-600/50 hover:bg-green-600/80 text-green-200 py-1.5 px-3 rounded-md transition-colors"
+                         >
+                            Import
+                        </button>
+                        <button 
+                            onClick={onExport} 
+                            disabled={projects.length === 0} 
+                            className="text-xs font-medium bg-slate-600/50 hover:bg-slate-600/80 text-slate-200 py-1.5 px-3 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Export All
+                        </button>
+                        <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors text-2xl font-bold">&times;</button>
+                    </div>
                 </header>
 
                 <div className="p-6 overflow-y-auto flex-grow">

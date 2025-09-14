@@ -1,16 +1,12 @@
 import React from 'react';
-import { AppMode } from '../types';
 
 interface HeaderProps {
-    mode: AppMode;
     onOpenGallery: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ mode, onOpenGallery }) => {
-    const title = mode === AppMode.DESCRIPTION ? 'AI Product Description Generator' : 'AI Storyboard Generator';
-    const subtitle = mode === AppMode.DESCRIPTION 
-        ? 'Craft compelling product descriptions in seconds. Just fill in the details below and let our AI do the magic!'
-        : 'Visualize your ideas instantly. Describe your story, set your creative direction, and generate a complete storyboard.';
+const Header: React.FC<HeaderProps> = ({ onOpenGallery }) => {
+    const title = 'Artifex.AI Studio Pro';
+    const subtitle = 'From product descriptions to video storyboards, bring your ideas to life with AI.';
 
     return (
         <header className="text-center relative">

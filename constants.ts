@@ -44,3 +44,11 @@ export const DESCRIPTION_LANGUAGE_OPTIONS: { value: string; label: string }[] = 
     { value: 'Spanish', label: 'Español' },
     { value: 'French', label: 'Français' },
 ];
+
+export const TEXT_MODEL_OPTIONS: { value: string; label: string; description: string }[] = [
+    { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash', description: 'Fast, multimodal, and cost-effective for most tasks.' },
+];
+
+export const IMAGE_MODEL_OPTIONS: { value: string; label: string; description: string }[] = [
+    { value: 'imagen-4.0-generate-001', label: 'Imagen 4.0', description: 'Google\'s most advanced image generation model.' },
+];

@@ -1,4 +1,5 @@
-import { GoogleGenAI, Type, GenerateContentResponse, GenerateImagesResponse } from '@google/genai';
+// FIX: Import Operation and GenerateVideosResponse to correctly type the video generation operation response.
+import { GoogleGenAI, Type, GenerateContentResponse, GenerateImagesResponse, Operation, GenerateVideosResponse } from '@google/genai';
 import { ProductDetails, Tone, StoryboardPanel, StoryboardConfig, AspectRatio, VisualStyle } from '../types';
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -75,9 +76,9 @@ const TONE_MAP: Record<Tone, string> = {
     [Tone.LUXURIOUS]: 'luxurious, elegant, and sophisticated',
 };
 
-export const generateDescription = async (details: ProductDetails): Promise<string> => {
+export const generateDescription = async (details: ProductDetails, model: string): Promise<string> => {
     const toneDescription = TONE_MAP[details.tone];
-    const prompt = `Generate a compelling product description for a product with the following details:
+    const prompt = `Generate a compelling product description in ${details.language} for a product with the following details:
 - Product Name: ${details.productName}
 - Key Features: ${details.keyFeatures}
 - Target Audience: ${details.targetAudience || 'general audience'}
@@ -87,7 +88,7 @@ The description should be engaging, highlight the key features as benefits, and 
 
     try {
         const response = await retryWithBackoff<GenerateContentResponse>(() => ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: model,
             contents: prompt,
         }));
 
@@ -99,10 +100,10 @@ The description should be engaging, highlight the key features as benefits, and 
     }
 };
 
-const generateStoryboardScenes = async (prompt: string): Promise<{ description: string }[]> => {
+const generateStoryboardScenes = async (prompt: string, model: string): Promise<{ description: string }[]> => {
      try {
         const response = await retryWithBackoff<GenerateContentResponse>(() => ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: model,
             contents: prompt,
             config: {
                 responseMimeType: 'application/json',
@@ -144,7 +145,7 @@ export const generateStoryboardFromDescription = async (productDescription: stri
 Product Description: "${productDescription}"
 
 Return the result as a JSON array of objects, where each object has a "description" key. Example: [{"description": "Scene 1 description..."}, {"description": "Scene 2 description..."}]`;
-    return generateStoryboardScenes(prompt);
+    return generateStoryboardScenes(prompt, 'gemini-2.5-flash');
 };
 
 export const generateStoryboardFromIdea = async (storyIdea: string, config: StoryboardConfig): Promise<{ description: string }[]> => {
@@ -162,18 +163,18 @@ For each of the ${config.sceneCount} scenes, provide a concise and vivid descrip
 The "description" text for each scene MUST be in ${config.descriptionLanguage}.
 
 Return the result as a JSON array of objects, where each object has a "description" key.`;
-    return generateStoryboardScenes(prompt);
+    return generateStoryboardScenes(prompt, config.textModel);
 };
 
 
-export const generateImageForPanel = async (description: string, style: VisualStyle, aspectRatio: AspectRatio): Promise<string> => {
+export const generateImageForPanel = async (description: string, style: VisualStyle, aspectRatio: AspectRatio, model: string): Promise<string> => {
     const prompt = `Generate an image for a storyboard panel in a ${style.toLowerCase()} style.
 The image should be cinematic and high-quality.
 Scene description: "${description}"`;
 
     try {
         const response = await retryWithBackoff<GenerateImagesResponse>(() => ai.models.generateImages({
-            model: 'imagen-4.0-generate-001',
+            model: model,
             prompt: prompt,
             config: {
                 numberOfImages: 1,
@@ -196,7 +197,7 @@ Scene description: "${description}"`;
 };
 
 
-export const expandSceneToDetailedPanels = async (sceneDescription: string, language: string): Promise<{ description: string }[]> => {
+export const expandSceneToDetailedPanels = async (sceneDescription: string, language: string, model: string): Promise<{ description: string }[]> => {
     const prompt = `Break down the following scene into 3 detailed shots for a storyboard. For each shot, provide a concise description focusing on camera angle, action, and subject.
 
 Original Scene: "${sceneDescription}"
@@ -205,7 +206,7 @@ Return the result in ${language} as a JSON array of objects, where each object h
 
     try {
         const response = await retryWithBackoff<GenerateContentResponse>(() => ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: model,
             contents: prompt,
             config: {
                 responseMimeType: 'application/json',
@@ -239,11 +240,15 @@ Return the result in ${language} as a JSON array of objects, where each object h
     }
 };
 
+// FIX: Explicitly type the return value of retryWithBackoff for video generation.
+// This ensures `operation` is correctly typed as Operation, fixing errors
+// where `done` and `response` properties were not found on an `unknown` type.
 export const generateVideoForPanel = async (description: string, imageBase64: string, visualStyle: VisualStyle, duration: number): Promise<string> => {
     const prompt = `Generate a high-quality, cinematic video clip with a visual style of "${visualStyle}". The video must be exactly ${duration} seconds long. The scene is: "${description}"`;
 
     try {
-        let operation = await retryWithBackoff(() => ai.models.generateVideos({
+        // FIX: Specify the generic type for Operation as GenerateVideosResponse.
+        let operation = await retryWithBackoff<Operation<GenerateVideosResponse>>(() => ai.models.generateVideos({
             model: 'veo-2.0-generate-001',
             prompt: prompt,
             image: {
@@ -257,7 +262,8 @@ export const generateVideoForPanel = async (description: string, imageBase64: st
 
         while (!operation.done) {
             await new Promise(resolve => setTimeout(resolve, 10000)); // Poll every 10 seconds
-            operation = await retryWithBackoff(() => ai.operations.getVideosOperation({ operation: operation }), 3, 1000);
+            // FIX: Specify the generic type for Operation as GenerateVideosResponse.
+            operation = await retryWithBackoff<Operation<GenerateVideosResponse>>(() => ai.operations.getVideosOperation({ operation: operation }), 3, 1000);
         }
 
         const downloadLink = operation.response?.generatedVideos?.[0]?.video?.uri;

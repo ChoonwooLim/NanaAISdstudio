@@ -47,6 +47,7 @@ export interface ProductDetails {
     keyFeatures: string;
     targetAudience?: string;
     tone: Tone;
+    language: string;
 }
 
 export interface StoryboardConfig {
@@ -56,6 +57,8 @@ export interface StoryboardConfig {
     videoLength: VideoLength;
     mood: Mood;
     descriptionLanguage: string;
+    textModel: string;
+    imageModel: string;
 }
 
 export interface StoryboardPanel {
@@ -83,10 +86,12 @@ export interface AppState {
     keyFeatures: string;
     targetAudience: string;
     tone: Tone;
+    descriptionLanguage: string;
     storyIdea: string;
     storyboardConfig: StoryboardConfig;
     description: string;
     storyboardPanels: StoryboardPanel[];
+    descriptionModel: string;
 }
 
 // Structure for a saved project in the gallery

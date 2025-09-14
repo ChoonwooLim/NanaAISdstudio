@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tone } from '../types';
-import { TONE_OPTIONS } from '../constants';
+import { TONE_OPTIONS, TEXT_MODEL_OPTIONS, DESCRIPTION_LANGUAGE_OPTIONS } from '../constants';
 import LoadingSpinner from './LoadingSpinner';
 
 interface InputFormProps {
@@ -12,6 +12,10 @@ interface InputFormProps {
     setTargetAudience: (value: string) => void;
     tone: Tone;
     setTone: (value: Tone) => void;
+    descriptionLanguage: string;
+    setDescriptionLanguage: (value: string) => void;
+    descriptionModel: string;
+    setDescriptionModel: (value: string) => void;
     onSubmit: () => void;
     isLoading: boolean;
     productNameIsKorean: boolean;
@@ -28,30 +32,36 @@ const InputForm: React.FC<InputFormProps> = ({
     setTargetAudience,
     tone,
     setTone,
+    descriptionLanguage,
+    setDescriptionLanguage,
+    descriptionModel,
+    setDescriptionModel,
     onSubmit,
     isLoading,
     productNameIsKorean,
     keyFeaturesIsKorean,
     targetAudienceIsKorean,
 }) => {
+    const selectedModel = TEXT_MODEL_OPTIONS.find(o => o.value === descriptionModel);
     return (
         <form onSubmit={(e) => { e.preventDefault(); onSubmit(); }} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label htmlFor="productName" className="block text-sm font-medium text-slate-300 mb-2">
-                        Product Name <span className="text-red-400">*</span>
-                    </label>
-                    <input
-                        id="productName"
-                        type="text"
-                        value={productName}
-                        onChange={(e) => setProductName(e.target.value)}
-                        placeholder="e.g., Ergonomic Office Chair"
-                        required
-                        className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                    />
-                    {productNameIsKorean && <p className="text-xs text-cyan-400 mt-1">🇰🇷 Korean detected. This will be automatically translated to English.</p>}
-                </div>
+            <div>
+                <label htmlFor="productName" className="block text-sm font-medium text-slate-300 mb-2">
+                    Product Name <span className="text-red-400">*</span>
+                </label>
+                <input
+                    id="productName"
+                    type="text"
+                    value={productName}
+                    onChange={(e) => setProductName(e.target.value)}
+                    placeholder="e.g., Ergonomic Office Chair"
+                    required
+                    className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                />
+                {productNameIsKorean && <p className="text-xs text-cyan-400 mt-1">🇰🇷 Korean detected. This will be automatically translated to English.</p>}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                  <div>
                     <label htmlFor="tone" className="block text-sm font-medium text-slate-300 mb-2">
                         Tone of Voice
@@ -68,6 +78,41 @@ const InputForm: React.FC<InputFormProps> = ({
                             </option>
                         ))}
                     </select>
+                </div>
+                 <div>
+                    <label htmlFor="descriptionLanguage" className="block text-sm font-medium text-slate-300 mb-2">
+                        Language
+                    </label>
+                    <select
+                        id="descriptionLanguage"
+                        value={descriptionLanguage}
+                        onChange={(e) => setDescriptionLanguage(e.target.value)}
+                        className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                    >
+                        {DESCRIPTION_LANGUAGE_OPTIONS.map((option) => (
+                            <option key={option.value} value={option.value} className="bg-slate-800 text-white">
+                                {option.label}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                 <div>
+                    <label htmlFor="descriptionModel" className="block text-sm font-medium text-slate-300 mb-2">
+                        AI Model
+                    </label>
+                    <select
+                        id="descriptionModel"
+                        value={descriptionModel}
+                        onChange={(e) => setDescriptionModel(e.target.value)}
+                        className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                    >
+                        {TEXT_MODEL_OPTIONS.map((option) => (
+                            <option key={option.value} value={option.value} className="bg-slate-800 text-white">
+                                {option.label}
+                            </option>
+                        ))}
+                    </select>
+                    {selectedModel && <p className="text-xs text-slate-500 mt-1">{selectedModel.description}</p>}
                 </div>
             </div>
 
