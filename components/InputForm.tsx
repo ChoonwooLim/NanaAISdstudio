@@ -2,6 +2,7 @@ import React from 'react';
 import { Tone } from '../types';
 import { TONE_OPTIONS, TEXT_MODEL_OPTIONS, DESCRIPTION_LANGUAGE_OPTIONS } from '../constants';
 import LoadingSpinner from './LoadingSpinner';
+import { useTranslation } from '../i18n/LanguageContext';
 
 interface InputFormProps {
     productName: string;
@@ -21,6 +22,8 @@ interface InputFormProps {
     productNameIsKorean: boolean;
     keyFeaturesIsKorean: boolean;
     targetAudienceIsKorean: boolean;
+    onSave: () => void;
+    canSave: boolean;
 }
 
 const InputForm: React.FC<InputFormProps> = ({
@@ -41,30 +44,34 @@ const InputForm: React.FC<InputFormProps> = ({
     productNameIsKorean,
     keyFeaturesIsKorean,
     targetAudienceIsKorean,
+    onSave,
+    canSave,
 }) => {
+    const { t } = useTranslation();
     const selectedModel = TEXT_MODEL_OPTIONS.find(o => o.value === descriptionModel);
+    
     return (
         <form onSubmit={(e) => { e.preventDefault(); onSubmit(); }} className="space-y-6">
             <div>
                 <label htmlFor="productName" className="block text-sm font-medium text-slate-300 mb-2">
-                    Product Name <span className="text-red-400">*</span>
+                    {t('descriptionForm.productName')} <span className="text-red-400">*</span>
                 </label>
                 <input
                     id="productName"
                     type="text"
                     value={productName}
                     onChange={(e) => setProductName(e.target.value)}
-                    placeholder="e.g., Ergonomic Office Chair"
+                    placeholder={t('descriptionForm.productNamePlaceholder')}
                     required
                     className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                 />
-                {productNameIsKorean && <p className="text-xs text-cyan-400 mt-1">🇰🇷 Korean detected. This will be automatically translated to English.</p>}
+                {productNameIsKorean && <p className="text-xs text-cyan-400 mt-1">{t('common.koreanDetected')}</p>}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                  <div>
                     <label htmlFor="tone" className="block text-sm font-medium text-slate-300 mb-2">
-                        Tone of Voice
+                        {t('descriptionForm.toneOfVoice')}
                     </label>
                     <select
                         id="tone"
@@ -74,14 +81,14 @@ const InputForm: React.FC<InputFormProps> = ({
                     >
                         {TONE_OPTIONS.map((option) => (
                             <option key={option.value} value={option.value} className="bg-slate-800 text-white">
-                                {option.label}
+                                {t(`tones.${option.value}`)}
                             </option>
                         ))}
                     </select>
                 </div>
                  <div>
                     <label htmlFor="descriptionLanguage" className="block text-sm font-medium text-slate-300 mb-2">
-                        Language
+                        {t('common.language')}
                     </label>
                     <select
                         id="descriptionLanguage"
@@ -98,7 +105,7 @@ const InputForm: React.FC<InputFormProps> = ({
                 </div>
                  <div>
                     <label htmlFor="descriptionModel" className="block text-sm font-medium text-slate-300 mb-2">
-                        AI Model
+                        {t('descriptionForm.aiModel')}
                     </label>
                     <select
                         id="descriptionModel"
@@ -118,37 +125,37 @@ const InputForm: React.FC<InputFormProps> = ({
 
             <div>
                 <label htmlFor="keyFeatures" className="block text-sm font-medium text-slate-300 mb-2">
-                    Key Features / Keywords <span className="text-red-400">*</span>
+                    {t('descriptionForm.keyFeatures')} <span className="text-red-400">*</span>
                 </label>
                 <textarea
                     id="keyFeatures"
                     rows={4}
                     value={keyFeatures}
                     onChange={(e) => setKeyFeatures(e.target.value)}
-                    placeholder="e.g., Lumbar support, breathable mesh, adjustable armrests, silent wheels"
+                    placeholder={t('descriptionForm.keyFeaturesPlaceholder')}
                     required
                     className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                 ></textarea>
-                 {keyFeaturesIsKorean && <p className="text-xs text-cyan-400 mt-1">🇰🇷 Korean detected. This will be automatically translated to English.</p>}
-                <p className="text-xs text-slate-500 mt-1">Separate features with commas.</p>
+                 {keyFeaturesIsKorean && <p className="text-xs text-cyan-400 mt-1">{t('common.koreanDetected')}</p>}
+                <p className="text-xs text-slate-500 mt-1">{t('descriptionForm.keyFeaturesHint')}</p>
             </div>
             
             <div>
                 <label htmlFor="targetAudience" className="block text-sm font-medium text-slate-300 mb-2">
-                    Target Audience (Optional)
+                    {t('descriptionForm.targetAudience')}
                 </label>
                 <input
                     id="targetAudience"
                     type="text"
                     value={targetAudience}
                     onChange={(e) => setTargetAudience(e.target.value)}
-                    placeholder="e.g., Remote workers, gamers, students"
+                    placeholder={t('descriptionForm.targetAudiencePlaceholder')}
                     className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                 />
-                 {targetAudienceIsKorean && <p className="text-xs text-cyan-400 mt-1">🇰🇷 Korean detected. This will be automatically translated to English.</p>}
+                 {targetAudienceIsKorean && <p className="text-xs text-cyan-400 mt-1">{t('common.koreanDetected')}</p>}
             </div>
             
-            <div className="pt-2">
+            <div className="pt-2 flex items-center gap-4">
                 <button
                     type="submit"
                     disabled={isLoading}
@@ -157,11 +164,19 @@ const InputForm: React.FC<InputFormProps> = ({
                     {isLoading ? (
                         <>
                             <LoadingSpinner />
-                            <span className="ml-2">Generating...</span>
+                            <span className="ml-2">{t('common.generating')}</span>
                         </>
                     ) : (
-                        '✨ Generate Description'
+                        t('descriptionForm.generateButton')
                     )}
+                </button>
+                <button
+                    type="button"
+                    onClick={onSave}
+                    disabled={!canSave}
+                    className="flex-shrink-0 bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-600 font-medium py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    💾 {t('common.saveProject')}
                 </button>
             </div>
         </form>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { AppMode } from '../types';
+import { useTranslation } from '../i18n/LanguageContext';
 
 interface ModeSwitcherProps {
     mode: AppMode;
@@ -7,6 +8,7 @@ interface ModeSwitcherProps {
 }
 
 const ModeSwitcher: React.FC<ModeSwitcherProps> = ({ mode, setMode }) => {
+    const { t } = useTranslation();
     const getButtonClass = (buttonMode: AppMode) => {
         const baseClass = "w-full text-center px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300";
         if (mode === buttonMode) {
@@ -21,13 +23,13 @@ const ModeSwitcher: React.FC<ModeSwitcherProps> = ({ mode, setMode }) => {
                 onClick={() => setMode(AppMode.DESCRIPTION)}
                 className={getButtonClass(AppMode.DESCRIPTION)}
             >
-                Product Description Generator
+                {t('modeSwitcher.productDescription')}
             </button>
             <button
                 onClick={() => setMode(AppMode.STORYBOARD)}
                 className={getButtonClass(AppMode.STORYBOARD)}
             >
-                Storyboard Generator
+                {t('modeSwitcher.storyboard')}
             </button>
         </div>
     );

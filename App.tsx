@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
     AppMode,
     Tone,
@@ -38,7 +38,8 @@ import GalleryModal from './components/GalleryModal';
 import SampleGalleryModal from './components/SampleGalleryModal';
 
 
-import { sampleProducts, sampleStoryIdeas } from './sampleData';
+import { sampleProductsData, sampleStoryIdeasData } from './sampleData';
+import { useTranslation } from './i18n/LanguageContext';
 
 const isKorean = (text: string): boolean => /[\u3131-\uD79D]/.test(text);
 
@@ -51,20 +52,26 @@ const initialStoryboardConfig: StoryboardConfig = {
     descriptionLanguage: 'English',
     textModel: 'gemini-2.5-flash',
     imageModel: 'imagen-4.0-generate-001',
+    videoModel: 'veo-3.0-generate-001',
 };
 
 const App: React.FC = () => {
+    const { language, t } = useTranslation();
+
     // App State
     const [mode, setMode] = useState<AppMode>(AppMode.DESCRIPTION);
     const [productName, setProductName] = useState('');
     const [keyFeatures, setKeyFeatures] = useState('');
     const [targetAudience, setTargetAudience] = useState('');
     const [tone, setTone] = useState<Tone>(Tone.PROFESSIONAL);
-    const [descriptionLanguage, setDescriptionLanguage] = useState('English');
+    const [descriptionLanguage, setDescriptionLanguage] = useState(language);
     const [descriptionModel, setDescriptionModel] = useState('gemini-2.5-flash');
     const [description, setDescription] = useState('');
     const [storyIdea, setStoryIdea] = useState('');
-    const [storyboardConfig, setStoryboardConfig] = useState<StoryboardConfig>(initialStoryboardConfig);
+    const [storyboardConfig, setStoryboardConfig] = useState<StoryboardConfig>({
+        ...initialStoryboardConfig,
+        descriptionLanguage: language
+    });
     const [storyboardPanels, setStoryboardPanels] = useState<StoryboardPanel[]>([]);
     
     // UI State
@@ -88,6 +95,13 @@ const App: React.FC = () => {
 
     const apiKey = process.env.API_KEY;
 
+    // Sync local language settings with global language
+    useEffect(() => {
+        setDescriptionLanguage(language);
+        setStoryboardConfig(prev => ({ ...prev, descriptionLanguage: language }));
+    }, [language]);
+
+
     // Load projects on mount
     useEffect(() => {
         if (apiKey) {
@@ -101,7 +115,7 @@ const App: React.FC = () => {
             setProjects(savedProjects);
         } catch (err) {
             console.error("Failed to load projects:", err);
-            setError("Could not load saved projects from the database.");
+            setError(t('errors.loadProjects'));
         }
     };
 
@@ -111,7 +125,7 @@ const App: React.FC = () => {
         setKeyFeatures(loadedState.keyFeatures);
         setTargetAudience(loadedState.targetAudience);
         setTone(loadedState.tone);
-        setDescriptionLanguage(loadedState.descriptionLanguage || 'English');
+        setDescriptionLanguage(loadedState.descriptionLanguage || language); // Fallback to global language
         setDescriptionModel(loadedState.descriptionModel || 'gemini-2.5-flash');
         setStoryIdea(loadedState.storyIdea);
         setStoryboardConfig(loadedState.storyboardConfig);
@@ -126,12 +140,12 @@ const App: React.FC = () => {
             setIsGalleryOpen(false);
             setError(null);
         } else {
-            setError("Failed to load the selected project.");
+            setError(t('errors.loadProjectFailed'));
         }
     };
 
     const handleDeleteProject = async (id: string) => {
-        if (window.confirm("Are you sure you want to delete this project?")) {
+        if (window.confirm(t('prompts.deleteProjectConfirm'))) {
             await deleteProject(id);
             await loadProjects(); // Refresh the list
         }
@@ -152,7 +166,7 @@ const App: React.FC = () => {
     });
 
     const handleSaveProject = async () => {
-        const title = productName || storyIdea || 'Untitled Project';
+        const title = productName || storyIdea || t('common.untitledProject');
         const timestamp = Date.now();
         const id = timestamp.toString();
         const thumbnailUrl = storyboardPanels.find(p => p.imageUrl && p.imageUrl !== 'error' && p.imageUrl !== 'quota_error')?.imageUrl || '';
@@ -168,16 +182,16 @@ const App: React.FC = () => {
         try {
             await saveProject(project);
             await loadProjects(); // Refresh gallery list
-            alert(`Project "${title}" saved!`);
+            alert(t('prompts.projectSaved', { title }));
         } catch (err) {
             console.error("Failed to save project:", err);
-            setError("Failed to save the project.");
+            setError(t('errors.saveProjectFailed'));
         }
     };
 
     const handleGenerateDescription = async () => {
         if (!productName || !keyFeatures) {
-            setError('Product Name and Key Features are required.');
+            setError(t('errors.productNameAndFeaturesRequired'));
             return;
         }
         setIsLoading(true);
@@ -208,7 +222,7 @@ const App: React.FC = () => {
             }, descriptionModel);
             setDescription(result);
         } catch (err: any) {
-            setError(err.message || 'An unknown error occurred.');
+            setError(err.message || t('errors.unknown'));
         } finally {
             setIsLoading(false);
         }
@@ -216,13 +230,13 @@ const App: React.FC = () => {
 
     const handleProceedToStoryboard = () => {
         setMode(AppMode.STORYBOARD);
-        setStoryIdea(`Create a short video ad for ${productName}. The ad should highlight its key features: ${keyFeatures}. The tone should be ${tone}. Here is the product description for inspiration: "${description}"`);
+        setStoryIdea(t('prompts.storyboardIdeaFromDescription', { productName, keyFeatures, tone, description }));
         setStoryboardPanels([]); // Clear previous storyboard
     };
 
     const handleGenerateStoryboard = async () => {
         if (!storyIdea) {
-            setError('Story Idea is required.');
+            setError(t('errors.storyIdeaRequired'));
             return;
         }
         setIsLoading(true);
@@ -243,7 +257,7 @@ const App: React.FC = () => {
             }));
             setStoryboardPanels(panels);
         } catch (err: any) {
-            setError(err.message || 'Failed to generate storyboard scenes.');
+            setError(err.message || t('errors.storyboardGenerationFailed'));
             setIsLoading(false); // Stop loading if scene generation fails
         } finally {
             // The main loading spinner stops, but panel spinners will continue
@@ -318,7 +332,7 @@ const App: React.FC = () => {
     };
 
     const handleDeletePanel = (indexToDelete: number) => {
-        if (window.confirm(`Are you sure you want to delete Panel ${indexToDelete + 1}?`)) {
+        if (window.confirm(t('prompts.deletePanelConfirm', { index: indexToDelete + 1 }))) {
             setStoryboardPanels(prevPanels =>
                 prevPanels.filter((_, index) => index !== indexToDelete)
             );
@@ -354,7 +368,7 @@ const App: React.FC = () => {
             setModalPanels(generatedPanels);
 
         } catch (err: any) {
-            setModalError(err.message || 'Failed to expand scene.');
+            setModalError(err.message || t('errors.expandSceneFailed'));
         } finally {
             setIsModalLoading(false);
         }
@@ -385,7 +399,7 @@ const App: React.FC = () => {
             setStoryboardPanels(prev => prev.map((p, i) => i === index ? { ...p, isLoadingVideo: true, videoUrl: undefined } : p));
             
             const imageBase64 = panel.imageUrl.split(',')[1];
-            generateVideoForPanel(panel.description, imageBase64, storyboardConfig.visualStyle, panel.sceneDuration || 4)
+            generateVideoForPanel(panel.description, imageBase64, storyboardConfig.visualStyle, panel.sceneDuration || 4, storyboardConfig.videoModel)
                 .then(videoUrl => {
                     setStoryboardPanels(prev => prev.map((p, i) => i === index ? { ...p, videoUrl, isLoadingVideo: false } : p));
                 })
@@ -440,7 +454,7 @@ const App: React.FC = () => {
         try {
             const allProjects = await getProjects();
             if (allProjects.length === 0) {
-                alert("There are no projects to export.");
+                alert(t('prompts.noProjectsToExport'));
                 return;
             }
             const jsonString = JSON.stringify(allProjects, null, 2);
@@ -455,7 +469,7 @@ const App: React.FC = () => {
             URL.revokeObjectURL(url);
         } catch (err) {
             console.error("Failed to export projects:", err);
-            setError("Could not export projects.");
+            setError(t('errors.exportFailed'));
         }
     };
 
@@ -472,31 +486,43 @@ const App: React.FC = () => {
                 try {
                     const text = e.target?.result;
                     if (typeof text !== 'string') {
-                        throw new Error("File could not be read.");
+                        throw new Error(t('errors.fileReadError'));
                     }
                     const importedProjects = JSON.parse(text) as Project[];
                     
                     if (!Array.isArray(importedProjects) || importedProjects.some(p => !p.id || !p.title || !p.appState)) {
-                         throw new Error("Invalid project file format.");
+                         throw new Error(t('errors.invalidProjectFile'));
                     }
 
-                    if (window.confirm(`This will import ${importedProjects.length} projects. Existing projects with the same ID will be overwritten. Continue?`)) {
+                    if (window.confirm(t('prompts.importConfirm', { count: importedProjects.length }))) {
                         await Promise.all(importedProjects.map(project => saveProject(project)));
                         await loadProjects();
-                        alert("Projects imported successfully!");
+                        alert(t('prompts.importSuccess'));
                     }
                 } catch (err: any) {
                     console.error("Failed to import projects:", err);
-                    setError(`Failed to import projects: ${err.message}`);
+                    setError(`${t('errors.importFailed')}: ${err.message}`);
                 }
             };
             reader.onerror = () => {
-                setError("Error reading the project file.");
+                setError(t('errors.fileReadError'));
             };
             reader.readAsText(file);
         };
         input.click();
     };
+
+    // Prepare localized sample data
+    const sampleProducts = useMemo(() => {
+        const langCode = language === 'Korean' ? 'ko' : 'en';
+        return Object.values(sampleProductsData).map(p => p[langCode] || p.en);
+    }, [language]);
+
+    const sampleStoryIdeas = useMemo(() => {
+        const langCode = language === 'Korean' ? 'ko' : 'en';
+        return Object.values(sampleStoryIdeasData).map(s => s[langCode] || s.en);
+    }, [language]);
+
 
     if (!apiKey) {
         return <ApiKeyInstructions />;
@@ -509,6 +535,9 @@ const App: React.FC = () => {
     const keyFeaturesIsKorean = isKorean(keyFeatures);
     const targetAudienceIsKorean = isKorean(targetAudience);
     const storyIdeaIsKorean = isKorean(storyIdea);
+
+    const canSave = (mode === AppMode.DESCRIPTION && !!productName) || (mode === AppMode.STORYBOARD && !!storyIdea);
+
 
     return (
         <div className="bg-slate-900 text-white min-h-screen font-sans">
@@ -524,7 +553,7 @@ const App: React.FC = () => {
                         <>
                             <div className="flex justify-end mb-4 -mt-2">
                                 <button onClick={openSampleProductModal} className="text-xs text-blue-400 hover:underline">
-                                    Load Sample Product
+                                    {t('common.loadSampleProduct')}
                                 </button>
                             </div>
                             <InputForm
@@ -545,13 +574,15 @@ const App: React.FC = () => {
                                 productNameIsKorean={productNameIsKorean}
                                 keyFeaturesIsKorean={keyFeaturesIsKorean}
                                 targetAudienceIsKorean={targetAudienceIsKorean}
+                                onSave={handleSaveProject}
+                                canSave={canSave}
                             />
                         </>
                     ) : (
                          <>
                             <div className="flex justify-end mb-4 -mt-2">
                                 <button onClick={openSampleStoryModal} className="text-xs text-blue-400 hover:underline">
-                                    Load Sample Story
+                                    {t('common.loadSampleStory')}
                                 </button>
                             </div>
                             <StoryboardInputForm
@@ -562,6 +593,8 @@ const App: React.FC = () => {
                                 onSubmit={handleGenerateStoryboard}
                                 isLoading={isLoading}
                                 storyIdeaIsKorean={storyIdeaIsKorean}
+                                onSave={handleSaveProject}
+                                canSave={canSave}
                             />
                         </>
                     )}
@@ -569,14 +602,14 @@ const App: React.FC = () => {
                 
                 {error && (
                     <div className="mt-6 max-w-4xl mx-auto p-4 bg-red-500/20 text-red-300 border border-red-500/30 rounded-lg">
-                        <p><span className="font-bold">Error:</span> {error}</p>
+                        <p><span className="font-bold">{t('common.errorPrefix')}</span> {error}</p>
                     </div>
                 )}
 
                 {isLoading && mode === AppMode.DESCRIPTION && (
                     <div className="text-center mt-8">
                         <LoadingSpinner />
-                        <p className="mt-2 text-slate-400">Generating your compelling description...</p>
+                        <p className="mt-2 text-slate-400">{t('descriptionForm.loadingMessage')}</p>
                     </div>
                 )}
                 
@@ -588,7 +621,7 @@ const App: React.FC = () => {
                                 onClick={handleProceedToStoryboard}
                                 className="bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white font-semibold py-3 px-8 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105"
                             >
-                                🚀 Create Storyboard from Description
+                                {t('descriptionDisplay.proceedButton')}
                             </button>
                         </div>
                     </div>
@@ -611,14 +644,7 @@ const App: React.FC = () => {
                                 disabled={!canGenerateVideos || storyboardPanels.some(p => p.isLoadingVideo)}
                                 className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-3 px-8 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                               🎬 Generate All Video Clips
-                            </button>
-                             <button
-                                onClick={handleSaveProject}
-                                disabled={!canGenerateVideos}
-                                className="bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-600 font-medium py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                💾 Save Project
+                               {t('storyboardDisplay.generateAllClips')}
                             </button>
                         </div>
                     </div>

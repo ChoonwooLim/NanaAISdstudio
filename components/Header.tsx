@@ -1,12 +1,15 @@
 import React from 'react';
+import { useTranslation } from '../i18n/LanguageContext';
+import { DESCRIPTION_LANGUAGE_OPTIONS } from '../constants';
 
 interface HeaderProps {
     onOpenGallery: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ onOpenGallery }) => {
-    const title = 'Artifex.AI Studio Pro';
-    const subtitle = 'From product descriptions to video storyboards, bring your ideas to life with AI.';
+    const { t, language, setLanguage } = useTranslation();
+    const title = t('header.title');
+    const subtitle = t('header.subtitle');
 
     return (
         <header className="text-center relative">
@@ -16,12 +19,25 @@ const Header: React.FC<HeaderProps> = ({ onOpenGallery }) => {
             <p className="mt-4 text-lg text-slate-400 max-w-2xl mx-auto">
                 {subtitle}
             </p>
-             <div className="absolute top-0 right-0">
+             <div className="absolute top-0 right-0 flex items-center space-x-4">
+                 <div className="relative">
+                     <select
+                        value={language}
+                        onChange={(e) => setLanguage(e.target.value)}
+                        className="bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-600 font-medium py-2 pl-3 pr-8 rounded-lg transition-colors text-sm appearance-none focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        aria-label="Select application language"
+                    >
+                        {DESCRIPTION_LANGUAGE_OPTIONS.map(opt => <option key={opt.value} value={opt.value} className="bg-slate-800">{opt.label}</option>)}
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
+                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M5.516 7.548c.436-.446 1.043-.481 1.576 0L10 10.405l2.908-2.857c.533-.481 1.141-.446 1.574 0 .436.445.408 1.197 0 1.615l-3.712 3.667a1.109 1.109 0 0 1-1.576 0L5.516 9.163c-.409-.418-.436-1.17 0-1.615z"/></svg>
+                    </div>
+                 </div>
                 <button 
                     onClick={onOpenGallery}
                     className="bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-600 font-medium py-2 px-4 rounded-lg transition-colors"
                 >
-                    Open Gallery
+                    {t('header.openGallery')}
                 </button>
             </div>
         </header>

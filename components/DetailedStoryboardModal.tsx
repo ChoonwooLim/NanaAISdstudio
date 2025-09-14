@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { DetailedStoryboardPanel } from '../types';
 import LoadingSpinner from './LoadingSpinner';
+import { useTranslation } from '../i18n/LanguageContext';
 
 interface DetailedStoryboardModalProps {
     isOpen: boolean;
@@ -21,6 +22,7 @@ const DetailedStoryboardModal: React.FC<DetailedStoryboardModalProps> = ({
     originalSceneDescription,
     onSaveChanges,
 }) => {
+    const { t } = useTranslation();
     const [editablePanels, setEditablePanels] = useState<DetailedStoryboardPanel[]>([]);
 
     useEffect(() => {
@@ -66,8 +68,8 @@ const DetailedStoryboardModal: React.FC<DetailedStoryboardModalProps> = ({
             >
                 <header className="p-4 border-b border-slate-700 flex justify-between items-center flex-shrink-0">
                     <div>
-                        <h2 className="text-lg font-bold text-white">Scene Breakdown & Edit</h2>
-                        <p className="text-xs text-slate-400 mt-1 max-w-lg truncate">Original: "{originalSceneDescription}"</p>
+                        <h2 className="text-lg font-bold text-white">{t('detailedModal.title')}</h2>
+                        <p className="text-xs text-slate-400 mt-1 max-w-lg truncate">{t('detailedModal.originalPrefix')} "{originalSceneDescription}"</p>
                     </div>
                     <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors text-2xl font-bold">&times;</button>
                 </header>
@@ -76,12 +78,12 @@ const DetailedStoryboardModal: React.FC<DetailedStoryboardModalProps> = ({
                     {isLoading && (
                         <div className="flex flex-col items-center justify-center text-slate-400 py-12">
                             <LoadingSpinner />
-                            <p className="mt-3 text-sm text-center">Breaking down the scene...<br/>This might take a moment.</p>
+                            <p className="mt-3 text-sm text-center whitespace-pre-wrap">{t('detailedModal.loadingMessage')}</p>
                         </div>
                     )}
                     {error && !isLoading && (
                          <div className="p-4 bg-red-500/20 text-red-300 border border-red-500/30 rounded-lg">
-                            <p><span className="font-bold">Error:</span> {error}</p>
+                            <p><span className="font-bold">{t('common.errorPrefix')}</span> {error}</p>
                         </div>
                     )}
                     {!isLoading && !error && editablePanels.length > 0 && (
@@ -92,7 +94,7 @@ const DetailedStoryboardModal: React.FC<DetailedStoryboardModalProps> = ({
                                          {panel.isLoadingImage && (
                                             <div className="flex flex-col items-center text-slate-400">
                                                 <LoadingSpinner />
-                                                <p className="text-xs mt-2">Drawing shot {index + 1}...</p>
+                                                <p className="text-xs mt-2">{t('detailedModal.drawingShot', { index: index + 1 })}</p>
                                             </div>
                                         )}
                                         {panel.imageUrl && panel.imageUrl !== 'error' && panel.imageUrl !== 'quota_error' && (
@@ -101,14 +103,14 @@ const DetailedStoryboardModal: React.FC<DetailedStoryboardModalProps> = ({
                                         {panel.imageUrl === 'error' && (
                                             <div className="text-red-400 text-center p-4">
                                                 <p className="font-semibold">Oops!</p>
-                                                <p className="text-xs">Could not generate image.</p>
+                                                <p className="text-xs">{t('storyboardDisplay.imageError')}</p>
                                             </div>
                                         )}
                                         {panel.imageUrl === 'quota_error' && (
                                             <div className="text-yellow-400 text-center p-4">
-                                                <p className="font-semibold">Quota Exceeded</p>
-                                                <p className="text-xs mt-1">Cannot generate image.</p>
-                                                <p className="text-xs mt-1 text-slate-400">Please check your API plan.</p>
+                                                <p className="font-semibold">{t('storyboardDisplay.quotaErrorTitle')}</p>
+                                                <p className="text-xs mt-1">{t('storyboardDisplay.imageError')}</p>
+                                                <p className="text-xs mt-1 text-slate-400">{t('storyboardDisplay.checkPlan')}</p>
                                             </div>
                                         )}
                                     </div>
@@ -132,7 +134,7 @@ const DetailedStoryboardModal: React.FC<DetailedStoryboardModalProps> = ({
                         disabled={isSaveDisabled}
                         className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-2 px-5 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
                     >
-                        💾 Save and Add to Storyboard
+                        {t('detailedModal.saveButton')}
                     </button>
                 </footer>
             </div>

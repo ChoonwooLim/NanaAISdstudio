@@ -1,12 +1,13 @@
-
 import React, { useState, useEffect } from 'react';
 import { StoryboardPanel } from '../types';
+import { useTranslation } from '../i18n/LanguageContext';
 
 interface VideoDisplayProps {
     panels: StoryboardPanel[];
 }
 
 const VideoDisplay: React.FC<VideoDisplayProps> = ({ panels }) => {
+    const { t } = useTranslation();
     const validClips = panels.filter(p => p.videoUrl && p.videoUrl !== 'error');
     const [currentClipIndex, setCurrentClipIndex] = useState(0);
 
@@ -31,7 +32,7 @@ const VideoDisplay: React.FC<VideoDisplayProps> = ({ panels }) => {
 
     return (
         <div className="mt-8 max-w-5xl mx-auto animate-fade-in">
-            <h2 className="text-xl font-semibold text-slate-200 mb-4">Final Combined Video</h2>
+            <h2 className="text-xl font-semibold text-slate-200 mb-4">{t('videoDisplay.title')}</h2>
             <div className="aspect-video bg-slate-900/70 border border-slate-700 rounded-lg flex flex-col items-center justify-center p-4 relative">
                 <video 
                     key={currentClip.videoUrl} // Use key to force re-render and autoplay when src changes
@@ -42,7 +43,7 @@ const VideoDisplay: React.FC<VideoDisplayProps> = ({ panels }) => {
                     className="w-full h-full rounded-md" 
                 />
                 <div className="absolute bottom-4 right-4 bg-black/50 text-white text-xs px-2 py-1 rounded">
-                    Playing Scene {originalPanelIndex + 1} of {panels.length}
+                    {t('videoDisplay.playingScene', { current: originalPanelIndex + 1, total: panels.length })}
                 </div>
             </div>
         </div>

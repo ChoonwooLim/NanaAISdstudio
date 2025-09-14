@@ -7,8 +7,10 @@ import {
     MOOD_OPTIONS, 
     DESCRIPTION_LANGUAGE_OPTIONS,
     TEXT_MODEL_OPTIONS,
-    IMAGE_MODEL_OPTIONS
+    IMAGE_MODEL_OPTIONS,
+    VIDEO_MODEL_OPTIONS
 } from '../constants';
+import { useTranslation } from '../i18n/LanguageContext';
 
 interface StoryboardSettingsProps {
     config: StoryboardConfig;
@@ -16,6 +18,7 @@ interface StoryboardSettingsProps {
 }
 
 const StoryboardSettings: React.FC<StoryboardSettingsProps> = ({ config, setConfig }) => {
+    const { t } = useTranslation();
     
     const handleConfigChange = (field: keyof StoryboardConfig, value: any) => {
         const newConfig = { ...config, [field]: value };
@@ -35,11 +38,11 @@ const StoryboardSettings: React.FC<StoryboardSettingsProps> = ({ config, setConf
 
     return (
         <fieldset>
-            <legend className="block text-sm font-medium text-slate-300 mb-2">Creative Direction</legend>
-            <div className="grid grid-cols-2 gap-4 p-4 border border-slate-700 rounded-lg bg-slate-900/30">
+            <legend className="block text-sm font-medium text-slate-300 mb-2">{t('storyboardSettings.title')}</legend>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-4 border border-slate-700 rounded-lg bg-slate-900/30">
                  <div>
                     <label htmlFor="sceneCount" className="block text-xs font-medium text-slate-400 mb-1">
-                       Scenes
+                       {t('storyboardSettings.scenes')}
                     </label>
                     <input
                         id="sceneCount"
@@ -53,7 +56,7 @@ const StoryboardSettings: React.FC<StoryboardSettingsProps> = ({ config, setConf
                 </div>
                  <div>
                     <label htmlFor="aspectRatio" className="block text-xs font-medium text-slate-400 mb-1">
-                       Aspect Ratio
+                       {t('storyboardSettings.aspectRatio')}
                     </label>
                     <select
                         id="aspectRatio"
@@ -66,7 +69,7 @@ const StoryboardSettings: React.FC<StoryboardSettingsProps> = ({ config, setConf
                 </div>
                  <div>
                     <label htmlFor="visualStyle" className="block text-xs font-medium text-slate-400 mb-1">
-                       Visual Style
+                       {t('storyboardSettings.visualStyle')}
                     </label>
                     <select
                         id="visualStyle"
@@ -79,7 +82,7 @@ const StoryboardSettings: React.FC<StoryboardSettingsProps> = ({ config, setConf
                 </div>
                  <div>
                     <label htmlFor="videoLength" className="block text-xs font-medium text-slate-400 mb-1">
-                       Target Length
+                       {t('storyboardSettings.targetLength')}
                     </label>
                     <select
                         id="videoLength"
@@ -92,7 +95,7 @@ const StoryboardSettings: React.FC<StoryboardSettingsProps> = ({ config, setConf
                 </div>
                  <div>
                     <label htmlFor="mood" className="block text-xs font-medium text-slate-400 mb-1">
-                       Mood & Pacing
+                       {t('storyboardSettings.moodPacing')}
                     </label>
                     <select
                         id="mood"
@@ -105,7 +108,7 @@ const StoryboardSettings: React.FC<StoryboardSettingsProps> = ({ config, setConf
                 </div>
                 <div>
                     <label htmlFor="descriptionLanguage" className="block text-xs font-medium text-slate-400 mb-1">
-                        Description Language
+                        {t('storyboardSettings.descriptionLanguage')}
                     </label>
                     <select
                         id="descriptionLanguage"
@@ -118,7 +121,7 @@ const StoryboardSettings: React.FC<StoryboardSettingsProps> = ({ config, setConf
                 </div>
                  <div>
                     <label htmlFor="textModel" className="block text-xs font-medium text-slate-400 mb-1">
-                        Text Model
+                        {t('storyboardSettings.textModel')}
                     </label>
                     <select
                         id="textModel"
@@ -131,7 +134,7 @@ const StoryboardSettings: React.FC<StoryboardSettingsProps> = ({ config, setConf
                 </div>
                  <div>
                     <label htmlFor="imageModel" className="block text-xs font-medium text-slate-400 mb-1">
-                        Image Model
+                        {t('storyboardSettings.imageModel')}
                     </label>
                     <select
                         id="imageModel"
@@ -140,6 +143,19 @@ const StoryboardSettings: React.FC<StoryboardSettingsProps> = ({ config, setConf
                         className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
                         {IMAGE_MODEL_OPTIONS.map(o => <option key={o.value} value={o.value} className="bg-slate-800">{o.label}</option>)}
+                    </select>
+                </div>
+                <div>
+                    <label htmlFor="videoModel" className="block text-xs font-medium text-slate-400 mb-1">
+                        {t('storyboardSettings.videoModel')}
+                    </label>
+                    <select
+                        id="videoModel"
+                        value={config.videoModel}
+                        onChange={(e) => handleConfigChange('videoModel', e.target.value)}
+                        className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                        {VIDEO_MODEL_OPTIONS.map(o => <option key={o.value} value={o.value} className="bg-slate-800">{o.label}</option>)}
                     </select>
                 </div>
             </div>

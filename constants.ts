@@ -52,3 +52,8 @@ export const TEXT_MODEL_OPTIONS: { value: string; label: string; description: st
 export const IMAGE_MODEL_OPTIONS: { value: string; label: string; description: string }[] = [
     { value: 'imagen-4.0-generate-001', label: 'Imagen 4.0', description: 'Google\'s most advanced image generation model.' },
 ];
+
+export const VIDEO_MODEL_OPTIONS: { value: string; label: string; description: string }[] = [
+    { value: 'veo-3.0-generate-001', label: 'Veo 3.0', description: 'Google\'s state-of-the-art video generation model.' },
+    { value: 'veo-2.0-generate-001', label: 'Veo 2.0', description: 'Google\'s previous generation advanced video model.' },
+];

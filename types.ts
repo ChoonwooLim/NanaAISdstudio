@@ -1,5 +1,4 @@
-// FIX: Removed circular self-import of types defined within this file to resolve type declaration conflicts.
-
+// FIX: Removed circular self-import which was causing type declaration conflicts with locally defined types.
 export enum Tone {
     PROFESSIONAL = 'PROFESSIONAL',
     FRIENDLY = 'FRIENDLY',
@@ -59,6 +58,7 @@ export interface StoryboardConfig {
     descriptionLanguage: string;
     textModel: string;
     imageModel: string;
+    videoModel: string;
 }
 
 export interface StoryboardPanel {

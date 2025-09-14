@@ -1,0 +1,149 @@
+{
+  "header": {
+    "title": "Artifex.AI Studio Pro",
+    "subtitle": "From product descriptions to video storyboards, bring your ideas to life with AI.",
+    "openGallery": "Open Gallery"
+  },
+  "modeSwitcher": {
+    "productDescription": "Product Description Generator",
+    "storyboard": "Storyboard Generator"
+  },
+  "common": {
+    "loadSampleProduct": "Load Sample Product",
+    "loadSampleStory": "Load Sample Story",
+    "errorPrefix": "Error:",
+    "generating": "Generating...",
+    "saveProject": "Save Project",
+    "import": "Import",
+    "exportAll": "Export All",
+    "language": "Language",
+    "koreanDetected": "🇰🇷 Korean detected. This will be automatically translated to English.",
+    "koreanDetectedIdea": "🇰🇷 Korean detected. Your idea will be automatically translated to English for the AI.",
+    "untitledProject": "Untitled Project",
+    "regenerate": "Regenerate"
+  },
+  "tones": {
+    "PROFESSIONAL": "Professional",
+    "FRIENDLY": "Friendly & Casual",
+    "HUMOROUS": "Witty & Humorous",
+    "LUXURIOUS": "Luxurious & Elegant"
+  },
+  "descriptionForm": {
+    "productName": "Product Name",
+    "productNamePlaceholder": "e.g., Ergonomic Office Chair",
+    "keyFeatures": "Key Features / Keywords",
+    "keyFeaturesPlaceholder": "e.g., Lumbar support, breathable mesh, adjustable armrests, silent wheels",
+    "keyFeaturesHint": "Separate features with commas.",
+    "targetAudience": "Target Audience (Optional)",
+    "targetAudiencePlaceholder": "e.g., Remote workers, gamers, students",
+    "toneOfVoice": "Tone of Voice",
+    "aiModel": "AI Model",
+    "generateButton": "✨ Generate Description",
+    "loadingMessage": "Generating your compelling description..."
+  },
+  "descriptionDisplay": {
+    "title": "Generated Description",
+    "copyToClipboard": "Copy to clipboard",
+    "proceedButton": "🚀 Create Storyboard from Description"
+  },
+  "storyboardForm": {
+    "storyIdea": "Story Idea",
+    "storyIdeaPlaceholder": "e.g., A mischievous squirrel steals a magician's wand and causes chaos in a city park.",
+    "storyIdeaHint": "Describe the story you want to visualize.",
+    "generateButton": "🎨 Generate Storyboard",
+    "loadingMessage": "Generating Storyboard..."
+  },
+  "storyboardSettings": {
+    "title": "Creative Direction",
+    "scenes": "Scenes",
+    "aspectRatio": "Aspect Ratio",
+    "visualStyle": "Visual Style",
+    "targetLength": "Target Length",
+    "moodPacing": "Mood & Pacing",
+    "descriptionLanguage": "Description Language",
+    "textModel": "Text Model",
+    "imageModel": "Image Model",
+    "videoModel": "Video Model"
+  },
+  "storyboardDisplay": {
+    "title": "Generated Storyboard",
+    "queued": "Queued...",
+    "drawingPanel": "Drawing panel {{index}}...",
+    "imageError": "Could not generate image.",
+    "quotaErrorTitle": "Quota Exceeded",
+    "quotaError": "You have exceeded your Gemini API quota.",
+    "quotaErrorCheckPlan": "Check your plan on the {{link}} page.",
+    "googleAIStudio": "Google AI Studio",
+    "checkPlan": "Please check your API plan.",
+    "regenerateImage": "Regenerate image",
+    "deletePanel": "Delete panel",
+    "duration": "Duration (s):",
+    "expandScene": "🎬 Expand Scene",
+    "videoClip": "Video Clip",
+    "generateClip": "Generate Clip",
+    "generateClipTitle": "Generate video for this panel",
+    "regenerateVideo": "Regenerate this video clip",
+    "generatingClip": "Generating clip...",
+    "generatingClipHint": "(this may take a minute)",
+    "clipFailed": "Clip generation failed.",
+    "generateClipPrompt": "Click \"Generate Clip\" to create a video.",
+    "generateAllClips": "🎬 Generate All Video Clips"
+  },
+  "detailedModal": {
+    "title": "Scene Breakdown & Edit",
+    "originalPrefix": "Original:",
+    "loadingMessage": "Breaking down the scene...\nThis might take a moment.",
+    "drawingShot": "Drawing shot {{index}}...",
+    "saveButton": "💾 Save and Add to Storyboard"
+  },
+  "videoDisplay": {
+    "title": "Final Combined Video",
+    "playingScene": "Playing Scene {{current}} of {{total}}"
+  },
+  "galleryModal": {
+    "title": "My Gallery",
+    "noProjects": "You haven't saved any projects yet.",
+    "noPreview": "No Preview",
+    "load": "Load",
+    "delete": "Delete"
+  },
+  "sampleModal": {
+    "productTitle": "Load a Sample Product",
+    "storyTitle": "Load a Sample Story Idea",
+    "productSearchPlaceholder": "Search products...",
+    "storySearchPlaceholder": "Search story keywords...",
+    "noResults": "No results found for \"{{searchTerm}}\"."
+  },
+  "apiKeyInstructions": {
+    "title": "Gemini API Key Required",
+    "welcome": "Welcome! To use this application, you need to provide your Google Gemini API key.",
+    "howTo": "How to set up your API key:",
+    "step1": "Obtain your API key from {{link}}.",
+    "step2": "Set it as an environment variable named {{apiKey}} in your execution environment.",
+    "step3": "Once the key is set, please reload this application.",
+    "disclaimer": "Your API key is used directly by the application and is never stored or shared."
+  },
+  "errors": {
+      "unknown": "An unknown error occurred.",
+      "loadProjects": "Could not load saved projects from the database.",
+      "loadProjectFailed": "Failed to load the selected project.",
+      "saveProjectFailed": "Failed to save the project.",
+      "productNameAndFeaturesRequired": "Product Name and Key Features are required.",
+      "storyIdeaRequired": "Story Idea is required.",
+      "storyboardGenerationFailed": "Failed to generate storyboard scenes.",
+      "expandSceneFailed": "Failed to expand scene.",
+      "exportFailed": "Could not export projects.",
+      "fileReadError": "File could not be read.",
+      "invalidProjectFile": "Invalid project file format.",
+      "importFailed": "Failed to import projects"
+  },
+  "prompts": {
+      "deleteProjectConfirm": "Are you sure you want to delete this project?",
+      "projectSaved": "Project \"{{title}}\" saved!",
+      "storyboardIdeaFromDescription": "Create a short video ad for {{productName}}. The ad should highlight its key features: {{keyFeatures}}. The tone should be {{tone}}. Here is the product description for inspiration: \"{{description}}\"",
+      "deletePanelConfirm": "Are you sure you want to delete Panel {{index}}?",
+      "noProjectsToExport": "There are no projects to export.",
+      "importConfirm": "This will import {{count}} projects. Existing projects with the same ID will be overwritten. Continue?",
+      "importSuccess": "Projects imported successfully!"
+  }
+}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { SampleProduct, SampleStory } from '../types';
+import { useTranslation } from '../i18n/LanguageContext';
 
 interface SampleGalleryModalProps {
     isOpen: boolean;
@@ -20,6 +21,7 @@ const SampleGalleryModal: React.FC<SampleGalleryModalProps> = ({
     onSelectProduct,
     onSelectStory,
 }) => {
+    const { t } = useTranslation();
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
@@ -42,9 +44,9 @@ const SampleGalleryModal: React.FC<SampleGalleryModalProps> = ({
 
     if (!isOpen) return null;
 
-    const title = type === 'product' ? 'Load a Sample Product' : 'Load a Sample Story Idea';
+    const title = type === 'product' ? t('sampleModal.productTitle') : t('sampleModal.storyTitle');
     const items = type === 'product' ? products : stories;
-    const placeholder = type === 'product' ? 'Search products...' : 'Search story keywords...';
+    const placeholder = type === 'product' ? t('sampleModal.productSearchPlaceholder') : t('sampleModal.storySearchPlaceholder');
 
     const filteredItems = items.filter(item => {
         if (type === 'product') {
@@ -109,7 +111,7 @@ const SampleGalleryModal: React.FC<SampleGalleryModalProps> = ({
                     </ul>
                      {filteredItems.length === 0 && (
                         <div className="text-center py-10 text-slate-500">
-                            <p>No results found for "{searchTerm}".</p>
+                            <p>{t('sampleModal.noResults', { searchTerm })}</p>
                         </div>
                     )}
                 </div>

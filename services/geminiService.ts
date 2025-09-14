@@ -243,13 +243,13 @@ Return the result in ${language} as a JSON array of objects, where each object h
 // FIX: Explicitly type the return value of retryWithBackoff for video generation.
 // This ensures `operation` is correctly typed as Operation, fixing errors
 // where `done` and `response` properties were not found on an `unknown` type.
-export const generateVideoForPanel = async (description: string, imageBase64: string, visualStyle: VisualStyle, duration: number): Promise<string> => {
+export const generateVideoForPanel = async (description: string, imageBase64: string, visualStyle: VisualStyle, duration: number, videoModel: string): Promise<string> => {
     const prompt = `Generate a high-quality, cinematic video clip with a visual style of "${visualStyle}". The video must be exactly ${duration} seconds long. The scene is: "${description}"`;
 
     try {
         // FIX: Specify the generic type for Operation as GenerateVideosResponse.
         let operation = await retryWithBackoff<Operation<GenerateVideosResponse>>(() => ai.models.generateVideos({
-            model: 'veo-2.0-generate-001',
+            model: videoModel,
             prompt: prompt,
             image: {
                 imageBytes: imageBase64,

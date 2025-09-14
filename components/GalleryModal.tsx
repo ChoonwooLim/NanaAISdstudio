@@ -1,5 +1,6 @@
 import React from 'react';
 import { Project } from '../types';
+import { useTranslation } from '../i18n/LanguageContext';
 
 interface GalleryModalProps {
     isOpen: boolean;
@@ -12,6 +13,7 @@ interface GalleryModalProps {
 }
 
 const GalleryModal: React.FC<GalleryModalProps> = ({ isOpen, onClose, projects, onLoad, onDelete, onExport, onImport }) => {
+    const { t } = useTranslation();
     if (!isOpen) return null;
 
     return (
@@ -24,20 +26,20 @@ const GalleryModal: React.FC<GalleryModalProps> = ({ isOpen, onClose, projects, 
                 onClick={(e) => e.stopPropagation()}
             >
                 <header className="p-4 border-b border-slate-700 flex justify-between items-center flex-shrink-0">
-                    <h2 className="text-lg font-bold text-white">My Gallery</h2>
+                    <h2 className="text-lg font-bold text-white">{t('galleryModal.title')}</h2>
                     <div className="flex items-center space-x-2">
                          <button 
                             onClick={onImport} 
                             className="text-xs font-medium bg-green-600/50 hover:bg-green-600/80 text-green-200 py-1.5 px-3 rounded-md transition-colors"
                          >
-                            Import
+                            {t('common.import')}
                         </button>
                         <button 
                             onClick={onExport} 
                             disabled={projects.length === 0} 
                             className="text-xs font-medium bg-slate-600/50 hover:bg-slate-600/80 text-slate-200 py-1.5 px-3 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Export All
+                            {t('common.exportAll')}
                         </button>
                         <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors text-2xl font-bold">&times;</button>
                     </div>
@@ -46,7 +48,7 @@ const GalleryModal: React.FC<GalleryModalProps> = ({ isOpen, onClose, projects, 
                 <div className="p-6 overflow-y-auto flex-grow">
                     {projects.length === 0 ? (
                         <div className="flex items-center justify-center h-full text-slate-500">
-                            <p>You haven't saved any projects yet.</p>
+                            <p>{t('galleryModal.noProjects')}</p>
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
@@ -56,7 +58,7 @@ const GalleryModal: React.FC<GalleryModalProps> = ({ isOpen, onClose, projects, 
                                         {project.thumbnailUrl ? (
                                             <img src={project.thumbnailUrl} alt={project.title} className="w-full h-full object-cover" />
                                         ) : (
-                                            <div className="text-slate-600 text-xs">No Preview</div>
+                                            <div className="text-slate-600 text-xs">{t('galleryModal.noPreview')}</div>
                                         )}
                                     </div>
                                     <div className="p-3 flex-grow flex flex-col">
@@ -72,13 +74,13 @@ const GalleryModal: React.FC<GalleryModalProps> = ({ isOpen, onClose, projects, 
                                             onClick={() => onLoad(project.id)}
                                             className="text-xs font-medium bg-blue-600/50 hover:bg-blue-600/80 text-blue-200 py-1 px-3 rounded-md transition-colors"
                                         >
-                                            Load
+                                            {t('galleryModal.load')}
                                         </button>
                                         <button 
                                             onClick={() => onDelete(project.id)}
                                             className="text-xs font-medium bg-red-600/50 hover:bg-red-600/80 text-red-200 py-1 px-3 rounded-md transition-colors"
                                         >
-                                            Delete
+                                            {t('galleryModal.delete')}
                                         </button>
                                     </div>
                                 </div>
