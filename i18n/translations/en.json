@@ -2,7 +2,9 @@
   "header": {
     "title": "Artifex.AI Studio Pro",
     "subtitle": "From product descriptions to video storyboards, bring your ideas to life with AI.",
-    "openGallery": "Open Gallery"
+    "openGallery": "Open Gallery",
+    "newProject": "New Project",
+    "importProject": "Import File"
   },
   "modeSwitcher": {
     "productDescription": "Product Description Generator",
@@ -13,8 +15,8 @@
     "loadSampleStory": "Load Sample Story",
     "errorPrefix": "Error:",
     "generating": "Generating...",
-    "saveProject": "Save Project",
-    "import": "Import",
+    "saveToGallery": "Save to Gallery",
+    "export": "Export",
     "exportAll": "Export All",
     "language": "Language",
     "koreanDetected": "🇰🇷 Korean detected. This will be automatically translated to English.",
@@ -148,6 +150,11 @@
       "deletePanelConfirm": "Are you sure you want to delete Panel {{index}}?",
       "noProjectsToExport": "There are no projects to export.",
       "importConfirm": "This will import {{count}} projects. Existing projects with the same ID will be overwritten. Continue?",
-      "importSuccess": "Projects imported successfully!"
+      "importSuccess": "{{count}} projects imported successfully!"
+  },
+  "tooltips": {
+    "saveToGallery": "Save the current project to your in-app gallery.",
+    "exportProject": "Save the current project as a file (.json) to your computer.",
+    "importProjectFile": "Import project(s) from a .json file."
   }
 }

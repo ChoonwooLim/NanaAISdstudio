@@ -92,11 +92,37 @@ const App: React.FC = () => {
     const [isSampleModalOpen, setIsSampleModalOpen] = useState(false);
     const [sampleModalType, setSampleModalType] = useState<'product' | 'story'>('product');
     
-    // Gallery State
+    // Gallery and Project State
     const [isGalleryOpen, setIsGalleryOpen] = useState(false);
     const [projects, setProjects] = useState<Project[]>([]);
+    const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
+
 
     const apiKey = process.env.API_KEY;
+    
+    const resetState = () => {
+        setMode(AppMode.DESCRIPTION);
+        setProductName('');
+        setKeyFeatures('');
+        setTargetAudience('');
+        setTone(Tone.PROFESSIONAL);
+        setDescriptionLanguage(language);
+        setDescriptionModel('gemini-2.5-flash');
+        setDescription('');
+        setStoryIdea('');
+        setStoryboardConfig({
+            ...initialStoryboardConfig,
+            descriptionLanguage: language,
+        });
+        setStoryboardPanels([]);
+        setError(null);
+        setCurrentProjectId(null);
+    };
+
+    const handleNewProject = () => {
+        // Optional: Could add a confirmation if there are unsaved changes.
+        resetState();
+    };
 
     // Sync local language settings with global language
     useEffect(() => {
@@ -135,14 +161,15 @@ const App: React.FC = () => {
         setStoryboardConfig(loadedState.storyboardConfig);
         setDescription(loadedState.description);
         setStoryboardPanels(loadedState.storyboardPanels);
+        setError(null);
     };
     
     const handleLoadProject = async (id: string) => {
         const project = await getProject(id);
         if (project) {
             applyState(project.appState);
+            setCurrentProjectId(project.id);
             setIsGalleryOpen(false);
-            setError(null);
         } else {
             setError(t('errors.loadProjectFailed'));
         }
@@ -151,6 +178,10 @@ const App: React.FC = () => {
     const handleDeleteProject = async (id: string) => {
         if (window.confirm(t('prompts.deleteProjectConfirm'))) {
             await deleteProject(id);
+            if (id === currentProjectId) {
+                // If we deleted the currently active project, reset the editor.
+                handleNewProject();
+            }
             await loadProjects(); // Refresh the list
         }
     };
@@ -170,21 +201,24 @@ const App: React.FC = () => {
     });
 
     const handleSaveProject = async () => {
+        const isUpdate = !!currentProjectId;
+        const id = isUpdate ? currentProjectId! : Date.now().toString();
         const title = productName || storyIdea || t('common.untitledProject');
-        const timestamp = Date.now();
-        const id = timestamp.toString();
         const thumbnailUrl = storyboardPanels.find(p => p.imageUrl && p.imageUrl !== 'error' && p.imageUrl !== 'quota_error')?.imageUrl || '';
 
         const project: Project = {
             id,
             title,
-            timestamp,
+            timestamp: Date.now(),
             thumbnailUrl,
             appState: getAppState(),
         };
 
         try {
             await saveProject(project);
+            if (!isUpdate) {
+                setCurrentProjectId(id); // Set the new ID for future saves
+            }
             await loadProjects(); // Refresh gallery list
             alert(t('prompts.projectSaved', { title }));
         } catch (err) {
@@ -234,7 +268,7 @@ const App: React.FC = () => {
 
     const handleProceedToStoryboard = () => {
         setMode(AppMode.STORYBOARD);
-        setStoryIdea(t('prompts.storyboardIdeaFromDescription', { productName, keyFeatures, tone, description }));
+        setStoryIdea(t('prompts.storyboardIdeaFromDescription', { productName, keyFeatures, tone: t(`tones.${tone}`), description }));
         setStoryboardPanels([]); // Clear previous storyboard
     };
 
@@ -437,20 +471,19 @@ const App: React.FC = () => {
     };
 
     const handleSelectSampleProduct = (sample: SampleProduct) => {
+        handleNewProject(); // Reset state before loading a sample
         setProductName(sample.productName);
         setKeyFeatures(sample.keyFeatures);
         setTargetAudience(sample.targetAudience);
         setTone(sample.tone);
-        setDescription('');
-        setError(null);
         setIsSampleModalOpen(false);
     };
 
     const handleSelectSampleStory = (sample: SampleStory) => {
+        handleNewProject(); // Reset state before loading a sample
+        setMode(AppMode.STORYBOARD);
         setStoryIdea(sample.idea);
         setStoryboardConfig(sample.config);
-        setStoryboardPanels([]);
-        setError(null);
         setIsSampleModalOpen(false);
     };
 
@@ -476,6 +509,35 @@ const App: React.FC = () => {
             setError(t('errors.exportFailed'));
         }
     };
+    
+    const handleExportCurrentProject = () => {
+        const currentAppState = getAppState();
+
+        const id = currentProjectId || Date.now().toString();
+        const title = productName || storyIdea || t('common.untitledProject');
+        const thumbnailUrl = storyboardPanels.find(p => p.imageUrl && p.imageUrl !== 'error' && p.imageUrl !== 'quota_error')?.imageUrl || '';
+
+        const project: Project = {
+            id,
+            title,
+            timestamp: Date.now(),
+            thumbnailUrl,
+            appState: currentAppState,
+        };
+        
+        const projectsToExport = [project];
+        const jsonString = JSON.stringify(projectsToExport, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const sanitizedTitle = title.replace(/[^a-z0-9]/gi, '_').toLowerCase().substring(0, 50);
+        a.download = `artifex-project-${sanitizedTitle}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
 
     const handleImportProjects = () => {
         const input = document.createElement('input');
@@ -499,9 +561,13 @@ const App: React.FC = () => {
                     }
 
                     if (window.confirm(t('prompts.importConfirm', { count: importedProjects.length }))) {
-                        await Promise.all(importedProjects.map(project => saveProject(project)));
+                        // Use a Set to avoid duplicates if importing the same file twice
+                        const existingIds = new Set(projects.map(p => p.id));
+                        const projectsToSave = importedProjects.filter(p => !existingIds.has(p.id));
+                        
+                        await Promise.all(projectsToSave.map(project => saveProject(project)));
                         await loadProjects();
-                        alert(t('prompts.importSuccess'));
+                        alert(t('prompts.importSuccess', { count: projectsToSave.length }));
                     }
                 } catch (err: any) {
                     console.error("Failed to import projects:", err);
@@ -546,7 +612,11 @@ const App: React.FC = () => {
     return (
         <div className="bg-slate-900 text-white min-h-screen font-sans">
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <Header onOpenGallery={() => setIsGalleryOpen(true)} />
+                <Header 
+                    onOpenGallery={() => setIsGalleryOpen(true)} 
+                    onNewProject={handleNewProject}
+                    onImport={handleImportProjects}
+                />
 
                 <div className="mt-8 max-w-lg mx-auto">
                     <ModeSwitcher mode={mode} setMode={setMode} />
@@ -579,6 +649,7 @@ const App: React.FC = () => {
                                 keyFeaturesIsKorean={keyFeaturesIsKorean}
                                 targetAudienceIsKorean={targetAudienceIsKorean}
                                 onSave={handleSaveProject}
+                                onExport={handleExportCurrentProject}
                                 canSave={canSave}
                             />
                         </>
@@ -598,6 +669,7 @@ const App: React.FC = () => {
                                 isLoading={isLoading}
                                 storyIdeaIsKorean={storyIdeaIsKorean}
                                 onSave={handleSaveProject}
+                                onExport={handleExportCurrentProject}
                                 canSave={canSave}
                             />
                         </>
@@ -677,7 +749,6 @@ const App: React.FC = () => {
                 onLoad={handleLoadProject}
                 onDelete={handleDeleteProject}
                 onExport={handleExportProjects}
-                onImport={handleImportProjects}
             />
 
             <SampleGalleryModal

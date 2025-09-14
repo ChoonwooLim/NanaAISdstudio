@@ -1,12 +1,15 @@
 import React from 'react';
 import { useTranslation } from '../i18n/LanguageContext';
 import { DESCRIPTION_LANGUAGE_OPTIONS } from '../constants';
+import UploadIcon from './icons/UploadIcon';
 
 interface HeaderProps {
     onOpenGallery: () => void;
+    onNewProject: () => void;
+    onImport: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onOpenGallery }) => {
+const Header: React.FC<HeaderProps> = ({ onOpenGallery, onNewProject, onImport }) => {
     const { t, language, setLanguage } = useTranslation();
     const title = t('header.title');
     const subtitle = t('header.subtitle');
@@ -19,7 +22,7 @@ const Header: React.FC<HeaderProps> = ({ onOpenGallery }) => {
             <p className="mt-4 text-lg text-slate-400 max-w-2xl mx-auto">
                 {subtitle}
             </p>
-             <div className="absolute top-0 right-0 flex items-center space-x-4">
+             <div className="absolute top-0 right-0 flex items-center space-x-2 sm:space-x-4">
                  <div className="relative">
                      <select
                         value={language}
@@ -34,8 +37,24 @@ const Header: React.FC<HeaderProps> = ({ onOpenGallery }) => {
                     </div>
                  </div>
                 <button 
+                    onClick={onNewProject}
+                    className="bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-600 font-medium py-2 px-4 rounded-lg transition-colors"
+                    title={t('header.newProject')}
+                >
+                    {t('header.newProject')}
+                </button>
+                 <button 
+                    onClick={onImport}
+                    className="bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-600 font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2"
+                    title={t('tooltips.importProjectFile')}
+                >
+                    <UploadIcon className="w-4 h-4" />
+                    <span className="hidden sm:inline">{t('header.importProject')}</span>
+                </button>
+                <button 
                     onClick={onOpenGallery}
                     className="bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-600 font-medium py-2 px-4 rounded-lg transition-colors"
+                     title={t('header.openGallery')}
                 >
                     {t('header.openGallery')}
                 </button>

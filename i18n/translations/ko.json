@@ -2,7 +2,9 @@
   "header": {
     "title": "Artifex.AI Studio Pro",
     "subtitle": "제품 설명부터 비디오 스토리보드까지, AI로 아이디어를 현실로 만들어 보세요.",
-    "openGallery": "갤러리 열기"
+    "openGallery": "갤러리 열기",
+    "newProject": "새 프로젝트",
+    "importProject": "파일 가져오기"
   },
   "modeSwitcher": {
     "productDescription": "제품 설명 생성기",
@@ -13,8 +15,8 @@
     "loadSampleStory": "샘플 스토리 불러오기",
     "errorPrefix": "오류:",
     "generating": "생성 중...",
-    "saveProject": "프로젝트 저장",
-    "import": "가져오기",
+    "saveToGallery": "갤러리에 저장",
+    "export": "내보내기",
     "exportAll": "모두 내보내기",
     "language": "언어",
     "koreanDetected": "🇰🇷 한국어 감지됨. 영어로 자동 번역됩니다.",
@@ -148,6 +150,11 @@
       "deletePanelConfirm": "{{index}}번 패널을 정말 삭제하시겠습니까?",
       "noProjectsToExport": "내보낼 프로젝트가 없습니다.",
       "importConfirm": "{{count}}개의 프로젝트를 가져옵니다. 동일한 ID를 가진 기존 프로젝트는 덮어쓰여집니다. 계속하시겠습니까?",
-      "importSuccess": "프로젝트를 성공적으로 가져왔습니다!"
+      "importSuccess": "{{count}}개의 프로젝트를 성공적으로 가져왔습니다!"
+  },
+  "tooltips": {
+    "saveToGallery": "현재 프로젝트를 앱 내 갤러리에 저장합니다.",
+    "exportProject": "현재 프로젝트를 파일(.json)로 컴퓨터에 저장합니다.",
+    "importProjectFile": ".json 파일에서 프로젝트를 가져옵니다."
   }
 }

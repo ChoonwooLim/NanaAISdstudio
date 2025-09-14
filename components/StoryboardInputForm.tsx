@@ -3,6 +3,8 @@ import LoadingSpinner from './LoadingSpinner';
 import { StoryboardConfig } from '../types';
 import StoryboardSettings from './StoryboardSettings';
 import { useTranslation } from '../i18n/LanguageContext';
+import SaveIcon from './icons/SaveIcon';
+import DownloadIcon from './icons/DownloadIcon';
 
 interface StoryboardInputFormProps {
     storyIdea: string;
@@ -13,6 +15,7 @@ interface StoryboardInputFormProps {
     isLoading: boolean;
     storyIdeaIsKorean: boolean;
     onSave: () => void;
+    onExport: () => void;
     canSave: boolean;
 }
 
@@ -25,6 +28,7 @@ const StoryboardInputForm: React.FC<StoryboardInputFormProps> = ({
     isLoading,
     storyIdeaIsKorean,
     onSave,
+    onExport,
     canSave,
 }) => {
     const { t } = useTranslation();
@@ -64,14 +68,28 @@ const StoryboardInputForm: React.FC<StoryboardInputFormProps> = ({
                         t('storyboardForm.generateButton')
                     )}
                 </button>
-                <button
-                    type="button"
-                    onClick={onSave}
-                    disabled={!canSave}
-                    className="flex-shrink-0 bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-600 font-medium py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    💾 {t('common.saveProject')}
-                </button>
+                <div className="flex-shrink-0 flex items-center gap-2">
+                    <button
+                        type="button"
+                        onClick={onSave}
+                        disabled={!canSave}
+                        className="flex items-center justify-center bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-600 font-medium py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        title={t('tooltips.saveToGallery')}
+                    >
+                        <SaveIcon className="w-5 h-5" />
+                        <span className="hidden sm:inline ml-2">{t('common.saveToGallery')}</span>
+                    </button>
+                    <button
+                        type="button"
+                        onClick={onExport}
+                        disabled={!canSave}
+                        className="flex items-center justify-center bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-600 font-medium py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        title={t('tooltips.exportProject')}
+                    >
+                        <DownloadIcon className="w-5 h-5" />
+                        <span className="hidden sm:inline ml-2">{t('common.export')}</span>
+                    </button>
+                </div>
             </div>
         </form>
     );

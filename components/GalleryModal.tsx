@@ -9,10 +9,9 @@ interface GalleryModalProps {
     onLoad: (id: string) => void;
     onDelete: (id: string) => void;
     onExport: () => void;
-    onImport: () => void;
 }
 
-const GalleryModal: React.FC<GalleryModalProps> = ({ isOpen, onClose, projects, onLoad, onDelete, onExport, onImport }) => {
+const GalleryModal: React.FC<GalleryModalProps> = ({ isOpen, onClose, projects, onLoad, onDelete, onExport }) => {
     const { t } = useTranslation();
     if (!isOpen) return null;
 
@@ -28,12 +27,6 @@ const GalleryModal: React.FC<GalleryModalProps> = ({ isOpen, onClose, projects, 
                 <header className="p-4 border-b border-slate-700 flex justify-between items-center flex-shrink-0">
                     <h2 className="text-lg font-bold text-white">{t('galleryModal.title')}</h2>
                     <div className="flex items-center space-x-2">
-                         <button 
-                            onClick={onImport} 
-                            className="text-xs font-medium bg-green-600/50 hover:bg-green-600/80 text-green-200 py-1.5 px-3 rounded-md transition-colors"
-                         >
-                            {t('common.import')}
-                        </button>
                         <button 
                             onClick={onExport} 
                             disabled={projects.length === 0} 
