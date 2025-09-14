@@ -1,1 +1,184 @@
-full contents of i18n/translations/en.json
+{
+  "header": {
+    "title": "Artifex.AI Studio Pro",
+    "subtitle": "From product descriptions to video storyboards, bring your ideas to life with AI.",
+    "newProject": "New Project",
+    "importProject": "Import File",
+    "openGallery": "Open Gallery"
+  },
+  "tooltips": {
+    "newProject": "Start a new blank project",
+    "importProjectFile": "Import projects from a .json file",
+    "openGallery": "Open your saved projects gallery",
+    "saveToGallery": "Save current work to your gallery",
+    "exportProject": "Export the current project to a .json file"
+  },
+  "common": {
+    "koreanDetected": "Korean input detected. Consider using the Korean language setting for best results.",
+    "koreanDetectedIdea": "Korean input detected. Consider setting the description language to Korean.",
+    "language": "Language",
+    "generating": "Generating...",
+    "regenerate": "Regenerate",
+    "saveToGallery": "Save to Gallery",
+    "export": "Export",
+    "exportAll": "Export All",
+    "errorPrefix": "Error:",
+    "importSuccess": "Successfully imported {{count}} project(s).",
+    "importFailure": "Failed to import projects. The file might be corrupt or in the wrong format."
+  },
+  "tones": {
+    "professional": "Professional",
+    "friendly": "Friendly & Casual",
+    "humorous": "Witty & Humorous",
+    "luxurious": "Luxurious & Elegant"
+  },
+  "descriptionForm": {
+    "productName": "Product Name",
+    "productNamePlaceholder": "e.g., Ergonomic Office Chair",
+    "toneOfVoice": "Tone of Voice",
+    "aiModel": "AI Model",
+    "keyFeatures": "Key Features / Keywords",
+    "keyFeaturesPlaceholder": "e.g., Lumbar support, breathable mesh, adjustable armrests, silent wheels",
+    "keyFeaturesHint": "Separate features with commas.",
+    "targetAudience": "Target Audience (Optional)",
+    "targetAudiencePlaceholder": "e.g., Remote workers, gamers, students",
+    "generateButton": "✨ Generate Description"
+  },
+  "descriptionDisplay": {
+    "title": "Generated Description",
+    "copyToClipboard": "Copy to clipboard"
+  },
+  "modeSwitcher": {
+    "productDescription": "Product Description Generator",
+    "storyboard": "Storyboard Generator",
+    "mediaArt": "Media Art Generator"
+  },
+  "storyboardForm": {
+    "storyIdea": "Story Idea",
+    "storyIdeaPlaceholder": "e.g., A cinematic trailer for a futuristic flying car weaving through a neon-lit cyberpunk city.",
+    "storyIdeaHint": "Provide a clear, concise idea. The AI will break it down into scenes.",
+    "loadingMessage": "Generating Storyboard...",
+    "generateButton": "🎬 Generate Storyboard"
+  },
+  "storyboardSettings": {
+    "title": "Storyboard Settings",
+    "storySection": "Story",
+    "scenes": "Scenes (2-10)",
+    "moodPacing": "Mood & Pacing",
+    "pacing": "Pacing / Target Length",
+    "descriptionLanguage": "Description Language",
+    "textModel": "Text Model",
+    "imageSection": "Image",
+    "aspectRatio": "Aspect Ratio",
+    "visualStyle": "Visual Style",
+    "imageModel": "Image Model",
+    "videoSection": "Video",
+    "videoModel": "Video Model",
+    "videoNote": "Video aspect ratio is determined by the Image aspect ratio. Resolution and framerate are optimized by the model for the highest quality."
+  },
+  "storyboardDisplay": {
+    "title": "Generated Storyboard",
+    "drawingPanel": "Drawing panel {{index}}...",
+    "queued": "Queued for drawing...",
+    "imageError": "Image generation failed. Please try regenerating.",
+    "quotaErrorTitle": "Quota Reached",
+    "quotaError": "You may have reached your image generation limit.",
+    "quotaErrorCheckPlan": "Please check your plan and billing details on {{link}}.",
+    "checkPlan": "Please check your plan and billing details.",
+    "googleAIStudio": "Google AI Studio",
+    "duration": "Duration (s)",
+    "regenerateImage": "Regenerate Image",
+    "deletePanel": "Delete Panel",
+    "expandScene": "Expand Scene",
+    "videoClip": "Video Clip",
+    "generateClipTitle": "Generate a video clip for this scene",
+    "generateClip": "Generate Clip",
+    "regenerateVideo": "Regenerate Video",
+    "generatingClip": "Generating clip...",
+    "generatingClipHint": "This can take a few minutes.",
+    "clipFailed": "Clip generation failed.",
+    "generateClipPrompt": "Generate a clip to see the result."
+  },
+  "detailedModal": {
+    "title": "Expand and Edit Scene",
+    "originalPrefix": "Original:",
+    "loadingMessage": "Generating detailed shots and images...\nThis may take a moment.",
+    "drawingShot": "Drawing shot {{index}}...",
+    "saveButton": "Save Changes to Storyboard"
+  },
+  "videoDisplay": {
+    "title": "Final Video Preview",
+    "playingScene": "Playing Scene {{current}} of {{total}}"
+  },
+  "apiKeyInstructions": {
+    "title": "API Key Required",
+    "welcome": "To use Artifex.AI Studio Pro, you need to set up your Google AI API key.",
+    "howTo": "How to get your API key:",
+    "step1": "Go to {{link}} and create an API key.",
+    "step2": "In the Code Editor, find the \"Secrets\" tab (usually on the left panel).",
+    "step3": "Add a new secret with the name {{apiKey}} and paste your key as the value.",
+    "disclaimer": "Your API key is stored securely as an environment variable and is not exposed on the client-side."
+  },
+  "galleryModal": {
+    "title": "My Gallery",
+    "noProjects": "You have no saved projects yet.",
+    "noPreview": "No Preview Available",
+    "load": "Load",
+    "delete": "Delete",
+    "untitledDescription": "Untitled Description",
+    "untitledStoryboard": "Untitled Storyboard",
+    "untitledMediaArt": "Untitled Media Art"
+  },
+  "sampleModal": {
+    "productTitle": "Load a Sample Product",
+    "storyTitle": "Load a Sample Story Idea",
+    "loadSampleProduct": "Try a Sample Product",
+    "loadSampleStory": "Try a Sample Story",
+    "productSearchPlaceholder": "Search for products...",
+    "storySearchPlaceholder": "Search for ideas or keywords...",
+    "noResults": "No results found for \"{{searchTerm}}\""
+  },
+  "mediaArt": {
+    "sourceImageTitle": "Source Image",
+    "changeImage": "Change Image",
+    "selectImagePrompt": "Click to Select a Source Image",
+    "selectImageSubprompt": "Choose from a classic painting or upload your own.",
+    "styleTitle": "Animation Style",
+    "generateScenesButton": "🎬 Generate Scenes",
+    "generatingScenes": "Generating Scenes...",
+    "generatedScenesTitle": "Generated Scenes",
+    "generateAllClips": "Generate All Clips",
+    "generatingSceneImage": "Generating scene image...",
+    "deleteConfirm": "Are you sure you want to delete this scene? This action cannot be undone."
+  },
+  "imageModal": {
+    "title": "Select Source Image",
+    "fromGallery": "From Gallery",
+    "uploadImage": "Upload Image",
+    "uploadCTA": "Click to Upload an Image File",
+    "uploadHint": "PNG, JPG, or WEBP files are recommended.",
+    "orSelect": "Or select a masterpiece from the gallery"
+  },
+  "mediaArtStyles": {
+    "subtleMotion": "Subtle Motion",
+    "subtleMotionDesc": "Gentle, slow movements in key elements of the image.",
+    "parallax": "Parallax",
+    "parallaxDesc": "Creates a 3D effect by moving layers at different speeds.",
+    "dreamlike": "Dreamlike",
+    "dreamlikeDesc": "Flowing, liquid-like distortions and surreal transitions.",
+    "elemental": "Elemental",
+    "elementalDesc": "Adds natural effects like wind, rain, or shimmering light."
+  },
+  "paintings": {
+    "starryNight": { "title": "The Starry Night", "artist": "Vincent van Gogh" },
+    "greatWave": { "title": "The Great Wave off Kanagawa", "artist": "Hokusai" },
+    "pearlEarring": { "title": "Girl with a Pearl Earring", "artist": "Johannes Vermeer" },
+    "monaLisa": { "title": "Mona Lisa", "artist": "Leonardo da Vinci" },
+    "wandererSeaFog": { "title": "Wanderer above the Sea of Fog", "artist": "Caspar David Friedrich" },
+    "birthOfVenus": { "title": "The Birth of Venus", "artist": "Sandro Botticelli" },
+    "theScream": { "title": "The Scream", "artist": "Edvard Munch" },
+    "americanGothic": { "title": "American Gothic", "artist": "Grant Wood" },
+    "theNightWatch": { "title": "The Night Watch", "artist": "Rembrandt van Rijn" },
+    "luncheonBoatingParty": { "title": "Luncheon of the Boating Party", "artist": "Pierre-Auguste Renoir" }
+  }
+}

@@ -155,8 +155,9 @@ const StoryboardDisplay: React.FC<StoryboardDisplayProps> = ({ panels, onExpandS
                                             </div>
                                         )}
                                         {!panel.isLoadingVideo && panel.videoUrl === 'error' && (
-                                            <div className="text-red-400">
+                                            <div className="text-red-400 p-2">
                                                 <p className="text-xs font-semibold">{t('storyboardDisplay.clipFailed')}</p>
+                                                {panel.videoError && <p className="text-xs mt-1 opacity-80">{panel.videoError}</p>}
                                             </div>
                                         )}
                                         {!panel.isLoadingVideo && panel.videoUrl && panel.videoUrl !== 'error' && (

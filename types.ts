@@ -1,4 +1,4 @@
-// FIX: Created this file to define and export shared types, resolving module resolution errors.
+// FIX: Re-implement the Media Art state management to support the multi-step video generation workflow, including panels for scenes, images, and videos.
 
 export enum Tone {
     PROFESSIONAL = 'professional',
@@ -21,7 +21,7 @@ export enum VisualStyle {
     ANIME = 'anime',
     WATERCOLOR = 'watercolor',
     CLAYMATION = 'claymation',
-    PIXEL_ART = 'pixel-art',
+    PIXEL_ART = 'pixel art',
 }
 
 export enum VideoLength {
@@ -39,16 +39,10 @@ export enum Mood {
 }
 
 export enum MediaArtStyle {
-    SUBTLE_MOTION = 'subtle-motion',
+    SUBTLE_MOTION = 'subtle motion',
     PARALLAX = 'parallax',
     DREAMLIKE = 'dreamlike',
     ELEMENTAL = 'elemental',
-}
-
-export enum AppMode {
-    DESCRIPTION = 'description',
-    STORYBOARD = 'storyboard',
-    MEDIA_ART = 'media-art',
 }
 
 export interface FamousPainting {
@@ -71,56 +65,85 @@ export interface StoryboardConfig {
     videoModel: string;
 }
 
+export interface StoryboardPanel {
+    description: string;
+    imageUrl?: string;
+    isLoadingImage: boolean;
+    sceneDuration?: number;
+    videoUrl?: string;
+    isLoadingVideo: boolean;
+    videoError?: string;
+}
+
+export interface DetailedStoryboardPanel {
+    description: string;
+    imageUrl?: string;
+    isLoadingImage: boolean;
+}
+
+export enum AppMode {
+    DESCRIPTION = 'description',
+    STORYBOARD = 'storyboard',
+    MEDIA_ART = 'media_art',
+}
+
 export interface SampleProduct {
     productName: string;
     keyFeatures: string;
     targetAudience: string;
     tone: Tone;
 }
-
 export interface SampleStory {
     keyword: string;
     idea: string;
     config: StoryboardConfig;
 }
 
-export interface StoryboardPanel {
-    description: string;
-    imageUrl: string | null;
-    isLoadingImage: boolean;
-    videoUrl: string | null;
-    isLoadingVideo: boolean;
-    sceneDuration: number;
+export interface DescriptionState {
+    productName: string;
+    keyFeatures: string;
+    targetAudience: string;
+    tone: Tone;
+    descriptionLanguage: string;
+    descriptionModel: string;
+    generatedDescription: string;
 }
 
-export interface DetailedStoryboardPanel {
+export interface StoryboardState {
+    storyIdea: string;
+    config: StoryboardConfig;
+    panels: StoryboardPanel[];
+}
+
+export interface MediaArtSourceImage {
+    type: 'painting' | 'upload';
+    url: string; 
+    title: string;
+    artist?: string;
+}
+
+export interface MediaArtPanel {
     description: string;
-    imageUrl?: string | null;
-    isLoadingImage?: boolean;
+    imageUrl?: string;
+    isLoadingImage: boolean;
+    videoUrl?: string;
+    isLoadingVideo: boolean;
+    videoError?: string;
+}
+
+export interface MediaArtState {
+    sourceImage: MediaArtSourceImage | null;
+    style: MediaArtStyle;
+    panels: MediaArtPanel[];
 }
 
 export interface Project {
     id: string;
     timestamp: number;
     title: string;
-    thumbnailUrl: string | null;
+    thumbnailUrl?: string;
     mode: AppMode;
-    // Description mode state
-    productName?: string;
-    keyFeatures?: string;
-    targetAudience?: string;
-    tone?: Tone;
-    descriptionLanguage?: string;
-    descriptionModel?: string;
-    description?: string;
-    // Storyboard mode state
-    storyIdea?: string;
-    storyboardConfig?: StoryboardConfig;
-    panels?: StoryboardPanel[];
-    // Media Art state
-    mediaArt?: {
-        sourceImageUrl: string;
-        resultImageUrl: string;
-        prompt: string;
-    }
+    descriptionState?: DescriptionState;
+    storyboardState?: StoryboardState;
+    mediaArtState?: MediaArtState;
 }

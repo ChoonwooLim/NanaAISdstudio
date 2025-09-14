@@ -1,1 +1,184 @@
-full contents of i18n/translations/ko.json
+{
+  "header": {
+    "title": "Artifex.AI Studio Pro",
+    "subtitle": "제품 설명부터 비디오 스토리보드까지, AI로 당신의 아이디어를 현실로 만들어보세요.",
+    "newProject": "새 프로젝트",
+    "importProject": "파일 가져오기",
+    "openGallery": "갤러리 열기"
+  },
+  "tooltips": {
+    "newProject": "새로운 빈 프로젝트 시작하기",
+    "importProjectFile": ".json 파일에서 프로젝트 가져오기",
+    "openGallery": "저장된 프로젝트 갤러리 열기",
+    "saveToGallery": "현재 작업을 갤러리에 저장하기",
+    "exportProject": "현재 프로젝트를 .json 파일로 내보내기"
+  },
+  "common": {
+    "koreanDetected": "한글 입력이 감지되었습니다. 최상의 결과를 위해 언어 설정을 한국어로 변경하는 것을 고려해보세요.",
+    "koreanDetectedIdea": "한글 입력이 감지되었습니다. 설명 언어를 한국어로 설정하는 것을 고려해보세요.",
+    "language": "언어",
+    "generating": "생성 중...",
+    "regenerate": "재생성",
+    "saveToGallery": "갤러리에 저장",
+    "export": "내보내기",
+    "exportAll": "모두 내보내기",
+    "errorPrefix": "오류:",
+    "importSuccess": "{{count}}개의 프로젝트를 성공적으로 가져왔습니다.",
+    "importFailure": "프로젝트를 가져오지 못했습니다. 파일이 손상되었거나 형식이 잘못되었을 수 있습니다."
+  },
+  "tones": {
+    "professional": "전문적인",
+    "friendly": "친근하고 편안한",
+    "humorous": "재치있고 유머러스한",
+    "luxurious": "고급스럽고 우아한"
+  },
+  "descriptionForm": {
+    "productName": "제품명",
+    "productNamePlaceholder": "예: 인체공학적 사무용 의자",
+    "toneOfVoice": "분위기",
+    "aiModel": "AI 모델",
+    "keyFeatures": "주요 특징 / 키워드",
+    "keyFeaturesPlaceholder": "예: 허리 지지대, 통기성 메쉬, 조절 가능한 팔걸이, 무소음 바퀴",
+    "keyFeaturesHint": "쉼표로 특징을 구분해주세요.",
+    "targetAudience": "타겟 고객 (선택 사항)",
+    "targetAudiencePlaceholder": "예: 재택 근무자, 게이머, 학생",
+    "generateButton": "✨ 설명 생성하기"
+  },
+  "descriptionDisplay": {
+    "title": "생성된 설명",
+    "copyToClipboard": "클립보드에 복사"
+  },
+  "modeSwitcher": {
+    "productDescription": "제품 설명 생성기",
+    "storyboard": "스토리보드 생성기",
+    "mediaArt": "미디어 아트 생성기"
+  },
+  "storyboardForm": {
+    "storyIdea": "스토리 아이디어",
+    "storyIdeaPlaceholder": "예: 네온 불빛의 사이버펑크 도시를 가로지르는 미래형 비행 자동차의 시네마틱 트레일러.",
+    "storyIdeaHint": "명확하고 간결한 아이디어를 제공해주세요. AI가 장면으로 나누어 줄 것입니다.",
+    "loadingMessage": "스토리보드 생성 중...",
+    "generateButton": "🎬 스토리보드 생성하기"
+  },
+  "storyboardSettings": {
+    "title": "스토리보드 설정",
+    "storySection": "스토리",
+    "scenes": "장면 수 (2-10)",
+    "moodPacing": "분위기 및 속도",
+    "pacing": "페이싱 / 목표 길이",
+    "descriptionLanguage": "설명 언어",
+    "textModel": "텍스트 모델",
+    "imageSection": "이미지",
+    "aspectRatio": "화면 비율",
+    "visualStyle": "시각 스타일",
+    "imageModel": "이미지 모델",
+    "videoSection": "비디오",
+    "videoModel": "비디오 모델",
+    "videoNote": "비디오 화면 비율은 이미지 화면 비율에 따라 결정됩니다. 해상도와 프레임레이트는 최고 품질을 위해 모델에 의해 최적화됩니다."
+  },
+  "storyboardDisplay": {
+    "title": "생성된 스토리보드",
+    "drawingPanel": "{{index}}번 패널 그리는 중...",
+    "queued": "그리기 대기 중...",
+    "imageError": "이미지 생성에 실패했습니다. 다시 시도해주세요.",
+    "quotaErrorTitle": "할당량 초과",
+    "quotaError": "이미지 생성 한도에 도달했을 수 있습니다.",
+    "quotaErrorCheckPlan": "{{link}}에서 요금제 및 결제 세부 정보를 확인하세요.",
+    "checkPlan": "요금제 및 결제 세부 정보를 확인하세요.",
+    "googleAIStudio": "Google AI Studio",
+    "duration": "길이 (초)",
+    "regenerateImage": "이미지 재생성",
+    "deletePanel": "패널 삭제",
+    "expandScene": "장면 확장",
+    "videoClip": "비디오 클립",
+    "generateClipTitle": "이 장면에 대한 비디오 클립 생성하기",
+    "generateClip": "클립 생성",
+    "regenerateVideo": "비디오 재생성",
+    "generatingClip": "클립 생성 중...",
+    "generatingClipHint": "이 작업은 몇 분 정도 소요될 수 있습니다.",
+    "clipFailed": "클립 생성 실패.",
+    "generateClipPrompt": "클립을 생성하여 결과를 확인하세요."
+  },
+  "detailedModal": {
+    "title": "장면 확장 및 편집",
+    "originalPrefix": "원본:",
+    "loadingMessage": "세부 샷과 이미지를 생성 중입니다...\n잠시만 기다려주세요.",
+    "drawingShot": "{{index}}번 샷 그리는 중...",
+    "saveButton": "스토리보드에 변경사항 저장"
+  },
+  "videoDisplay": {
+    "title": "최종 비디오 미리보기",
+    "playingScene": "장면 {{current}} / {{total}} 재생 중"
+  },
+  "apiKeyInstructions": {
+    "title": "API 키가 필요합니다",
+    "welcome": "Artifex.AI Studio Pro를 사용하려면 Google AI API 키를 설정해야 합니다.",
+    "howTo": "API 키를 받는 방법:",
+    "step1": "{{link}}로 이동하여 API 키를 생성하세요.",
+    "step2": "코드 편집기에서 \"Secrets\" 탭(보통 왼쪽 패널에 있음)을 찾으세요.",
+    "step3": "이름이 {{apiKey}}인 새 시크릿을 추가하고 값을 키로 붙여넣으세요.",
+    "disclaimer": "API 키는 환경 변수로 안전하게 저장되며 클라이언트 측에 노출되지 않습니다."
+  },
+  "galleryModal": {
+    "title": "내 갤러리",
+    "noProjects": "아직 저장된 프로젝트가 없습니다.",
+    "noPreview": "미리보기 없음",
+    "load": "불러오기",
+    "delete": "삭제",
+    "untitledDescription": "제목 없는 설명",
+    "untitledStoryboard": "제목 없는 스토리보드",
+    "untitledMediaArt": "제목 없는 미디어 아트"
+  },
+  "sampleModal": {
+    "productTitle": "샘플 제품 불러오기",
+    "storyTitle": "샘플 스토리 아이디어 불러오기",
+    "loadSampleProduct": "샘플 제품으로 시작하기",
+    "loadSampleStory": "샘플 스토리로 시작하기",
+    "productSearchPlaceholder": "제품 검색...",
+    "storySearchPlaceholder": "아이디어나 키워드 검색...",
+    "noResults": "\"{{searchTerm}}\"에 대한 검색 결과가 없습니다."
+  },
+  "mediaArt": {
+    "sourceImageTitle": "소스 이미지",
+    "changeImage": "이미지 변경",
+    "selectImagePrompt": "클릭하여 소스 이미지 선택",
+    "selectImageSubprompt": "고전 명화를 선택하거나 직접 업로드하세요.",
+    "styleTitle": "애니메이션 스타일",
+    "generateScenesButton": "🎬 장면 생성하기",
+    "generatingScenes": "장면 생성 중...",
+    "generatedScenesTitle": "생성된 장면",
+    "generateAllClips": "모든 클립 생성",
+    "generatingSceneImage": "장면 이미지 생성 중...",
+    "deleteConfirm": "이 장면을 정말로 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."
+  },
+  "imageModal": {
+    "title": "소스 이미지 선택",
+    "fromGallery": "갤러리에서 선택",
+    "uploadImage": "이미지 업로드",
+    "uploadCTA": "클릭하여 이미지 파일 업로드",
+    "uploadHint": "PNG, JPG, 또는 WEBP 파일을 권장합니다.",
+    "orSelect": "또는 갤러리에서 명작 선택하기"
+  },
+  "mediaArtStyles": {
+    "subtleMotion": "미묘한 움직임",
+    "subtleMotionDesc": "이미지의 주요 요소에 부드럽고 느린 움직임을 줍니다.",
+    "parallax": "패럴랙스",
+    "parallaxDesc": "레이어를 다른 속도로 움직여 3D 효과를 만듭니다.",
+    "dreamlike": "몽환적인",
+    "dreamlikeDesc": "흐르는 듯한, 액체 같은 왜곡과 초현실적인 전환.",
+    "elemental": "자연 요소",
+    "elementalDesc": "바람, 비, 반짝이는 빛과 같은 자연 효과를 추가합니다."
+  },
+  "paintings": {
+    "starryNight": { "title": "별이 빛나는 밤", "artist": "빈센트 반 고흐" },
+    "greatWave": { "title": "가나가와 해변의 높은 파도 아래", "artist": "호쿠사이" },
+    "pearlEarring": { "title": "진주 귀걸이를 한 소녀", "artist": "요하네스 페르메이르" },
+    "monaLisa": { "title": "모나리자", "artist": "레오나르도 다빈치" },
+    "wandererSeaFog": { "title": "안개 바다 위의 방랑자", "artist": "카스파르 다비트 프리드리히" },
+    "birthOfVenus": { "title": "비너스의 탄생", "artist": "산드로 보티첼리" },
+    "theScream": { "title": "절규", "artist": "에드바르 뭉크" },
+    "americanGothic": { "title": "아메리칸 고딕", "artist": "그랜트 우드" },
+    "theNightWatch": { "title": "야경", "artist": "렘브란트 판 레인" },
+    "luncheonBoatingParty": { "title": "뱃놀이 일행의 오찬", "artist": "피에르 오귀스트 르누아르" }
+  }
+}
