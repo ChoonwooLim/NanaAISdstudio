@@ -3,26 +3,7 @@ import { StoryboardPanel } from '../types';
 import LoadingSpinner from './LoadingSpinner';
 import RefreshIcon from './icons/RefreshIcon';
 import { useTranslation } from '../i18n/LanguageContext';
-
-const DeleteIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-    <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        {...props}
-    >
-        <path d="M3 6h18" />
-        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-        <line x1="10" y1="11" x2="10" y2="17" />
-        <line x1="14" y1="11" x2="14" y2="17" />
-    </svg>
-);
+import DeleteIcon from './icons/DeleteIcon';
 
 interface StoryboardDisplayProps {
     panels: StoryboardPanel[];
@@ -90,25 +71,7 @@ const StoryboardDisplay: React.FC<StoryboardDisplayProps> = ({ panels, onExpandS
                                 )}
                             </div>
                             <div className="p-4 flex-grow flex flex-col bg-slate-800/40 relative">
-                                {!panel.isLoadingImage && (
-                                    <div className="absolute top-3 right-3 flex space-x-2 z-10">
-                                        <button
-                                            onClick={() => onRegenerateImage(index)}
-                                            className="p-1.5 bg-slate-700/50 hover:bg-slate-700 rounded-full transition-colors"
-                                            title={t('storyboardDisplay.regenerateImage')}
-                                        >
-                                            <RefreshIcon className="w-4 h-4 text-slate-300" />
-                                        </button>
-                                        <button
-                                            onClick={() => onDeletePanel(index)}
-                                            className="p-1.5 bg-slate-700/50 hover:bg-slate-700 rounded-full transition-colors"
-                                            title={t('storyboardDisplay.deletePanel')}
-                                        >
-                                            <DeleteIcon className="w-4 h-4 text-slate-300 hover:text-red-400" />
-                                        </button>
-                                    </div>
-                                )}
-                                <p className="text-sm text-slate-300 leading-relaxed flex-grow pr-16">{panel.description}</p>
+                                <p className="text-sm text-slate-300 leading-relaxed flex-grow">{panel.description}</p>
                                 
                                 <div className="mt-4 flex justify-between items-center gap-4">
                                     {canGenerateVideo ? (
@@ -125,13 +88,32 @@ const StoryboardDisplay: React.FC<StoryboardDisplayProps> = ({ panels, onExpandS
                                             />
                                         </div>
                                     ) : <div />}
-                                    <button
-                                        onClick={() => onExpandScene(panel.description, index)}
-                                        className="bg-teal-600/50 hover:bg-teal-600/80 border border-teal-500/60 text-teal-200 text-xs font-semibold py-1.5 px-3 rounded-md transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-                                        disabled={!canGenerateVideo}
-                                    >
-                                       {t('storyboardDisplay.expandScene')}
-                                    </button>
+                                    
+                                    <div className="flex items-center space-x-2">
+                                        <button
+                                            onClick={() => onRegenerateImage(index)}
+                                            className="p-2 bg-slate-700/50 hover:bg-slate-700 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                            title={t('storyboardDisplay.regenerateImage')}
+                                            disabled={!canGenerateVideo}
+                                        >
+                                            <RefreshIcon className="w-4 h-4 text-slate-300" />
+                                        </button>
+                                        <button
+                                            onClick={() => onDeletePanel(index)}
+                                            className="p-2 bg-slate-700/50 hover:bg-slate-700 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                            title={t('storyboardDisplay.deletePanel')}
+                                            disabled={!canGenerateVideo}
+                                        >
+                                            <DeleteIcon className="w-4 h-4 text-slate-300 hover:text-red-400" />
+                                        </button>
+                                        <button
+                                            onClick={() => onExpandScene(panel.description, index)}
+                                            className="bg-teal-600/50 hover:bg-teal-600/80 border border-teal-500/60 text-teal-200 text-xs font-semibold py-1.5 px-3 rounded-md transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            disabled={!canGenerateVideo}
+                                        >
+                                           {t('storyboardDisplay.expandScene')}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                              {canGenerateVideo && (

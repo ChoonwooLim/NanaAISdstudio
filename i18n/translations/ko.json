@@ -155,6 +155,8 @@
   "tooltips": {
     "saveToGallery": "현재 프로젝트를 앱 내 갤러리에 저장합니다.",
     "exportProject": "현재 프로젝트를 파일(.json)로 컴퓨터에 저장합니다.",
-    "importProjectFile": ".json 파일에서 프로젝트를 가져옵니다."
+    "importProjectFile": ".json 파일에서 프로젝트를 가져옵니다.",
+    "newProject": "새로운 빈 프로젝트를 시작합니다.",
+    "openGallery": "저장된 프로젝트 갤러리를 엽니다."
   }
 }
