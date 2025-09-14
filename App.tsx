@@ -12,7 +12,10 @@ import {
     Project,
     AppState,
     SampleProduct,
-    SampleStory
+    SampleStory,
+    MediaArtState,
+    MediaArtStyle,
+    FamousPainting
 } from './types';
 import {
     generateDescription,
@@ -21,6 +24,8 @@ import {
     expandSceneToDetailedPanels,
     generateVideoForPanel,
     translateText,
+    imageUrlToBase64,
+    generateMediaArt,
 } from './services/geminiService';
 import { getProjects, saveProject, deleteProject, getProject } from './services/db';
 
@@ -36,9 +41,11 @@ import DetailedStoryboardModal from './components/DetailedStoryboardModal';
 import VideoDisplay from './components/VideoDisplay';
 import GalleryModal from './components/GalleryModal';
 import SampleGalleryModal from './components/SampleGalleryModal';
+import MediaArtGenerator from './components/MediaArtGenerator';
 
 
 import { sampleProductsData, sampleStoryIdeasData } from './sampleData';
+import { FAMOUS_PAINTINGS } from './constants';
 import { useTranslation } from './i18n/LanguageContext';
 
 const isKorean = (text: string): boolean => /[\u3131-\uD79D]/.test(text);
@@ -56,6 +63,13 @@ const initialStoryboardConfig: StoryboardConfig = {
     // FIX: Updated videoModel to 'veo-2.0-generate-001' to comply with coding guidelines.
     videoModel: 'veo-2.0-generate-001',
 };
+
+const initialMediaArtState: MediaArtState = {
+    selectedPaintingId: null,
+    animationStyle: MediaArtStyle.SUBTLE_MOTION,
+    videoUrl: null,
+};
+
 
 const App: React.FC = () => {
     const { language, t } = useTranslation();
@@ -76,11 +90,13 @@ const App: React.FC = () => {
         descriptionLanguage: language
     });
     const [storyboardPanels, setStoryboardPanels] = useState<StoryboardPanel[]>([]);
+    const [mediaArtState, setMediaArtState] = useState<MediaArtState>(initialMediaArtState);
     
     // UI State
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isGeneratingImages, setIsGeneratingImages] = useState(false);
+    const [isMediaArtLoading, setIsMediaArtLoading] = useState(false);
 
 
     // Modal State
@@ -115,6 +131,7 @@ const App: React.FC = () => {
             descriptionLanguage: language,
         });
         setStoryboardPanels([]);
+        setMediaArtState(initialMediaArtState);
         setError(null);
         setCurrentProjectId(null);
     };
@@ -161,6 +178,7 @@ const App: React.FC = () => {
         setStoryboardConfig(loadedState.storyboardConfig);
         setDescription(loadedState.description);
         setStoryboardPanels(loadedState.storyboardPanels);
+        setMediaArtState(loadedState.mediaArtState || initialMediaArtState);
         setError(null);
     };
     
@@ -198,13 +216,28 @@ const App: React.FC = () => {
         storyboardConfig,
         description,
         storyboardPanels,
+        mediaArtState,
     });
 
     const handleSaveProject = async () => {
         const isUpdate = !!currentProjectId;
         const id = isUpdate ? currentProjectId! : Date.now().toString();
-        const title = productName || storyIdea || t('common.untitledProject');
-        const thumbnailUrl = storyboardPanels.find(p => p.imageUrl && p.imageUrl !== 'error' && p.imageUrl !== 'quota_error')?.imageUrl || '';
+        
+        let title = t('common.untitledProject');
+        let thumbnailUrl = '';
+
+        if (mode === AppMode.MEDIA_ART && mediaArtState.selectedPaintingId) {
+            const painting = FAMOUS_PAINTINGS.find(p => p.id === mediaArtState.selectedPaintingId);
+            if (painting) {
+                title = t(painting.titleKey);
+                thumbnailUrl = painting.imageUrl;
+            }
+        } else if (mode === AppMode.STORYBOARD && storyIdea) {
+             title = storyIdea;
+             thumbnailUrl = storyboardPanels.find(p => p.imageUrl && p.imageUrl !== 'error' && p.imageUrl !== 'quota_error')?.imageUrl || '';
+        } else if (mode === AppMode.DESCRIPTION && productName) {
+            title = productName;
+        }
 
         const project: Project = {
             id,
@@ -460,6 +493,41 @@ const App: React.FC = () => {
         generateVideoForSinglePanel(index);
     };
 
+    const handleGenerateMediaArt = async () => {
+        const { selectedPaintingId, animationStyle } = mediaArtState;
+        if (!selectedPaintingId) {
+            setError(t('errors.paintingRequired'));
+            return;
+        }
+
+        const painting = FAMOUS_PAINTINGS.find(p => p.id === selectedPaintingId);
+        if (!painting) {
+            setError(t('errors.paintingNotFound'));
+            return;
+        }
+
+        setIsMediaArtLoading(true);
+        setError(null);
+        setMediaArtState(prev => ({ ...prev, videoUrl: null }));
+
+        try {
+            const imageBase64 = await imageUrlToBase64(painting.imageUrl);
+            const videoUrl = await generateMediaArt(
+                t(painting.titleKey),
+                t(painting.artistKey),
+                animationStyle,
+                imageBase64,
+                'veo-2.0-generate-001' // Currently hardcoded
+            );
+            setMediaArtState(prev => ({ ...prev, videoUrl }));
+        } catch (err: any) {
+            setError(err.message || t('errors.unknown'));
+            setMediaArtState(prev => ({ ...prev, videoUrl: 'error' }));
+        } finally {
+            setIsMediaArtLoading(false);
+        }
+    };
+
     const openSampleProductModal = () => {
         setSampleModalType('product');
         setIsSampleModalOpen(true);
@@ -512,9 +580,14 @@ const App: React.FC = () => {
     
     const handleExportCurrentProject = () => {
         const currentAppState = getAppState();
-
+        
         const id = currentProjectId || Date.now().toString();
-        const title = productName || storyIdea || t('common.untitledProject');
+        let title = productName || storyIdea || t('common.untitledProject');
+        if (mode === AppMode.MEDIA_ART && mediaArtState.selectedPaintingId) {
+             const painting = FAMOUS_PAINTINGS.find(p => p.id === mediaArtState.selectedPaintingId);
+             if (painting) title = t(painting.titleKey);
+        }
+
         const thumbnailUrl = storyboardPanels.find(p => p.imageUrl && p.imageUrl !== 'error' && p.imageUrl !== 'quota_error')?.imageUrl || '';
 
         const project: Project = {
@@ -606,7 +679,9 @@ const App: React.FC = () => {
     const targetAudienceIsKorean = isKorean(targetAudience);
     const storyIdeaIsKorean = isKorean(storyIdea);
 
-    const canSave = (mode === AppMode.DESCRIPTION && !!productName) || (mode === AppMode.STORYBOARD && !!storyIdea);
+    const canSave = (mode === AppMode.DESCRIPTION && !!productName) || 
+                  (mode === AppMode.STORYBOARD && !!storyIdea) ||
+                  (mode === AppMode.MEDIA_ART && !!mediaArtState.selectedPaintingId);
 
 
     return (
@@ -618,12 +693,12 @@ const App: React.FC = () => {
                     onImport={handleImportProjects}
                 />
 
-                <div className="mt-8 max-w-lg mx-auto">
+                <div className="mt-8 max-w-2xl mx-auto">
                     <ModeSwitcher mode={mode} setMode={setMode} />
                 </div>
 
                 <div className="mt-8 max-w-4xl mx-auto p-8 bg-slate-800/50 border border-slate-700 rounded-2xl shadow-xl">
-                    {mode === AppMode.DESCRIPTION ? (
+                    {mode === AppMode.DESCRIPTION && (
                         <>
                             <div className="flex justify-end mb-4 -mt-2">
                                 <button onClick={openSampleProductModal} className="text-xs text-blue-400 hover:underline">
@@ -653,7 +728,8 @@ const App: React.FC = () => {
                                 canSave={canSave}
                             />
                         </>
-                    ) : (
+                    )}
+                    {mode === AppMode.STORYBOARD && (
                          <>
                             <div className="flex justify-end mb-4 -mt-2">
                                 <button onClick={openSampleStoryModal} className="text-xs text-blue-400 hover:underline">
@@ -673,6 +749,16 @@ const App: React.FC = () => {
                                 canSave={canSave}
                             />
                         </>
+                    )}
+                    {mode === AppMode.MEDIA_ART && (
+                        <MediaArtGenerator 
+                           mediaArtState={mediaArtState}
+                           onStateChange={(newState) => setMediaArtState(prev => ({...prev, ...newState}))}
+                           paintings={FAMOUS_PAINTINGS}
+                           onSubmit={handleGenerateMediaArt}
+                           isLoading={isMediaArtLoading}
+                           error={error}
+                        />
                     )}
                 </div>
                 
@@ -703,7 +789,7 @@ const App: React.FC = () => {
                     </div>
                 )}
 
-                {storyboardPanels.length > 0 && (
+                {mode === AppMode.STORYBOARD && storyboardPanels.length > 0 && (
                      <div className="mt-8 max-w-7xl mx-auto">
                         <StoryboardDisplay 
                             panels={storyboardPanels} 
@@ -726,7 +812,7 @@ const App: React.FC = () => {
                     </div>
                 )}
                 
-                {hasVideos && (
+                {mode === AppMode.STORYBOARD && hasVideos && (
                     <VideoDisplay panels={storyboardPanels} />
                 )}
 

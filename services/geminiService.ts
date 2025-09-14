@@ -1,6 +1,6 @@
 // FIX: Import Operation and GenerateVideosResponse to correctly type the video generation operation response.
 import { GoogleGenAI, Type, GenerateContentResponse, GenerateImagesResponse, Operation, GenerateVideosResponse } from '@google/genai';
-import { ProductDetails, Tone, StoryboardPanel, StoryboardConfig, AspectRatio, VisualStyle } from '../types';
+import { ProductDetails, Tone, StoryboardPanel, StoryboardConfig, AspectRatio, VisualStyle, MediaArtStyle } from '../types';
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
@@ -46,6 +46,28 @@ const retryWithBackoff = async <T>(
         lastError.message = `API call failed after ${retries} attempts. Please try again later. Last error: ${lastError.message}`;
     }
     throw lastError || new Error('API call failed after all retries.');
+};
+
+export const imageUrlToBase64 = async (url: string): Promise<string> => {
+    try {
+        // FIX: Replaced the unreliable cors-anywhere proxy with a more stable alternative
+        // to resolve the '403 Forbidden' error when fetching painting images.
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+        const response = await fetch(proxyUrl);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch image from URL: ${response.statusText}`);
+        }
+        const blob = await response.blob();
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve((reader.result as string).split(',')[1]);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+    } catch (error) {
+        console.error("Error converting image URL to base64:", error);
+        throw new Error("Could not load the painting image. Please try another one.");
+    }
 };
 
 export const translateText = async (text: string, targetLanguage: string, sourceLanguage?: string): Promise<string> => {
@@ -240,14 +262,9 @@ Return the result in ${language} as a JSON array of objects, where each object h
     }
 };
 
-// FIX: Explicitly type the return value of retryWithBackoff for video generation.
-// This ensures `operation` is correctly typed as Operation, fixing errors
-// where `done` and `response` properties were not found on an `unknown` type.
-export const generateVideoForPanel = async (description: string, imageBase64: string, visualStyle: VisualStyle, duration: number, videoModel: string): Promise<string> => {
-    const prompt = `Generate a high-quality, cinematic video clip with a visual style of "${visualStyle}". The video must be exactly ${duration} seconds long. The scene is: "${description}"`;
 
-    try {
-        // FIX: Specify the generic type for Operation as GenerateVideosResponse.
+const generateVideoFromImageAndPrompt = async (prompt: string, imageBase64: string, videoModel: string): Promise<string> => {
+     try {
         let operation = await retryWithBackoff<Operation<GenerateVideosResponse>>(() => ai.models.generateVideos({
             model: videoModel,
             prompt: prompt,
@@ -262,7 +279,6 @@ export const generateVideoForPanel = async (description: string, imageBase64: st
 
         while (!operation.done) {
             await new Promise(resolve => setTimeout(resolve, 10000)); // Poll every 10 seconds
-            // FIX: Specify the generic type for Operation as GenerateVideosResponse.
             operation = await retryWithBackoff<Operation<GenerateVideosResponse>>(() => ai.operations.getVideosOperation({ operation: operation }), 3, 1000);
         }
 
@@ -283,4 +299,47 @@ export const generateVideoForPanel = async (description: string, imageBase64: st
         if ((error.message || '').includes('quota')) throw error;
         throw new Error(`Failed to generate video for panel. ${error.message}`);
     }
+}
+
+
+// FIX: Explicitly type the return value of retryWithBackoff for video generation.
+// This ensures `operation` is correctly typed as Operation, fixing errors
+// where `done` and `response` properties were not found on an `unknown` type.
+export const generateVideoForPanel = async (description: string, imageBase64: string, visualStyle: VisualStyle, duration: number, videoModel: string): Promise<string> => {
+    const prompt = `Generate a high-quality, cinematic video clip with a visual style of "${visualStyle}". The video must be exactly ${duration} seconds long. The scene is: "${description}"`;
+    return generateVideoFromImageAndPrompt(prompt, imageBase64, videoModel);
+};
+
+export const generateMediaArt = async (
+    paintingTitle: string, 
+    artist: string, 
+    animationStyle: MediaArtStyle, 
+    imageBase64: string, 
+    videoModel: string
+): Promise<string> => {
+    
+    let styleInstruction = '';
+    switch(animationStyle) {
+        case MediaArtStyle.SUBTLE_MOTION:
+            styleInstruction = 'Bring the painting to life with very subtle, gentle, and flowing movements. Key elements should drift and breathe, but the overall composition must remain serene and respectful of the original work.';
+            break;
+        case MediaArtStyle.PARALLAX:
+            styleInstruction = 'Create a 2.5D parallax effect. Separate the foreground, midground, and background elements and move them slowly to create a sense of depth and immersion. The movement should be smooth and cinematic.';
+            break;
+        case MediaArtStyle.DREAMLIKE:
+            styleInstruction = 'Animate the painting with a surreal, dreamlike quality. Elements should morph, blend, and flow into each other in impossible ways. Use warping, ripples, and soft focus to create a hypnotic, ethereal experience.';
+            break;
+        case MediaArtStyle.ELEMENTAL:
+             styleInstruction = 'Focus on animating the natural elements within the painting. Make water ripple and flow, clouds drift across the sky, leaves rustle in the wind, and light flicker and dance. The effect should be realistic and dynamic.';
+            break;
+    }
+
+    const prompt = `Animate the famous painting "${paintingTitle}" by ${artist}. The goal is to create a living, breathing piece of media art that is respectful of the original masterpiece.
+    
+Animation Style: ${animationStyle}.
+Detailed Instruction: ${styleInstruction}
+
+The final video should be a high-quality, 10-second seamless loop.`;
+
+    return generateVideoFromImageAndPrompt(prompt, imageBase64, videoModel);
 };

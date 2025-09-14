@@ -8,7 +8,8 @@
   },
   "modeSwitcher": {
     "productDescription": "제품 설명 생성기",
-    "storyboard": "스토리보드 생성기"
+    "storyboard": "스토리보드 생성기",
+    "mediaArt": "미디어 아트 생성기"
   },
   "common": {
     "loadSampleProduct": "샘플 제품 불러오기",
@@ -106,6 +107,37 @@
     "title": "최종 완성된 비디오",
     "playingScene": "{{total}}개 중 {{current}}번 장면 재생 중"
   },
+  "mediaArtGenerator": {
+    "title": "미디어 아트 생성기",
+    "selectPainting": "명화 선택",
+    "animationStyle": "애니메이션 스타일",
+    "generateButton": "명화 애니메이션화",
+    "pleaseSelect": "명화를 선택해주세요...",
+    "selectToPreview": "여기에 미리보기를 표시하려면 명화를 선택하세요.",
+    "loadingMessage": "명화를 애니메이션으로 만드는 중..."
+  },
+  "mediaArtStyles": {
+    "subtleMotion": "미묘한 움직임",
+    "subtleMotionDesc": "그림에 생명을 불어넣는 부드럽고 흐르는 듯한 움직임.",
+    "parallax": "패럴랙스",
+    "parallaxDesc": "레이어를 움직여 깊이감을 시뮬레이션하는 2.5D 효과를 만듭니다.",
+    "dreamlike": "꿈결 같은",
+    "dreamlikeDesc": "요소들이 변형되고 섞이는 초현실적이고 최면적인 효과.",
+    "elemental": "자연 요소",
+    "elementalDesc": "물, 구름, 빛과 같은 자연 요소를 애니메이션화하는 데 중점."
+  },
+  "paintings": {
+    "starryNight": { "title": "별이 빛나는 밤", "artist": "빈센트 반 고흐" },
+    "greatWave": { "title": "가나가와 해변의 높은 파도 아래", "artist": "가쓰시카 호쿠사이" },
+    "pearlEarring": { "title": "진주 귀걸이를 한 소녀", "artist": "요하네스 페르메이르" },
+    "monaLisa": { "title": "모나리자", "artist": "레오나르도 다 빈치" },
+    "wandererSeaFog": { "title": "안개 바다 위의 방랑자", "artist": "카스파르 다비트 프리드리히" },
+    "birthOfVenus": { "title": "비너스의 탄생", "artist": "산드로 보티첼리" },
+    "theScream": { "title": "절규", "artist": "에드바르 뭉크" },
+    "americanGothic": { "title": "아메리칸 고딕", "artist": "그랜트 우드" },
+    "theNightWatch": { "title": "야경", "artist": "렘브란트 판 레인" },
+    "luncheonBoatingParty": { "title": "뱃놀이 점심", "artist": "피에르 오귀스트 르누아르" }
+  },
   "galleryModal": {
     "title": "내 갤러리",
     "noProjects": "아직 저장된 프로젝트가 없습니다.",
@@ -141,7 +173,9 @@
       "exportFailed": "프로젝트를 내보낼 수 없습니다.",
       "fileReadError": "파일을 읽을 수 없습니다.",
       "invalidProjectFile": "잘못된 프로젝트 파일 형식입니다.",
-      "importFailed": "프로젝트를 가져오지 못했습니다"
+      "importFailed": "프로젝트를 가져오지 못했습니다",
+      "paintingRequired": "애니메이션화할 명화를 선택해주세요.",
+      "paintingNotFound": "선택한 명화 데이터를 찾을 수 없습니다."
   },
   "prompts": {
       "deleteProjectConfirm": "이 프로젝트를 정말 삭제하시겠습니까?",

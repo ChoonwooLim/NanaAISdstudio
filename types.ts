@@ -1,3 +1,5 @@
+
+
 // FIX: Removed circular self-import which was causing type declaration conflicts.
 export enum Tone {
     PROFESSIONAL = 'PROFESSIONAL',
@@ -9,6 +11,7 @@ export enum Tone {
 export enum AppMode {
     DESCRIPTION = 'DESCRIPTION',
     STORYBOARD = 'STORYBOARD',
+    MEDIA_ART = 'MEDIA_ART',
 }
 
 export enum AspectRatio {
@@ -40,6 +43,21 @@ export enum Mood {
     MYSTERIOUS = 'Mysterious & Suspenseful',
     COMEDIC = 'Comedic & Lighthearted',
     EPIC = 'Epic & Grandiose',
+}
+
+export enum MediaArtStyle {
+    SUBTLE_MOTION = 'Subtle Motion',
+    PARALLAX = 'Parallax',
+    DREAMLIKE = 'Dreamlike',
+    ELEMENTAL = 'Elemental',
+}
+
+export interface FamousPainting {
+    id: string;
+    titleKey: string;
+    artistKey: string;
+    year: string;
+    imageUrl: string;
 }
 
 export interface ProductDetails {
@@ -80,6 +98,12 @@ export interface DetailedStoryboardPanel {
     sceneDuration?: number; // Duration in seconds for the video clip
 }
 
+export interface MediaArtState {
+    selectedPaintingId: string | null;
+    animationStyle: MediaArtStyle;
+    videoUrl: string | null; // Can be blob URL, 'error', or null
+}
+
 // App state structure for saving/loading
 export interface AppState {
     mode: AppMode;
@@ -93,6 +117,7 @@ export interface AppState {
     description: string;
     storyboardPanels: StoryboardPanel[];
     descriptionModel: string;
+    mediaArtState: MediaArtState;
 }
 
 // Structure for a saved project in the gallery
