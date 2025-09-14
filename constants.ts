@@ -9,9 +9,10 @@ export const TONE_OPTIONS: { value: Tone; label: string }[] = [
 
 export const ASPECT_RATIO_OPTIONS: { value: AspectRatio; label: string }[] = [
     { value: AspectRatio.LANDSCAPE, label: '16:9 Landscape' },
-    { value: AspectRatio.PORTRAIT, label: '9:16 Portrait (Shorts)' },
+    { value: AspectRatio.PORTRAIT, label: '9:16 Portrait' },
     { value: AspectRatio.SQUARE, label: '1:1 Square' },
-    { value: AspectRatio.CLASSIC, label: '4:3 Classic TV' },
+    { value: AspectRatio.VERTICAL, label: '3:4 Vertical' },
+    { value: AspectRatio.CLASSIC, label: '4:3 Classic' },
 ];
 
 export const VISUAL_STYLE_OPTIONS: { value: VisualStyle; label: string }[] = [
@@ -45,15 +46,17 @@ export const DESCRIPTION_LANGUAGE_OPTIONS: { value: string; label: string }[] = 
     { value: 'French', label: 'Français' },
 ];
 
+// FIX: Removed 'gemini-2.5-pro' to adhere to the coding guidelines, which specify 'gemini-2.5-flash' for general text tasks.
 export const TEXT_MODEL_OPTIONS: { value: string; label: string; description: string }[] = [
     { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash', description: 'Fast, multimodal, and cost-effective for most tasks.' },
 ];
 
+// FIX: Removed 'imagen-3.0-generate-001' to adhere to the coding guidelines, which specify 'imagen-4.0-generate-001' for image generation.
 export const IMAGE_MODEL_OPTIONS: { value: string; label: string; description: string }[] = [
     { value: 'imagen-4.0-generate-001', label: 'Imagen 4.0', description: 'Google\'s most advanced image generation model.' },
 ];
 
+// FIX: Removed 'veo-3.0-generate-001' to adhere to the coding guidelines, which specify 'veo-2.0-generate-001' for video generation.
 export const VIDEO_MODEL_OPTIONS: { value: string; label: string; description: string }[] = [
-    { value: 'veo-3.0-generate-001', label: 'Veo 3.0', description: 'Google\'s state-of-the-art video generation model.' },
-    { value: 'veo-2.0-generate-001', label: 'Veo 2.0', description: 'Google\'s previous generation advanced video model.' },
+    { value: 'veo-2.0-generate-001', label: 'Veo 2.0', description: 'Google\'s advanced video model.' },
 ];

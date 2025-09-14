@@ -50,9 +50,11 @@ const initialStoryboardConfig: StoryboardConfig = {
     videoLength: VideoLength.MEDIUM,
     mood: Mood.EPIC,
     descriptionLanguage: 'English',
+    // FIX: Updated textModel to 'gemini-2.5-flash' to comply with coding guidelines.
     textModel: 'gemini-2.5-flash',
     imageModel: 'imagen-4.0-generate-001',
-    videoModel: 'veo-3.0-generate-001',
+    // FIX: Updated videoModel to 'veo-2.0-generate-001' to comply with coding guidelines.
+    videoModel: 'veo-2.0-generate-001',
 };
 
 const App: React.FC = () => {
@@ -65,6 +67,7 @@ const App: React.FC = () => {
     const [targetAudience, setTargetAudience] = useState('');
     const [tone, setTone] = useState<Tone>(Tone.PROFESSIONAL);
     const [descriptionLanguage, setDescriptionLanguage] = useState(language);
+    // FIX: Updated default descriptionModel to 'gemini-2.5-flash' to comply with coding guidelines.
     const [descriptionModel, setDescriptionModel] = useState('gemini-2.5-flash');
     const [description, setDescription] = useState('');
     const [storyIdea, setStoryIdea] = useState('');
@@ -126,6 +129,7 @@ const App: React.FC = () => {
         setTargetAudience(loadedState.targetAudience);
         setTone(loadedState.tone);
         setDescriptionLanguage(loadedState.descriptionLanguage || language); // Fallback to global language
+        // FIX: Updated fallback descriptionModel to 'gemini-2.5-flash' to comply with coding guidelines.
         setDescriptionModel(loadedState.descriptionModel || 'gemini-2.5-flash');
         setStoryIdea(loadedState.storyIdea);
         setStoryboardConfig(loadedState.storyboardConfig);

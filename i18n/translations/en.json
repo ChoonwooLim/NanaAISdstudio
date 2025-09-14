@@ -55,15 +55,19 @@
   },
   "storyboardSettings": {
     "title": "Creative Direction",
+    "storySection": "Story Settings",
+    "imageSection": "Image Settings",
+    "videoSection": "Video Settings",
     "scenes": "Scenes",
     "aspectRatio": "Aspect Ratio",
     "visualStyle": "Visual Style",
-    "targetLength": "Target Length",
+    "pacing": "Pacing / Target Length",
     "moodPacing": "Mood & Pacing",
     "descriptionLanguage": "Description Language",
     "textModel": "Text Model",
     "imageModel": "Image Model",
-    "videoModel": "Video Model"
+    "videoModel": "Video Model",
+    "videoNote": "Note: Video aspect ratio is inherited from Image Settings. Resolution and frame rate are automatically determined by the model for optimal quality."
   },
   "storyboardDisplay": {
     "title": "Generated Storyboard",

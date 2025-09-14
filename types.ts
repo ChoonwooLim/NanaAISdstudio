@@ -1,4 +1,4 @@
-// FIX: Removed circular self-import which was causing type declaration conflicts with locally defined types.
+// FIX: Removed circular self-import which was causing type declaration conflicts.
 export enum Tone {
     PROFESSIONAL = 'PROFESSIONAL',
     FRIENDLY = 'FRIENDLY',
@@ -16,6 +16,7 @@ export enum AspectRatio {
     PORTRAIT = '9:16',
     SQUARE = '1:1',
     CLASSIC = '4:3',
+    VERTICAL = '3:4',
 }
 
 export enum VideoLength {

@@ -55,15 +55,19 @@
   },
   "storyboardSettings": {
     "title": "크리에이티브 디렉션",
+    "storySection": "스토리 설정",
+    "imageSection": "이미지 설정",
+    "videoSection": "비디오 설정",
     "scenes": "장면 수",
     "aspectRatio": "화면 비율",
     "visualStyle": "시각적 스타일",
-    "targetLength": "목표 길이",
+    "pacing": "페이싱 / 목표 길이",
     "moodPacing": "분위기 및 속도",
     "descriptionLanguage": "설명 언어",
     "textModel": "텍스트 모델",
     "imageModel": "이미지 모델",
-    "videoModel": "비디오 모델"
+    "videoModel": "비디오 모델",
+    "videoNote": "참고: 비디오 화면 비율은 이미지 설정에 따라 결정됩니다. 해상도와 프레임레이트는 최적의 품질을 위해 모델이 자동으로 결정합니다."
   },
   "storyboardDisplay": {
     "title": "생성된 스토리보드",
