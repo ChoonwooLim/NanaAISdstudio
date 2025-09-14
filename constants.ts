@@ -10,7 +10,8 @@ export const TONE_OPTIONS: { value: Tone; label: string }[] = [
 export const ASPECT_RATIO_OPTIONS: { value: AspectRatio; label: string }[] = [
     { value: AspectRatio.LANDSCAPE, label: '16:9 Landscape' },
     { value: AspectRatio.PORTRAIT, label: '9:16 Portrait' },
-    { value: AspectRatio.SQUARE, label: '11 Square' },
+    // FIX: Corrected label typo from '11 Square' to '1:1 Square'.
+    { value: AspectRatio.SQUARE, label: '1:1 Square' },
     { value: AspectRatio.VERTICAL, label: '3:4 Vertical' },
     { value: AspectRatio.CLASSIC, label: '4:3 Classic' },
 ];

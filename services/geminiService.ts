@@ -1,345 +1,243 @@
-// FIX: Import Operation and GenerateVideosResponse to correctly type the video generation operation response.
-import { GoogleGenAI, Type, GenerateContentResponse, GenerateImagesResponse, Operation, GenerateVideosResponse } from '@google/genai';
-import { ProductDetails, Tone, StoryboardPanel, StoryboardConfig, AspectRatio, VisualStyle, MediaArtStyle } from '../types';
+// FIX: Created this file to house all Gemini API interactions, resolving module resolution errors.
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+import { GoogleGenAI, Modality, Type } from "@google/genai";
+import { StoryboardConfig, DetailedStoryboardPanel, Tone } from "../types";
+
+// The user must set this in their environment.
+const apiKey = process.env.API_KEY;
+
+if (!apiKey) {
+    console.error("API_KEY environment variable not set.");
+}
+
+// Initialize the Google AI client
+const ai = new GoogleGenAI({ apiKey: apiKey! });
 
 /**
- * Retries an async function with exponential backoff to handle transient API errors.
- * @param fn The async function to execute.
- * @param retries Number of retries.
- * @param delay Initial delay in ms.
- * @param backoffFactor The factor to multiply delay with for each retry.
- * @returns The result of the async function.
+ * Detects if the given text contains Korean characters.
  */
-const retryWithBackoff = async <T>(
-    fn: () => Promise<T>,
-    retries = 3,
-    delay = 2000,
-    backoffFactor = 2
-): Promise<T> => {
-    let lastError: any;
-
-    for (let i = 0; i < retries; i++) {
-        try {
-            return await fn();
-        } catch (error: any) {
-            lastError = error;
-
-            // Check for a specific quota error to avoid pointless retries.
-            const errorMessage = (error.message || '').toLowerCase();
-            if (errorMessage.includes('resource_exhausted') || errorMessage.includes('quota')) {
-                console.error('API Quota Exceeded. Aborting retries.', error);
-                throw new Error('You have exceeded your API quota. Please check your plan and billing details. For more information, visit https://ai.google.dev/gemini-api/docs/rate-limits');
-            }
-
-            if (i < retries - 1) {
-                const waitTime = delay * Math.pow(backoffFactor, i);
-                console.warn(`API call failed. Retrying in ${waitTime}ms... (Attempt ${i + 1}/${retries})`, error.message);
-                await new Promise(resolve => setTimeout(resolve, waitTime));
-            }
-        }
-    }
-    
-    console.error('API call failed after all retries.', lastError);
-    if (lastError) {
-        lastError.message = `API call failed after ${retries} attempts. Please try again later. Last error: ${lastError.message}`;
-    }
-    throw lastError || new Error('API call failed after all retries.');
-};
-
-export const imageUrlToBase64 = async (url: string): Promise<string> => {
-    try {
-        // FIX: Replaced the unreliable cors-anywhere proxy with a more stable alternative
-        // to resolve the '403 Forbidden' error when fetching painting images.
-        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-        const response = await fetch(proxyUrl);
-        if (!response.ok) {
-            throw new Error(`Failed to fetch image from URL: ${response.statusText}`);
-        }
-        const blob = await response.blob();
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve((reader.result as string).split(',')[1]);
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
-        });
-    } catch (error) {
-        console.error("Error converting image URL to base64:", error);
-        throw new Error("Could not load the painting image. Please try another one.");
-    }
-};
-
-export const translateText = async (text: string, targetLanguage: string, sourceLanguage?: string): Promise<string> => {
-    if (!text || text.trim() === '') return text;
-    const sourceLangInstruction = sourceLanguage ? ` from ${sourceLanguage}` : '';
-    const prompt = `Translate the following text${sourceLangInstruction} to ${targetLanguage}. Return ONLY the translated text, without any introductory phrases, explanations, or formatting like markdown or quotes.\n\nText to translate: "${text}"`;
-    
+export const detectLanguage = async (text: string): Promise<boolean> => {
+    if (!text || text.trim() === '') return false;
     try {
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
-            contents: prompt,
-            config: {
-                temperature: 0.1,
-            }
+            contents: `Does the following text contain Korean? Answer with only "yes" or "no": "${text}"`,
         });
-        return response.text.trim();
-    } catch (error: any) {
-        console.error(`Error translating text to ${targetLanguage}:`, error);
-        throw new Error(`Failed to translate text. ${error.message}`);
+        return response.text.toLowerCase().includes('yes');
+    } catch (error) {
+        console.error('Error detecting language:', error);
+        return false;
     }
 };
 
-
-const TONE_MAP: Record<Tone, string> = {
-    [Tone.PROFESSIONAL]: 'professional, clear, and confident',
-    [Tone.FRIENDLY]: 'friendly, casual, and relatable',
-    [Tone.HUMOROUS]: 'witty, humorous, and clever',
-    [Tone.LUXURIOUS]: 'luxurious, elegant, and sophisticated',
-};
-
-export const generateDescription = async (details: ProductDetails, model: string): Promise<string> => {
-    const toneDescription = TONE_MAP[details.tone];
-    const prompt = `Generate a compelling product description in ${details.language} for a product with the following details:
-- Product Name: ${details.productName}
-- Key Features: ${details.keyFeatures}
-- Target Audience: ${details.targetAudience || 'general audience'}
-- Tone of voice: ${toneDescription}
-
-The description should be engaging, highlight the key features as benefits, and be optimized for an e-commerce website. Do not use markdown. Return only the description text.`;
-
-    try {
-        const response = await retryWithBackoff<GenerateContentResponse>(() => ai.models.generateContent({
-            model: model,
-            contents: prompt,
-        }));
-
-        return response.text.trim();
-    } catch (error: any) {
-        console.error('Error generating description:', error);
-        if ((error.message || '').includes('quota')) throw error;
-        throw new Error(`Failed to generate product description. ${error.message}`);
-    }
-};
-
-const generateStoryboardScenes = async (prompt: string, model: string): Promise<{ description: string }[]> => {
-     try {
-        const response = await retryWithBackoff<GenerateContentResponse>(() => ai.models.generateContent({
-            model: model,
-            contents: prompt,
-            config: {
-                responseMimeType: 'application/json',
-                responseSchema: {
-                    type: Type.ARRAY,
-                    items: {
-                        type: Type.OBJECT,
-                        properties: {
-                            description: {
-                                type: Type.STRING,
-                                description: 'A concise description of the scene for this storyboard panel.'
-                            }
-                        },
-                        required: ['description']
-                    }
-                }
-            }
-        }));
-
-        const jsonText = response.text.trim();
-        const panels = JSON.parse(jsonText);
-        // Ensure it's an array of objects with a description property
-        if (Array.isArray(panels) && panels.every(p => typeof p.description === 'string')) {
-            return panels;
-        } else {
-            throw new Error('Invalid storyboard format received from AI.');
-        }
-    } catch (error: any) {
-        console.error('Error generating storyboard scenes:', error);
-        if ((error.message || '').includes('quota')) throw error;
-        throw new Error(`Failed to generate storyboard scenes. ${error.message}`);
-    }
-}
-
-
-export const generateStoryboardFromDescription = async (productDescription: string, sceneCount: number): Promise<{ description: string }[]> => {
-    const prompt = `Based on the following product description, create a ${sceneCount}-panel storyboard for a short video ad. For each panel, provide a concise scene description.
-
-Product Description: "${productDescription}"
-
-Return the result as a JSON array of objects, where each object has a "description" key. Example: [{"description": "Scene 1 description..."}, {"description": "Scene 2 description..."}]`;
-    return generateStoryboardScenes(prompt, 'gemini-2.5-flash');
-};
-
-export const generateStoryboardFromIdea = async (storyIdea: string, config: StoryboardConfig): Promise<{ description: string }[]> => {
-    const prompt = `Create a high-end storyboard based on the following creative direction.
-
-Creative Direction:
-- Story Idea: "${storyIdea}"
-- Number of Scenes: Exactly ${config.sceneCount} scenes.
-- Target Video Length: The pacing should be suitable for a ${config.videoLength} video.
-- Mood & Pacing: ${config.mood}.
-- Visual Style: The descriptions should align with a ${config.visualStyle} aesthetic.
-
-For each of the ${config.sceneCount} scenes, provide a concise and vivid description that visually tells the story according to the specified mood and style.
-
-The "description" text for each scene MUST be in ${config.descriptionLanguage}.
-
-Return the result as a JSON array of objects, where each object has a "description" key.`;
-    return generateStoryboardScenes(prompt, config.textModel);
-};
-
-
-export const generateImageForPanel = async (description: string, style: VisualStyle, aspectRatio: AspectRatio, model: string): Promise<string> => {
-    const prompt = `Generate an image for a storyboard panel in a ${style.toLowerCase()} style.
-The image should be cinematic and high-quality.
-Scene description: "${description}"`;
-
-    try {
-        const response = await retryWithBackoff<GenerateImagesResponse>(() => ai.models.generateImages({
-            model: model,
-            prompt: prompt,
-            config: {
-                numberOfImages: 1,
-                outputMimeType: 'image/jpeg',
-                aspectRatio: aspectRatio,
-            },
-        }));
-
-        if (response.generatedImages && response.generatedImages.length > 0) {
-            const base64ImageBytes = response.generatedImages[0].image.imageBytes;
-            return `data:image/jpeg;base64,${base64ImageBytes}`;
-        } else {
-            throw new Error('No image was generated.');
-        }
-    } catch (error: any) {
-        console.error('Error generating image for panel:', error);
-        // Re-throw the original error to preserve specific messages (e.g., QuotaError)
-        throw error;
-    }
-};
-
-
-export const expandSceneToDetailedPanels = async (sceneDescription: string, language: string, model: string): Promise<{ description: string }[]> => {
-    const prompt = `Break down the following scene into 3 detailed shots for a storyboard. For each shot, provide a concise description focusing on camera angle, action, and subject.
-
-Original Scene: "${sceneDescription}"
-
-Return the result in ${language} as a JSON array of objects, where each object has a "description" key.`;
-
-    try {
-        const response = await retryWithBackoff<GenerateContentResponse>(() => ai.models.generateContent({
-            model: model,
-            contents: prompt,
-            config: {
-                responseMimeType: 'application/json',
-                responseSchema: {
-                    type: Type.ARRAY,
-                    items: {
-                        type: Type.OBJECT,
-                        properties: {
-                            description: {
-                                type: Type.STRING,
-                                description: 'A concise description of the detailed shot.'
-                            }
-                        },
-                        required: ['description']
-                    }
-                }
-            }
-        }));
-
-        const jsonText = response.text.trim();
-        const panels = JSON.parse(jsonText);
-        if (Array.isArray(panels) && panels.every(p => typeof p.description === 'string')) {
-            return panels;
-        } else {
-            throw new Error('Invalid detailed panel format received from AI.');
-        }
-    } catch (error: any) {
-        console.error('Error expanding scene:', error);
-        if ((error.message || '').includes('quota')) throw error;
-        throw new Error(`Failed to expand scene. ${error.message}`);
-    }
-};
-
-
-const generateVideoFromImageAndPrompt = async (prompt: string, imageBase64: string, videoModel: string): Promise<string> => {
-     try {
-        let operation = await retryWithBackoff<Operation<GenerateVideosResponse>>(() => ai.models.generateVideos({
-            model: videoModel,
-            prompt: prompt,
-            image: {
-                imageBytes: imageBase64,
-                mimeType: 'image/jpeg',
-            },
-            config: {
-                numberOfVideos: 1
-            }
-        }));
-
-        while (!operation.done) {
-            await new Promise(resolve => setTimeout(resolve, 10000)); // Poll every 10 seconds
-            operation = await retryWithBackoff<Operation<GenerateVideosResponse>>(() => ai.operations.getVideosOperation({ operation: operation }), 3, 1000);
-        }
-
-        const downloadLink = operation.response?.generatedVideos?.[0]?.video?.uri;
-        if (!downloadLink) {
-            throw new Error('Video generation completed, but no download link was found.');
-        }
-
-        const videoResponse = await fetch(`${downloadLink}&key=${process.env.API_KEY}`);
-        if (!videoResponse.ok) {
-            throw new Error(`Failed to download video file: ${videoResponse.statusText}`);
-        }
-        const videoBlob = await videoResponse.blob();
-        return URL.createObjectURL(videoBlob);
-
-    } catch (error: any) {
-        console.error('Error generating video for panel:', error);
-        if ((error.message || '').includes('quota')) throw error;
-        throw new Error(`Failed to generate video for panel. ${error.message}`);
-    }
-}
-
-
-// FIX: Explicitly type the return value of retryWithBackoff for video generation.
-// This ensures `operation` is correctly typed as Operation, fixing errors
-// where `done` and `response` properties were not found on an `unknown` type.
-export const generateVideoForPanel = async (description: string, imageBase64: string, visualStyle: VisualStyle, duration: number, videoModel: string): Promise<string> => {
-    const prompt = `Generate a high-quality, cinematic video clip with a visual style of "${visualStyle}". The video must be exactly ${duration} seconds long. The scene is: "${description}"`;
-    return generateVideoFromImageAndPrompt(prompt, imageBase64, videoModel);
-};
-
-export const generateMediaArt = async (
-    paintingTitle: string, 
-    artist: string, 
-    animationStyle: MediaArtStyle, 
-    imageBase64: string, 
-    videoModel: string
+/**
+ * Generates a product description.
+ */
+export const generateDescription = async (
+    productName: string,
+    keyFeatures: string,
+    targetAudience: string,
+    tone: Tone,
+    language: string,
+    model: string
 ): Promise<string> => {
+    const prompt = `Generate a compelling product description in ${language}.
+    Product Name: ${productName}
+    Key Features: ${keyFeatures}
+    Target Audience: ${targetAudience}
+    Tone of Voice: ${tone}`;
+
+    const response = await ai.models.generateContent({
+        model: model,
+        contents: prompt,
+    });
+    return response.text;
+};
+
+/**
+ * Generates a storyboard scene list from an idea.
+ */
+export const generateStoryboard = async (
+    idea: string,
+    config: StoryboardConfig
+): Promise<string[]> => {
+    const prompt = `Create a storyboard for a short video based on this idea: "${idea}".
+    The video should have exactly ${config.sceneCount} scenes.
+    The mood should be ${config.mood}.
+    The overall video length is approximately ${config.videoLength}.
+    Provide a concise, one-sentence description for each scene, focusing on the visual elements.
+    The descriptions should be in ${config.descriptionLanguage}.`;
+
+    const response = await ai.models.generateContent({
+        model: config.textModel,
+        contents: prompt,
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    scenes: {
+                        type: Type.ARRAY,
+                        description: `An array of ${config.sceneCount} scene descriptions.`,
+                        items: { type: Type.STRING }
+                    }
+                },
+                required: ['scenes']
+            }
+        }
+    });
+
+    const result = JSON.parse(response.text);
+    return result.scenes;
+};
+
+/**
+ * Generates an image for a single storyboard panel.
+ */
+export const generateImage = async (
+    description: string,
+    visualStyle: string,
+    aspectRatio: string,
+    imageModel: string
+): Promise<string> => {
+    const prompt = `${description}, ${visualStyle} style.`;
+    const response = await ai.models.generateImages({
+        model: imageModel,
+        prompt: prompt,
+        config: {
+            numberOfImages: 1,
+            outputMimeType: 'image/png',
+            aspectRatio: aspectRatio as "1:1" | "16:9" | "9:16" | "4:3" | "3:4",
+        },
+    });
+    return response.generatedImages[0].image.imageBytes;
+};
+
+/**
+ * Expands a single scene into a more detailed multi-shot storyboard.
+ */
+export const generateDetailedStoryboard = async (
+    sceneDescription: string,
+    config: StoryboardConfig
+): Promise<DetailedStoryboardPanel[]> => {
+    const prompt = `Expand this single scene into 3 distinct shots: "${sceneDescription}".
+    Describe each shot with a focus on camera angle and action.
+    The descriptions should be in ${config.descriptionLanguage}.`;
+
+    const response = await ai.models.generateContent({
+        model: config.textModel,
+        contents: prompt,
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    shots: {
+                        type: Type.ARRAY,
+                        description: 'An array of 3 detailed shot descriptions.',
+                        items: {
+                            type: Type.OBJECT,
+                            properties: {
+                                description: { type: Type.STRING }
+                            },
+                            required: ['description']
+                        }
+                    }
+                },
+                required: ['shots']
+            }
+        }
+    });
+
+    const result = JSON.parse(response.text);
+    return result.shots.map((shot: any) => ({ description: shot.description }));
+};
+
+/**
+ * Generates a short video clip from an image and a description.
+ */
+export const generateVideo = async (
+    videoModel: string,
+    prompt: string,
+    imageBase64: string,
+    sceneDuration: number
+): Promise<string> => {
+    const fullPrompt = `${prompt}. A video clip, approximately ${sceneDuration} seconds long.`;
     
-    let styleInstruction = '';
-    switch(animationStyle) {
-        case MediaArtStyle.SUBTLE_MOTION:
-            styleInstruction = 'Bring the painting to life with very subtle, gentle, and flowing movements. Key elements should drift and breathe, but the overall composition must remain serene and respectful of the original work.';
-            break;
-        case MediaArtStyle.PARALLAX:
-            styleInstruction = 'Create a 2.5D parallax effect. Separate the foreground, midground, and background elements and move them slowly to create a sense of depth and immersion. The movement should be smooth and cinematic.';
-            break;
-        case MediaArtStyle.DREAMLIKE:
-            styleInstruction = 'Animate the painting with a surreal, dreamlike quality. Elements should morph, blend, and flow into each other in impossible ways. Use warping, ripples, and soft focus to create a hypnotic, ethereal experience.';
-            break;
-        case MediaArtStyle.ELEMENTAL:
-             styleInstruction = 'Focus on animating the natural elements within the painting. Make water ripple and flow, clouds drift across the sky, leaves rustle in the wind, and light flicker and dance. The effect should be realistic and dynamic.';
-            break;
+    let operation = await ai.models.generateVideos({
+        model: videoModel,
+        prompt: fullPrompt,
+        image: {
+            imageBytes: imageBase64,
+            mimeType: 'image/png',
+        },
+        config: {
+            numberOfVideos: 1,
+        }
+    });
+
+    while (!operation.done) {
+        await new Promise(resolve => setTimeout(resolve, 10000));
+        operation = await ai.operations.getVideosOperation({ operation: operation });
     }
 
-    const prompt = `Animate the famous painting "${paintingTitle}" by ${artist}. The goal is to create a living, breathing piece of media art that is respectful of the original masterpiece.
-    
-Animation Style: ${animationStyle}.
-Detailed Instruction: ${styleInstruction}
+    const downloadLink = operation.response?.generatedVideos?.[0]?.video?.uri;
+    if (downloadLink && apiKey) {
+        const response = await fetch(`${downloadLink}&key=${apiKey}`);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch video: ${response.statusText}`);
+        }
+        const videoBlob = await response.blob();
+        return URL.createObjectURL(videoBlob);
+    }
+    throw new Error('Video generation failed to produce a download link.');
+};
 
-The final video should be a high-quality, 10-second seamless loop.`;
 
-    return generateVideoFromImageAndPrompt(prompt, imageBase64, videoModel);
+/**
+ * Edits an image based on a text prompt using the image editing model.
+ */
+export const generateMediaArt = async (
+    prompt: string,
+    base64ImageData: string,
+    mimeType: string
+): Promise<{ text: string | null; image: string | null }> => {
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash-image-preview',
+        contents: {
+            parts: [
+                {
+                    inlineData: {
+                        data: base64ImageData,
+                        mimeType: mimeType,
+                    },
+                },
+                {
+                    text: prompt,
+                },
+            ],
+        },
+        config: {
+            responseModalities: [Modality.IMAGE, Modality.TEXT],
+        },
+    });
+
+    let textResult: string | null = null;
+    let imageResult: string | null = null;
+
+    if (response.candidates && response.candidates.length > 0) {
+        for (const part of response.candidates[0].content.parts) {
+            if (part.text) {
+                textResult = part.text;
+            } else if (part.inlineData) {
+                imageResult = part.inlineData.data;
+            }
+        }
+    }
+
+    if (!imageResult) {
+        throw new Error("The model did not return an image.");
+    }
+
+    return { text: textResult, image: imageResult };
 };

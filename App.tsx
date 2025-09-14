@@ -1,40 +1,19 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import {
-    AppMode,
-    Tone,
-    StoryboardConfig,
-    StoryboardPanel,
-    AspectRatio,
-    VisualStyle,
-    VideoLength,
-    Mood,
-    DetailedStoryboardPanel,
-    Project,
-    AppState,
-    SampleProduct,
-    SampleStory,
-    MediaArtState,
-    MediaArtStyle,
-    FamousPainting
-} from './types';
-import {
-    generateDescription,
-    generateStoryboardFromIdea,
-    generateImageForPanel,
-    expandSceneToDetailedPanels,
-    generateVideoForPanel,
-    translateText,
-    imageUrlToBase64,
-    generateMediaArt,
-} from './services/geminiService';
-import { getProjects, saveProject, deleteProject, getProject } from './services/db';
+// FIX: Created this file to serve as the main application component, resolving module resolution errors.
 
+import React, { useState, useEffect, useCallback } from 'react';
+import { AppMode, Tone, StoryboardConfig, StoryboardPanel, Project, DetailedStoryboardPanel, SampleProduct, SampleStory } from './types';
+import * as geminiService from './services/geminiService';
+import * as db from './services/db';
+import { useTranslation } from './i18n/LanguageContext';
+import { TEXT_MODEL_OPTIONS } from './constants';
+import { sampleProductsData, sampleStoryIdeasData } from './sampleData';
+import { AspectRatio, VisualStyle, VideoLength, Mood } from './types';
+
+import ApiKeyInstructions from './components/ApiKeyInstructions';
 import Header from './components/Header';
+import ModeSwitcher from './components/ModeSwitcher';
 import InputForm from './components/InputForm';
 import DescriptionDisplay from './components/DescriptionDisplay';
-import LoadingSpinner from './components/LoadingSpinner';
-import ApiKeyInstructions from './components/ApiKeyInstructions';
-import ModeSwitcher from './components/ModeSwitcher';
 import StoryboardInputForm from './components/StoryboardInputForm';
 import StoryboardDisplay from './components/StoryboardDisplay';
 import DetailedStoryboardModal from './components/DetailedStoryboardModal';
@@ -44,805 +23,514 @@ import SampleGalleryModal from './components/SampleGalleryModal';
 import MediaArtGenerator from './components/MediaArtGenerator';
 
 
-import { sampleProductsData, sampleStoryIdeasData } from './sampleData';
-import { FAMOUS_PAINTINGS } from './constants';
-import { useTranslation } from './i18n/LanguageContext';
-
-const isKorean = (text: string): boolean => /[\u3131-\uD79D]/.test(text);
-
-const initialStoryboardConfig: StoryboardConfig = {
-    sceneCount: 4,
-    aspectRatio: AspectRatio.LANDSCAPE,
-    visualStyle: VisualStyle.CINEMATIC,
-    videoLength: VideoLength.MEDIUM,
-    mood: Mood.EPIC,
-    descriptionLanguage: 'English',
-    // FIX: Updated textModel to 'gemini-2.5-flash' to comply with coding guidelines.
-    textModel: 'gemini-2.5-flash',
-    imageModel: 'imagen-4.0-generate-001',
-    // FIX: Updated videoModel to 'veo-2.0-generate-001' to comply with coding guidelines.
-    videoModel: 'veo-2.0-generate-001',
-};
-
-const initialMediaArtState: MediaArtState = {
-    selectedPaintingId: null,
-    animationStyle: MediaArtStyle.SUBTLE_MOTION,
-    videoUrl: null,
-};
-
-
 const App: React.FC = () => {
-    const { language, t } = useTranslation();
+    const { t, language } = useTranslation();
+    const apiKeyExists = !!process.env.API_KEY;
 
     // App State
     const [mode, setMode] = useState<AppMode>(AppMode.DESCRIPTION);
-    const [productName, setProductName] = useState('');
-    const [keyFeatures, setKeyFeatures] = useState('');
-    const [targetAudience, setTargetAudience] = useState('');
-    const [tone, setTone] = useState<Tone>(Tone.PROFESSIONAL);
-    const [descriptionLanguage, setDescriptionLanguage] = useState(language);
-    // FIX: Updated default descriptionModel to 'gemini-2.5-flash' to comply with coding guidelines.
-    const [descriptionModel, setDescriptionModel] = useState('gemini-2.5-flash');
-    const [description, setDescription] = useState('');
-    const [storyIdea, setStoryIdea] = useState('');
-    const [storyboardConfig, setStoryboardConfig] = useState<StoryboardConfig>({
-        ...initialStoryboardConfig,
-        descriptionLanguage: language
-    });
-    const [storyboardPanels, setStoryboardPanels] = useState<StoryboardPanel[]>([]);
-    const [mediaArtState, setMediaArtState] = useState<MediaArtState>(initialMediaArtState);
-    
-    // UI State
-    const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [isGeneratingImages, setIsGeneratingImages] = useState(false);
-    const [isMediaArtLoading, setIsMediaArtLoading] = useState(false);
-
-
-    // Modal State
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [modalPanels, setModalPanels] = useState<DetailedStoryboardPanel[]>([]);
-    const [isModalLoading, setIsModalLoading] = useState(false);
-    const [modalError, setModalError] = useState<string | null>(null);
-    const [expandingSceneIndex, setExpandingSceneIndex] = useState<number | null>(null);
-    const [isSampleModalOpen, setIsSampleModalOpen] = useState(false);
-    const [sampleModalType, setSampleModalType] = useState<'product' | 'story'>('product');
-    
-    // Gallery and Project State
-    const [isGalleryOpen, setIsGalleryOpen] = useState(false);
-    const [projects, setProjects] = useState<Project[]>([]);
     const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
 
 
-    const apiKey = process.env.API_KEY;
+    // Description Mode State
+    const [productName, setProductName] = useState('');
+    const [keyFeatures, setKeyFeatures] = useState('');
+    const [targetAudience, setTargetAudience] = useState('');
+    const [tone, setTone] = useState<Tone>(Tone.FRIENDLY);
+    const [descriptionLanguage, setDescriptionLanguage] = useState('English');
+    const [descriptionModel, setDescriptionModel] = useState(TEXT_MODEL_OPTIONS[0].value);
+    const [description, setDescription] = useState('');
+    const [isLoadingDescription, setIsLoadingDescription] = useState(false);
+
+    // Language Detection State
+    const [productNameIsKorean, setProductNameIsKorean] = useState(false);
+    const [keyFeaturesIsKorean, setKeyFeaturesIsKorean] = useState(false);
+    const [targetAudienceIsKorean, setTargetAudienceIsKorean] = useState(false);
+    const [storyIdeaIsKorean, setStoryIdeaIsKorean] = useState(false);
+
+    // Storyboard Mode State
+    const initialStoryboardConfig: StoryboardConfig = {
+        sceneCount: 4,
+        aspectRatio: AspectRatio.LANDSCAPE,
+        visualStyle: VisualStyle.CINEMATIC,
+        videoLength: VideoLength.SHORT,
+        mood: Mood.EPIC,
+        descriptionLanguage: 'English',
+        textModel: 'gemini-2.5-flash',
+        imageModel: 'imagen-4.0-generate-001',
+        videoModel: 'veo-2.0-generate-001',
+    };
+    const [storyIdea, setStoryIdea] = useState('');
+    const [storyboardConfig, setStoryboardConfig] = useState<StoryboardConfig>(initialStoryboardConfig);
+    const [panels, setPanels] = useState<StoryboardPanel[]>([]);
+    const [isLoadingStoryboard, setIsLoadingStoryboard] = useState(false);
+    const [isGeneratingImages, setIsGeneratingImages] = useState(false);
     
-    const resetState = () => {
-        setMode(AppMode.DESCRIPTION);
-        setProductName('');
-        setKeyFeatures('');
-        setTargetAudience('');
-        setTone(Tone.PROFESSIONAL);
-        setDescriptionLanguage(language);
-        setDescriptionModel('gemini-2.5-flash');
-        setDescription('');
-        setStoryIdea('');
-        setStoryboardConfig({
-            ...initialStoryboardConfig,
-            descriptionLanguage: language,
-        });
-        setStoryboardPanels([]);
-        setMediaArtState(initialMediaArtState);
-        setError(null);
-        setCurrentProjectId(null);
-    };
+    // Detailed Storyboard Modal State
+    const [isDetailedModalOpen, setIsDetailedModalOpen] = useState(false);
+    const [detailedPanels, setDetailedPanels] = useState<DetailedStoryboardPanel[]>([]);
+    const [isLoadingDetailed, setIsLoadingDetailed] = useState(false);
+    const [detailedError, setDetailedError] = useState<string | null>(null);
+    const [modalContext, setModalContext] = useState<{ sceneDescription: string; index: number } | null>(null);
 
-    const handleNewProject = () => {
-        // Optional: Could add a confirmation if there are unsaved changes.
-        resetState();
-    };
+    // Gallery State
+    const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+    const [projects, setProjects] = useState<Project[]>([]);
 
-    // Sync local language settings with global language
+    // Sample Modal State
+    const [isSampleModalOpen, setIsSampleModalOpen] = useState(false);
+    const [sampleType, setSampleType] = useState<'product' | 'story'>('product');
+
+    // Language Detection Logic
     useEffect(() => {
-        setDescriptionLanguage(language);
-        setStoryboardConfig(prev => ({ ...prev, descriptionLanguage: language }));
-    }, [language]);
-
-
-    // Load projects on mount
-    useEffect(() => {
-        if (apiKey) {
-            loadProjects();
-        }
-    }, [apiKey]);
-    
-    const loadProjects = async () => {
-        try {
-            const savedProjects = await getProjects();
-            setProjects(savedProjects);
-        } catch (err) {
-            console.error("Failed to load projects:", err);
-            setError(t('errors.loadProjects'));
-        }
-    };
-
-    const applyState = (loadedState: AppState) => {
-        setMode(loadedState.mode);
-        setProductName(loadedState.productName);
-        setKeyFeatures(loadedState.keyFeatures);
-        setTargetAudience(loadedState.targetAudience);
-        setTone(loadedState.tone);
-        setDescriptionLanguage(loadedState.descriptionLanguage || language); // Fallback to global language
-        // FIX: Updated fallback descriptionModel to 'gemini-2.5-flash' to comply with coding guidelines.
-        setDescriptionModel(loadedState.descriptionModel || 'gemini-2.5-flash');
-        setStoryIdea(loadedState.storyIdea);
-        setStoryboardConfig(loadedState.storyboardConfig);
-        setDescription(loadedState.description);
-        setStoryboardPanels(loadedState.storyboardPanels);
-        setMediaArtState(loadedState.mediaArtState || initialMediaArtState);
-        setError(null);
-    };
-    
-    const handleLoadProject = async (id: string) => {
-        const project = await getProject(id);
-        if (project) {
-            applyState(project.appState);
-            setCurrentProjectId(project.id);
-            setIsGalleryOpen(false);
-        } else {
-            setError(t('errors.loadProjectFailed'));
-        }
-    };
-
-    const handleDeleteProject = async (id: string) => {
-        if (window.confirm(t('prompts.deleteProjectConfirm'))) {
-            await deleteProject(id);
-            if (id === currentProjectId) {
-                // If we deleted the currently active project, reset the editor.
-                handleNewProject();
+        const checkLang = async (text: string, setter: (isKorean: boolean) => void) => {
+            if (language === 'Korean' || language === 'English') {
+                setter(await geminiService.detectLanguage(text));
+            } else {
+                setter(false);
             }
-            await loadProjects(); // Refresh the list
-        }
-    };
-
-    const getAppState = (): AppState => ({
-        mode,
-        productName,
-        keyFeatures,
-        targetAudience,
-        tone,
-        descriptionLanguage,
-        descriptionModel,
-        storyIdea,
-        storyboardConfig,
-        description,
-        storyboardPanels,
-        mediaArtState,
-    });
-
-    const handleSaveProject = async () => {
-        const isUpdate = !!currentProjectId;
-        const id = isUpdate ? currentProjectId! : Date.now().toString();
-        
-        let title = t('common.untitledProject');
-        let thumbnailUrl = '';
-
-        if (mode === AppMode.MEDIA_ART && mediaArtState.selectedPaintingId) {
-            const painting = FAMOUS_PAINTINGS.find(p => p.id === mediaArtState.selectedPaintingId);
-            if (painting) {
-                title = t(painting.titleKey);
-                thumbnailUrl = painting.imageUrl;
-            }
-        } else if (mode === AppMode.STORYBOARD && storyIdea) {
-             title = storyIdea;
-             thumbnailUrl = storyboardPanels.find(p => p.imageUrl && p.imageUrl !== 'error' && p.imageUrl !== 'quota_error')?.imageUrl || '';
-        } else if (mode === AppMode.DESCRIPTION && productName) {
-            title = productName;
-        }
-
-        const project: Project = {
-            id,
-            title,
-            timestamp: Date.now(),
-            thumbnailUrl,
-            appState: getAppState(),
         };
-
-        try {
-            await saveProject(project);
-            if (!isUpdate) {
-                setCurrentProjectId(id); // Set the new ID for future saves
-            }
-            await loadProjects(); // Refresh gallery list
-            alert(t('prompts.projectSaved', { title }));
-        } catch (err) {
-            console.error("Failed to save project:", err);
-            setError(t('errors.saveProjectFailed'));
-        }
-    };
-
+        const debounce = setTimeout(() => {
+            checkLang(productName, setProductNameIsKorean);
+            checkLang(keyFeatures, setKeyFeaturesIsKorean);
+            checkLang(targetAudience, setTargetAudienceIsKorean);
+            checkLang(storyIdea, setStoryIdeaIsKorean);
+        }, 500);
+        return () => clearTimeout(debounce);
+    }, [productName, keyFeatures, targetAudience, storyIdea, language]);
+    
     const handleGenerateDescription = async () => {
-        if (!productName || !keyFeatures) {
-            setError(t('errors.productNameAndFeaturesRequired'));
-            return;
-        }
-        setIsLoading(true);
+        setIsLoadingDescription(true);
         setError(null);
         setDescription('');
-
         try {
-            let finalProductName = productName;
-            let finalKeyFeatures = keyFeatures;
-            let finalTargetAudience = targetAudience;
-
-            if (isKorean(productName)) {
-                finalProductName = await translateText(productName, 'English');
-            }
-            if (isKorean(keyFeatures)) {
-                finalKeyFeatures = await translateText(keyFeatures, 'English');
-            }
-            if (targetAudience && isKorean(targetAudience)) {
-                finalTargetAudience = await translateText(targetAudience, 'English');
-            }
-
-            const result = await generateDescription({ 
-                productName: finalProductName, 
-                keyFeatures: finalKeyFeatures, 
-                targetAudience: finalTargetAudience, 
+            const result = await geminiService.generateDescription(
+                productName,
+                keyFeatures,
+                targetAudience,
                 tone,
-                language: descriptionLanguage,
-            }, descriptionModel);
+                descriptionLanguage,
+                descriptionModel
+            );
             setDescription(result);
         } catch (err: any) {
-            setError(err.message || t('errors.unknown'));
+            setError(err.message || t('errors.descriptionGeneration'));
         } finally {
-            setIsLoading(false);
+            setIsLoadingDescription(false);
         }
     };
-
-    const handleProceedToStoryboard = () => {
-        setMode(AppMode.STORYBOARD);
-        setStoryIdea(t('prompts.storyboardIdeaFromDescription', { productName, keyFeatures, tone: t(`tones.${tone}`), description }));
-        setStoryboardPanels([]); // Clear previous storyboard
-    };
-
+    
     const handleGenerateStoryboard = async () => {
-        if (!storyIdea) {
-            setError(t('errors.storyIdeaRequired'));
-            return;
-        }
-        setIsLoading(true);
+        setIsLoadingStoryboard(true);
+        setIsGeneratingImages(true);
         setError(null);
-        setStoryboardPanels([]);
-
+        setPanels([]);
         try {
-            let finalStoryIdea = storyIdea;
-            if (isKorean(storyIdea)) {
-                finalStoryIdea = await translateText(storyIdea, 'English');
-            }
-            const scenes = await generateStoryboardFromIdea(finalStoryIdea, storyboardConfig);
-            const panels: StoryboardPanel[] = scenes.map(scene => ({
-                description: scene.description,
-                imageUrl: '',
+            const sceneDescriptions = await geminiService.generateStoryboard(storyIdea, storyboardConfig);
+            const initialPanels: StoryboardPanel[] = sceneDescriptions.map(desc => ({
+                description: desc,
+                imageUrl: null,
                 isLoadingImage: true,
+                videoUrl: null,
+                isLoadingVideo: false,
                 sceneDuration: 4,
             }));
-            setStoryboardPanels(panels);
+            setPanels(initialPanels);
+
+            const generatedPanels = await Promise.all(
+                initialPanels.map(async (panel, index) => {
+                    try {
+                        const base64Image = await geminiService.generateImage(panel.description, storyboardConfig.visualStyle, storyboardConfig.aspectRatio, storyboardConfig.imageModel);
+                        setPanels(prev => prev.map((p, i) => i === index ? { ...p, imageUrl: `data:image/png;base64,${base64Image}`, isLoadingImage: false } : p));
+                        return { ...panel, imageUrl: `data:image/png;base64,${base64Image}`, isLoadingImage: false };
+                    } catch (err: any) {
+                        console.error(`Error generating image for panel ${index}:`, err);
+                        const isQuotaError = err.message?.includes('429');
+                        const errorType = isQuotaError ? 'quota_error' : 'error';
+                        setPanels(prev => prev.map((p, i) => i === index ? { ...p, imageUrl: errorType, isLoadingImage: false } : p));
+                        return { ...panel, imageUrl: errorType, isLoadingImage: false };
+                    }
+                })
+            );
+            setPanels(generatedPanels);
         } catch (err: any) {
-            setError(err.message || t('errors.storyboardGenerationFailed'));
-            setIsLoading(false); // Stop loading if scene generation fails
+            setError(err.message || t('errors.storyboardGeneration'));
+            setPanels([]);
         } finally {
-            // The main loading spinner stops, but panel spinners will continue
-            setIsLoading(false);
-        }
-    };
-
-    // Effect to generate images when panels are created/updated
-    useEffect(() => {
-        const processImageQueue = async () => {
-            const panelToProcessIndex = storyboardPanels.findIndex(
-                (p) => p.isLoadingImage && !p.imageUrl
-            );
-
-            if (panelToProcessIndex === -1 || isGeneratingImages) {
-                if(panelToProcessIndex === -1) {
-                    setIsGeneratingImages(false); 
-                }
-                return;
-            }
-
-            setIsGeneratingImages(true);
-            
-            const panel = storyboardPanels[panelToProcessIndex];
-
-            try {
-                const imageUrl = await generateImageForPanel(
-                    panel.description,
-                    storyboardConfig.visualStyle,
-                    storyboardConfig.aspectRatio,
-                    storyboardConfig.imageModel,
-                );
-                setStoryboardPanels((prevPanels) =>
-                    prevPanels.map((p, i) =>
-                        i === panelToProcessIndex
-                            ? { ...p, imageUrl, isLoadingImage: false }
-                            : p
-                    )
-                );
-            } catch (error: any) {
-                console.error(`Failed to generate image for panel ${panelToProcessIndex}:`, error);
-                const errorMessage = (error.message || '').includes('quota') ? 'quota_error' : 'error';
-                setStoryboardPanels((prevPanels) =>
-                    prevPanels.map((p, i) =>
-                        i === panelToProcessIndex
-                            ? { ...p, imageUrl: errorMessage, isLoadingImage: false }
-                            : p
-                    )
-                );
-            } finally {
-                setIsGeneratingImages(false);
-            }
-        };
-
-        processImageQueue();
-
-    }, [storyboardPanels, isGeneratingImages, storyboardConfig.visualStyle, storyboardConfig.aspectRatio, storyboardConfig.imageModel]);
-
-    const handleRegenerateImage = (indexToRegenerate: number) => {
-        setStoryboardPanels(prevPanels =>
-            prevPanels.map((panel, index) => {
-                if (index === indexToRegenerate) {
-                    return {
-                        ...panel,
-                        imageUrl: '', // Reset image URL
-                        isLoadingImage: true, // Set loading state to true
-                    };
-                }
-                return panel;
-            })
-        );
-    };
-
-    const handleDeletePanel = (indexToDelete: number) => {
-        if (window.confirm(t('prompts.deletePanelConfirm', { index: indexToDelete + 1 }))) {
-            setStoryboardPanels(prevPanels =>
-                prevPanels.filter((_, index) => index !== indexToDelete)
-            );
+            setIsLoadingStoryboard(false);
+            setIsGeneratingImages(false);
         }
     };
 
     const handleExpandScene = async (sceneDescription: string, index: number) => {
-        setExpandingSceneIndex(index);
-        setIsModalOpen(true);
-        setIsModalLoading(true);
-        setModalError(null);
-        setModalPanels([]);
-
+        setModalContext({ sceneDescription, index });
+        setIsDetailedModalOpen(true);
+        setIsLoadingDetailed(true);
+        setDetailedError(null);
+        setDetailedPanels([]);
         try {
-            const detailedScenes = await expandSceneToDetailedPanels(sceneDescription, storyboardConfig.descriptionLanguage, storyboardConfig.textModel);
-            const initialModalPanels: DetailedStoryboardPanel[] = detailedScenes.map(scene => ({
-                description: scene.description,
-                imageUrl: '',
-                isLoadingImage: true,
-            }));
-            setModalPanels(initialModalPanels);
-            
-            const generatedPanels = await Promise.all(initialModalPanels.map(async (panel) => {
-                try {
-                    const imageUrl = await generateImageForPanel(panel.description, storyboardConfig.visualStyle, storyboardConfig.aspectRatio, storyboardConfig.imageModel);
-                    return { ...panel, imageUrl, isLoadingImage: false };
-                } catch (err: any) {
-                    console.error(`Failed to generate modal image for "${panel.description}":`, err);
-                    const errorMessage = (err.message || '').includes('quota') ? 'quota_error' : 'error';
-                    return { ...panel, imageUrl: errorMessage, isLoadingImage: false };
-                }
-            }));
-            setModalPanels(generatedPanels);
+            const newDetailedPanels = await geminiService.generateDetailedStoryboard(sceneDescription, storyboardConfig);
+            setDetailedPanels(newDetailedPanels.map(p => ({ ...p, isLoadingImage: true })));
 
-        } catch (err: any) {
-            setModalError(err.message || t('errors.expandSceneFailed'));
-        } finally {
-            setIsModalLoading(false);
-        }
-    };
-
-    const handleSaveChangesFromModal = (editedPanels: DetailedStoryboardPanel[]) => {
-        if (expandingSceneIndex !== null) {
-            const newPanels = [...storyboardPanels];
-            const panelsToInsert = editedPanels.map(p => ({
-                description: p.description,
-                imageUrl: p.imageUrl,
-                isLoadingImage: false,
-                sceneDuration: 4, 
-            }));
-            newPanels.splice(expandingSceneIndex, 1, ...panelsToInsert);
-            setStoryboardPanels(newPanels);
-        }
-        setIsModalOpen(false);
-    };
-
-    const handleSceneDurationChange = (index: number, duration: number) => {
-        setStoryboardPanels(prev => prev.map((p, i) => i === index ? { ...p, sceneDuration: duration } : p));
-    };
-
-    const generateVideoForSinglePanel = (index: number) => {
-        const panel = storyboardPanels[index];
-        if (panel && panel.imageUrl && panel.imageUrl.startsWith('data:image')) {
-            setStoryboardPanels(prev => prev.map((p, i) => i === index ? { ...p, isLoadingVideo: true, videoUrl: undefined } : p));
-            
-            const imageBase64 = panel.imageUrl.split(',')[1];
-            generateVideoForPanel(panel.description, imageBase64, storyboardConfig.visualStyle, panel.sceneDuration || 4, storyboardConfig.videoModel)
-                .then(videoUrl => {
-                    setStoryboardPanels(prev => prev.map((p, i) => i === index ? { ...p, videoUrl, isLoadingVideo: false } : p));
+            // Generate images for detailed panels
+            await Promise.all(
+                newDetailedPanels.map(async (panel, i) => {
+                    try {
+                        const base64Image = await geminiService.generateImage(panel.description, storyboardConfig.visualStyle, storyboardConfig.aspectRatio, storyboardConfig.imageModel);
+                        setDetailedPanels(prev => prev.map((dp, idx) => idx === i ? { ...dp, imageUrl: `data:image/png;base64,${base64Image}`, isLoadingImage: false } : dp));
+                    } catch (err) {
+                        console.error(`Error generating detailed image ${i}:`, err);
+                        const isQuotaError = (err as any).message?.includes('429');
+                        setDetailedPanels(prev => prev.map((dp, idx) => idx === i ? { ...dp, imageUrl: isQuotaError ? 'quota_error' : 'error', isLoadingImage: false } : dp));
+                    }
                 })
-                .catch(err => {
-                    console.error(`Failed to generate video for panel ${index}:`, err);
-                    setStoryboardPanels(prev => prev.map((p, i) => i === index ? { ...p, videoUrl: 'error', isLoadingVideo: false } : p));
-                });
-        }
-    }
-    
-    const handleGenerateAllVideos = () => {
-        storyboardPanels.forEach((panel, index) => {
-            if (panel.imageUrl && panel.imageUrl.startsWith('data:image') && !panel.videoUrl) {
-                generateVideoForSinglePanel(index);
-            }
-        });
-    };
-    
-    const handleRegenerateVideo = (index: number) => {
-        generateVideoForSinglePanel(index);
-    };
-
-    const handleGenerateMediaArt = async () => {
-        const { selectedPaintingId, animationStyle } = mediaArtState;
-        if (!selectedPaintingId) {
-            setError(t('errors.paintingRequired'));
-            return;
-        }
-
-        const painting = FAMOUS_PAINTINGS.find(p => p.id === selectedPaintingId);
-        if (!painting) {
-            setError(t('errors.paintingNotFound'));
-            return;
-        }
-
-        setIsMediaArtLoading(true);
-        setError(null);
-        setMediaArtState(prev => ({ ...prev, videoUrl: null }));
-
-        try {
-            const imageBase64 = await imageUrlToBase64(painting.imageUrl);
-            const videoUrl = await generateMediaArt(
-                t(painting.titleKey),
-                t(painting.artistKey),
-                animationStyle,
-                imageBase64,
-                'veo-2.0-generate-001' // Currently hardcoded
             );
-            setMediaArtState(prev => ({ ...prev, videoUrl }));
         } catch (err: any) {
-            setError(err.message || t('errors.unknown'));
-            setMediaArtState(prev => ({ ...prev, videoUrl: 'error' }));
+            setDetailedError(err.message || t('errors.detailedStoryboardGeneration'));
         } finally {
-            setIsMediaArtLoading(false);
-        }
-    };
-
-    const openSampleProductModal = () => {
-        setSampleModalType('product');
-        setIsSampleModalOpen(true);
-    };
-
-    const openSampleStoryModal = () => {
-        setSampleModalType('story');
-        setIsSampleModalOpen(true);
-    };
-
-    const handleSelectSampleProduct = (sample: SampleProduct) => {
-        handleNewProject(); // Reset state before loading a sample
-        setProductName(sample.productName);
-        setKeyFeatures(sample.keyFeatures);
-        setTargetAudience(sample.targetAudience);
-        setTone(sample.tone);
-        setIsSampleModalOpen(false);
-    };
-
-    const handleSelectSampleStory = (sample: SampleStory) => {
-        handleNewProject(); // Reset state before loading a sample
-        setMode(AppMode.STORYBOARD);
-        setStoryIdea(sample.idea);
-        setStoryboardConfig(sample.config);
-        setIsSampleModalOpen(false);
-    };
-
-    const handleExportProjects = async () => {
-        try {
-            const allProjects = await getProjects();
-            if (allProjects.length === 0) {
-                alert(t('prompts.noProjectsToExport'));
-                return;
-            }
-            const jsonString = JSON.stringify(allProjects, null, 2);
-            const blob = new Blob([jsonString], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `artifex-ai-studio-pro-projects-${new Date().toISOString().split('T')[0]}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        } catch (err) {
-            console.error("Failed to export projects:", err);
-            setError(t('errors.exportFailed'));
+            setIsLoadingDetailed(false);
         }
     };
     
-    const handleExportCurrentProject = () => {
-        const currentAppState = getAppState();
-        
-        const id = currentProjectId || Date.now().toString();
-        let title = productName || storyIdea || t('common.untitledProject');
-        if (mode === AppMode.MEDIA_ART && mediaArtState.selectedPaintingId) {
-             const painting = FAMOUS_PAINTINGS.find(p => p.id === mediaArtState.selectedPaintingId);
-             if (painting) title = t(painting.titleKey);
+    const handleSaveDetailedChanges = (editedPanels: DetailedStoryboardPanel[]) => {
+        if (modalContext) {
+            const newPanels = editedPanels.map(dp => ({
+                description: dp.description,
+                imageUrl: dp.imageUrl || null,
+                isLoadingImage: false,
+                videoUrl: null,
+                isLoadingVideo: false,
+                sceneDuration: 4
+            }));
+            setPanels(prev => {
+                const updated = [...prev];
+                updated.splice(modalContext.index, 1, ...newPanels);
+                return updated;
+            });
         }
-
-        const thumbnailUrl = storyboardPanels.find(p => p.imageUrl && p.imageUrl !== 'error' && p.imageUrl !== 'quota_error')?.imageUrl || '';
-
-        const project: Project = {
-            id,
-            title,
-            timestamp: Date.now(),
-            thumbnailUrl,
-            appState: currentAppState,
-        };
-        
-        const projectsToExport = [project];
-        const jsonString = JSON.stringify(projectsToExport, null, 2);
-        const blob = new Blob([jsonString], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        const sanitizedTitle = title.replace(/[^a-z0-9]/gi, '_').toLowerCase().substring(0, 50);
-        a.download = `artifex-project-${sanitizedTitle}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        setIsDetailedModalOpen(false);
+        setModalContext(null);
     };
 
+    const handleRegenerateImage = async (index: number) => {
+        setPanels(prev => prev.map((p, i) => i === index ? { ...p, isLoadingImage: true, imageUrl: null } : p));
+        const panel = panels[index];
+        try {
+            const base64Image = await geminiService.generateImage(panel.description, storyboardConfig.visualStyle, storyboardConfig.aspectRatio, storyboardConfig.imageModel);
+            setPanels(prev => prev.map((p, i) => i === index ? { ...p, imageUrl: `data:image/png;base64,${base64Image}`, isLoadingImage: false } : p));
+        } catch (err) {
+             console.error(`Error regenerating image for panel ${index}:`, err);
+             const isQuotaError = (err as any).message?.includes('429');
+             setPanels(prev => prev.map((p, i) => i === index ? { ...p, imageUrl: isQuotaError ? 'quota_error' : 'error', isLoadingImage: false } : p));
+        }
+    };
+
+    const handleRegenerateVideo = async (index: number) => {
+        const panel = panels[index];
+        if (!panel.imageUrl || !panel.imageUrl.startsWith('data:image')) return;
+
+        setPanels(prev => prev.map((p, i) => i === index ? { ...p, isLoadingVideo: true, videoUrl: null } : p));
+
+        try {
+            const base64Data = panel.imageUrl.split(',')[1];
+            const videoUrl = await geminiService.generateVideo(storyboardConfig.videoModel, panel.description, base64Data, panel.sceneDuration);
+            setPanels(prev => prev.map((p, i) => i === index ? { ...p, videoUrl, isLoadingVideo: false } : p));
+        } catch (err) {
+            console.error(`Error generating video for panel ${index}:`, err);
+            setPanels(prev => prev.map((p, i) => i === index ? { ...p, videoUrl: 'error', isLoadingVideo: false } : p));
+        }
+    };
+    
+    // Gallery and Project Management
+    const loadProjects = useCallback(async () => {
+        const loadedProjects = await db.getProjects();
+        setProjects(loadedProjects);
+    }, []);
+
+    useEffect(() => {
+        loadProjects();
+    }, [loadProjects]);
+
+    const getAppState = (): Omit<Project, 'id' | 'timestamp' | 'title' | 'thumbnailUrl'> => ({
+        mode,
+        productName: mode === AppMode.DESCRIPTION ? productName : undefined,
+        keyFeatures: mode === AppMode.DESCRIPTION ? keyFeatures : undefined,
+        targetAudience: mode === AppMode.DESCRIPTION ? targetAudience : undefined,
+        tone: mode === AppMode.DESCRIPTION ? tone : undefined,
+        descriptionLanguage: mode === AppMode.DESCRIPTION ? descriptionLanguage : undefined,
+        descriptionModel: mode === AppMode.DESCRIPTION ? descriptionModel : undefined,
+        description: mode === AppMode.DESCRIPTION ? description : undefined,
+        storyIdea: mode === AppMode.STORYBOARD ? storyIdea : undefined,
+        storyboardConfig: mode === AppMode.STORYBOARD ? storyboardConfig : undefined,
+        panels: mode === AppMode.STORYBOARD ? panels : undefined,
+    });
+    
+    const applyState = (state: Partial<Project>) => {
+        if (state.mode) setMode(state.mode);
+        if (state.mode === AppMode.DESCRIPTION) {
+            setProductName(state.productName || '');
+            setKeyFeatures(state.keyFeatures || '');
+            setTargetAudience(state.targetAudience || '');
+            setTone(state.tone || Tone.FRIENDLY);
+            setDescriptionLanguage(state.descriptionLanguage || 'English');
+            setDescriptionModel(state.descriptionModel || TEXT_MODEL_OPTIONS[0].value);
+            setDescription(state.description || '');
+        } else if (state.mode === AppMode.STORYBOARD) {
+            setStoryIdea(state.storyIdea || '');
+            setStoryboardConfig(state.storyboardConfig || initialStoryboardConfig);
+            setPanels(state.panels || []);
+        }
+    };
+
+    const handleSaveProject = async () => {
+        const currentState = getAppState();
+        const project: Project = {
+            id: currentProjectId || crypto.randomUUID(),
+            timestamp: Date.now(),
+            title: mode === AppMode.DESCRIPTION ? productName : storyIdea,
+            thumbnailUrl: panels.find(p => p.imageUrl && p.imageUrl.startsWith('data:image'))?.imageUrl || null,
+            ...currentState
+        };
+        await db.saveProject(project);
+        if (!currentProjectId) {
+            setCurrentProjectId(project.id);
+        }
+        loadProjects();
+    };
+
+    const handleExportCurrentProject = () => {
+        const state = getAppState();
+        const title = mode === AppMode.DESCRIPTION ? productName : storyIdea;
+        const safeTitle = title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+        const fileName = `artifex-project-${safeTitle || 'untitled'}.json`;
+
+        const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(state, null, 2))}`;
+        const link = document.createElement("a");
+        link.href = jsonString;
+        link.download = fileName;
+        link.click();
+    };
+    
     const handleImportProjects = () => {
         const input = document.createElement('input');
         input.type = 'file';
-        input.accept = 'application/json';
-        input.onchange = async (event) => {
-            const file = (event.target as HTMLInputElement).files?.[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                try {
-                    const text = e.target?.result;
-                    if (typeof text !== 'string') {
-                        throw new Error(t('errors.fileReadError'));
+        input.accept = '.json';
+        input.multiple = true;
+        input.onchange = async (e) => {
+            const files = (e.target as HTMLInputElement).files;
+            if (files) {
+                let importedCount = 0;
+                for (const file of Array.from(files)) {
+                    try {
+                        const projectData = JSON.parse(await file.text());
+                        const project: Project = {
+                            id: crypto.randomUUID(),
+                            timestamp: Date.now(),
+                            title: projectData.productName || projectData.storyIdea || 'Imported Project',
+                            thumbnailUrl: projectData.panels?.find((p: StoryboardPanel) => p.imageUrl && p.imageUrl.startsWith('data:image'))?.imageUrl || null,
+                            ...projectData,
+                        };
+                        await db.saveProject(project);
+                        importedCount++;
+                    } catch (err) {
+                         console.error("Failed to import file:", file.name, err);
                     }
-                    const importedProjects = JSON.parse(text) as Project[];
-                    
-                    if (!Array.isArray(importedProjects) || importedProjects.some(p => !p.id || !p.title || !p.appState)) {
-                         throw new Error(t('errors.invalidProjectFile'));
-                    }
-
-                    if (window.confirm(t('prompts.importConfirm', { count: importedProjects.length }))) {
-                        // Use a Set to avoid duplicates if importing the same file twice
-                        const existingIds = new Set(projects.map(p => p.id));
-                        const projectsToSave = importedProjects.filter(p => !existingIds.has(p.id));
-                        
-                        await Promise.all(projectsToSave.map(project => saveProject(project)));
-                        await loadProjects();
-                        alert(t('prompts.importSuccess', { count: projectsToSave.length }));
-                    }
-                } catch (err: any) {
-                    console.error("Failed to import projects:", err);
-                    setError(`${t('errors.importFailed')}: ${err.message}`);
                 }
-            };
-            reader.onerror = () => {
-                setError(t('errors.fileReadError'));
-            };
-            reader.readAsText(file);
+                alert(t('galleryModal.importSuccess', { count: importedCount }));
+                loadProjects();
+            }
         };
         input.click();
     };
+    
+    const handleLoadProject = async (id: string) => {
+        const project = await db.getProject(id);
+        if (project) {
+            resetState();
+            setCurrentProjectId(project.id);
+            applyState(project);
+            setIsGalleryOpen(false);
+        }
+    };
+    
+    const handleDeleteProject = async (id: string) => {
+        if(window.confirm(t('galleryModal.confirmDelete'))) {
+            await db.deleteProject(id);
+            if(id === currentProjectId){
+                handleNewProject();
+            }
+            loadProjects();
+        }
+    };
+    
+    const resetState = () => {
+         setError(null);
+        setProductName('');
+        setKeyFeatures('');
+        setTargetAudience('');
+        setTone(Tone.FRIENDLY);
+        setDescriptionLanguage('English');
+        setDescriptionModel(TEXT_MODEL_OPTIONS[0].value);
+        setDescription('');
+        setStoryIdea('');
+        setStoryboardConfig(initialStoryboardConfig);
+        setPanels([]);
+    };
 
-    // Prepare localized sample data
-    const sampleProducts = useMemo(() => {
+    const handleNewProject = () => {
+        resetState();
+        setCurrentProjectId(null);
+    };
+
+    // Sample Modal Logic
+    const handleSelectSampleProduct = (product: SampleProduct) => {
+        setProductName(product.productName);
+        setKeyFeatures(product.keyFeatures);
+        setTargetAudience(product.targetAudience);
+        setTone(product.tone);
+        setIsSampleModalOpen(false);
+    };
+
+    const handleSelectSampleStory = (story: SampleStory) => {
+        setStoryIdea(story.idea);
+        setStoryboardConfig(story.config);
+        setIsSampleModalOpen(false);
+    };
+
+    const getLocalizedSamples = (data: { [key: string]: { en: any; ko: any } }) => {
         const langCode = language === 'Korean' ? 'ko' : 'en';
-        return Object.values(sampleProductsData).map(p => p[langCode] || p.en);
-    }, [language]);
+        return Object.values(data).map(item => item[langCode] || item['en']);
+    };
 
-    const sampleStoryIdeas = useMemo(() => {
-        const langCode = language === 'Korean' ? 'ko' : 'en';
-        return Object.values(sampleStoryIdeasData).map(s => s[langCode] || s.en);
-    }, [language]);
-
-
-    if (!apiKey) {
+    if (!apiKeyExists) {
         return <ApiKeyInstructions />;
     }
 
-    const canGenerateVideos = storyboardPanels.length > 0 && storyboardPanels.every(p => p.imageUrl && p.imageUrl !== 'error' && p.imageUrl !== 'quota_error');
-    const hasVideos = storyboardPanels.some(p => p.videoUrl && p.videoUrl !== 'error');
-
-    const productNameIsKorean = isKorean(productName);
-    const keyFeaturesIsKorean = isKorean(keyFeatures);
-    const targetAudienceIsKorean = isKorean(targetAudience);
-    const storyIdeaIsKorean = isKorean(storyIdea);
-
-    const canSave = (mode === AppMode.DESCRIPTION && !!productName) || 
-                  (mode === AppMode.STORYBOARD && !!storyIdea) ||
-                  (mode === AppMode.MEDIA_ART && !!mediaArtState.selectedPaintingId);
-
+    const canSaveProject = mode === AppMode.DESCRIPTION ? !!productName : !!storyIdea;
 
     return (
-        <div className="bg-slate-900 text-white min-h-screen font-sans">
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="min-h-screen bg-slate-900 text-white font-sans">
+            <main className="container mx-auto px-4 py-8 max-w-5xl">
                 <Header 
                     onOpenGallery={() => setIsGalleryOpen(true)} 
-                    onNewProject={handleNewProject}
+                    onNewProject={handleNewProject} 
                     onImport={handleImportProjects}
                 />
-
-                <div className="mt-8 max-w-2xl mx-auto">
+                
+                <div className="mt-12 space-y-8">
                     <ModeSwitcher mode={mode} setMode={setMode} />
-                </div>
-
-                <div className="mt-8 max-w-4xl mx-auto p-8 bg-slate-800/50 border border-slate-700 rounded-2xl shadow-xl">
-                    {mode === AppMode.DESCRIPTION && (
-                        <>
-                            <div className="flex justify-end mb-4 -mt-2">
-                                <button onClick={openSampleProductModal} className="text-xs text-blue-400 hover:underline">
-                                    {t('common.loadSampleProduct')}
-                                </button>
+                    
+                    <div className="p-8 bg-slate-800/50 border border-slate-700 rounded-2xl shadow-lg">
+                        {error && (
+                            <div className="p-4 mb-6 bg-red-500/20 text-red-300 border border-red-500/30 rounded-lg">
+                                <p><span className="font-bold">{t('common.errorPrefix')}</span> {error}</p>
                             </div>
-                            <InputForm
-                                productName={productName}
-                                setProductName={setProductName}
-                                keyFeatures={keyFeatures}
-                                setKeyFeatures={setKeyFeatures}
-                                targetAudience={targetAudience}
-                                setTargetAudience={setTargetAudience}
-                                tone={tone}
-                                setTone={setTone}
-                                descriptionLanguage={descriptionLanguage}
-                                setDescriptionLanguage={setDescriptionLanguage}
-                                descriptionModel={descriptionModel}
-                                setDescriptionModel={setDescriptionModel}
-                                onSubmit={handleGenerateDescription}
-                                isLoading={isLoading}
-                                productNameIsKorean={productNameIsKorean}
-                                keyFeaturesIsKorean={keyFeaturesIsKorean}
-                                targetAudienceIsKorean={targetAudienceIsKorean}
-                                onSave={handleSaveProject}
-                                onExport={handleExportCurrentProject}
-                                canSave={canSave}
-                            />
-                        </>
-                    )}
-                    {mode === AppMode.STORYBOARD && (
-                         <>
-                            <div className="flex justify-end mb-4 -mt-2">
-                                <button onClick={openSampleStoryModal} className="text-xs text-blue-400 hover:underline">
-                                    {t('common.loadSampleStory')}
-                                </button>
-                            </div>
-                            <StoryboardInputForm
-                                storyIdea={storyIdea}
-                                setStoryIdea={setStoryIdea}
-                                config={storyboardConfig}
-                                setConfig={setStoryboardConfig}
-                                onSubmit={handleGenerateStoryboard}
-                                isLoading={isLoading}
-                                storyIdeaIsKorean={storyIdeaIsKorean}
-                                onSave={handleSaveProject}
-                                onExport={handleExportCurrentProject}
-                                canSave={canSave}
-                            />
-                        </>
-                    )}
-                    {mode === AppMode.MEDIA_ART && (
-                        <MediaArtGenerator 
-                           mediaArtState={mediaArtState}
-                           onStateChange={(newState) => setMediaArtState(prev => ({...prev, ...newState}))}
-                           paintings={FAMOUS_PAINTINGS}
-                           onSubmit={handleGenerateMediaArt}
-                           isLoading={isMediaArtLoading}
-                           error={error}
-                        />
-                    )}
-                </div>
-                
-                {error && (
-                    <div className="mt-6 max-w-4xl mx-auto p-4 bg-red-500/20 text-red-300 border border-red-500/30 rounded-lg">
-                        <p><span className="font-bold">{t('common.errorPrefix')}</span> {error}</p>
-                    </div>
-                )}
+                        )}
+                        
+                        {mode === AppMode.DESCRIPTION && (
+                           <>
+                                <div className="flex justify-between items-center mb-6">
+                                    <h2 className="text-xl font-bold text-slate-200">{t('main.descriptionTitle')}</h2>
+                                    <button onClick={() => { setSampleType('product'); setIsSampleModalOpen(true); }} className="text-sm font-semibold text-blue-400 hover:text-blue-300">{t('main.loadSample')}</button>
+                                </div>
+                                <InputForm
+                                    productName={productName}
+                                    setProductName={setProductName}
+                                    keyFeatures={keyFeatures}
+                                    setKeyFeatures={setKeyFeatures}
+                                    targetAudience={targetAudience}
+                                    setTargetAudience={setTargetAudience}
+                                    tone={tone}
+                                    setTone={setTone}
+                                    descriptionLanguage={descriptionLanguage}
+                                    setDescriptionLanguage={setDescriptionLanguage}
+                                    descriptionModel={descriptionModel}
+                                    setDescriptionModel={setDescriptionModel}
+                                    onSubmit={handleGenerateDescription}
+                                    isLoading={isLoadingDescription}
+                                    productNameIsKorean={productNameIsKorean}
+                                    keyFeaturesIsKorean={keyFeaturesIsKorean}
+                                    targetAudienceIsKorean={targetAudienceIsKorean}
+                                    onSave={handleSaveProject}
+                                    onExport={handleExportCurrentProject}
+                                    canSave={canSaveProject}
+                                />
+                            </>
+                        )}
+                        {mode === AppMode.STORYBOARD && (
+                            <>
+                                <div className="flex justify-between items-center mb-6">
+                                    <h2 className="text-xl font-bold text-slate-200">{t('main.storyboardTitle')}</h2>
+                                    <button onClick={() => { setSampleType('story'); setIsSampleModalOpen(true); }} className="text-sm font-semibold text-blue-400 hover:text-blue-300">{t('main.loadSample')}</button>
+                                </div>
+                                <StoryboardInputForm
+                                    storyIdea={storyIdea}
+                                    setStoryIdea={setStoryIdea}
+                                    config={storyboardConfig}
+                                    setConfig={setStoryboardConfig}
+                                    onSubmit={handleGenerateStoryboard}
+                                    isLoading={isLoadingStoryboard}
+                                    storyIdeaIsKorean={storyIdeaIsKorean}
+                                    onSave={handleSaveProject}
+                                    onExport={handleExportCurrentProject}
+                                    canSave={canSaveProject}
+                                />
+                            </>
+                        )}
 
-                {isLoading && mode === AppMode.DESCRIPTION && (
-                    <div className="text-center mt-8">
-                        <LoadingSpinner />
-                        <p className="mt-2 text-slate-400">{t('descriptionForm.loadingMessage')}</p>
+                        {mode === AppMode.MEDIA_ART && (
+                            <>
+                                 <div className="flex justify-between items-center mb-6">
+                                    <h2 className="text-xl font-bold text-slate-200">{t('main.mediaArtTitle')}</h2>
+                                </div>
+                                <MediaArtGenerator />
+                            </>
+                        )}
                     </div>
-                )}
-                
-                {description && mode === AppMode.DESCRIPTION && (
-                    <div className="mt-8 max-w-4xl mx-auto">
-                        <DescriptionDisplay description={description} />
-                        <div className="mt-6 text-center">
-                            <button
-                                onClick={handleProceedToStoryboard}
-                                className="bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white font-semibold py-3 px-8 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105"
-                            >
-                                {t('descriptionDisplay.proceedButton')}
-                            </button>
-                        </div>
-                    </div>
-                )}
 
-                {mode === AppMode.STORYBOARD && storyboardPanels.length > 0 && (
-                     <div className="mt-8 max-w-7xl mx-auto">
+                    {mode === AppMode.DESCRIPTION && description && <DescriptionDisplay description={description} />}
+                    {mode === AppMode.STORYBOARD && panels.length > 0 && 
                         <StoryboardDisplay 
-                            panels={storyboardPanels} 
+                            panels={panels} 
                             onExpandScene={handleExpandScene} 
-                            onSceneDurationChange={handleSceneDurationChange}
+                            onSceneDurationChange={(index, duration) => setPanels(p => p.map((panel, i) => i === index ? { ...panel, sceneDuration: duration } : panel))}
                             onRegenerateVideo={handleRegenerateVideo}
                             onRegenerateImage={handleRegenerateImage}
-                            onDeletePanel={handleDeletePanel}
+                            onDeletePanel={(index) => setPanels(p => p.filter((_, i) => i !== index))}
                             isGeneratingImages={isGeneratingImages}
                         />
-                         <div className="mt-6 flex justify-center items-center gap-4">
-                            <button
-                                onClick={handleGenerateAllVideos}
-                                disabled={!canGenerateVideos || storyboardPanels.some(p => p.isLoadingVideo)}
-                                className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-3 px-8 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                               {t('storyboardDisplay.generateAllClips')}
-                            </button>
-                        </div>
-                    </div>
-                )}
-                
-                {mode === AppMode.STORYBOARD && hasVideos && (
-                    <VideoDisplay panels={storyboardPanels} />
-                )}
+                    }
+                    {mode === AppMode.STORYBOARD && panels.some(p => p.videoUrl && p.videoUrl !== 'error') && <VideoDisplay panels={panels} />}
 
+                </div>
             </main>
-            
+
             <DetailedStoryboardModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                panels={modalPanels}
-                isLoading={isModalLoading}
-                error={modalError}
-                originalSceneDescription={expandingSceneIndex !== null ? storyboardPanels[expandingSceneIndex]?.description : ''}
-                onSaveChanges={handleSaveChangesFromModal}
+                isOpen={isDetailedModalOpen}
+                onClose={() => setIsDetailedModalOpen(false)}
+                panels={detailedPanels}
+                isLoading={isLoadingDetailed}
+                error={detailedError}
+                originalSceneDescription={modalContext?.sceneDescription}
+                onSaveChanges={handleSaveDetailedChanges}
             />
 
-            <GalleryModal
+            <GalleryModal 
                 isOpen={isGalleryOpen}
                 onClose={() => setIsGalleryOpen(false)}
                 projects={projects}
                 onLoad={handleLoadProject}
                 onDelete={handleDeleteProject}
-                onExport={handleExportProjects}
+                onExport={() => { /* TODO: Export all projects */ }}
             />
 
             <SampleGalleryModal
                 isOpen={isSampleModalOpen}
                 onClose={() => setIsSampleModalOpen(false)}
-                type={sampleModalType}
-                products={sampleProducts}
-                stories={sampleStoryIdeas}
+                type={sampleType}
+                products={getLocalizedSamples(sampleProductsData)}
+                stories={getLocalizedSamples(sampleStoryIdeasData)}
                 onSelectProduct={handleSelectSampleProduct}
                 onSelectStory={handleSelectSampleStory}
             />

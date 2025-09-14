@@ -1,55 +1,54 @@
+// FIX: Created this file to define and export shared types, resolving module resolution errors.
 
-
-// FIX: Removed circular self-import which was causing type declaration conflicts.
 export enum Tone {
-    PROFESSIONAL = 'PROFESSIONAL',
-    FRIENDLY = 'FRIENDLY',
-    HUMOROUS = 'HUMOROUS',
-    LUXURIOUS = 'LUXURIOUS',
-}
-
-export enum AppMode {
-    DESCRIPTION = 'DESCRIPTION',
-    STORYBOARD = 'STORYBOARD',
-    MEDIA_ART = 'MEDIA_ART',
+    PROFESSIONAL = 'professional',
+    FRIENDLY = 'friendly',
+    HUMOROUS = 'humorous',
+    LUXURIOUS = 'luxurious',
 }
 
 export enum AspectRatio {
     LANDSCAPE = '16:9',
     PORTRAIT = '9:16',
     SQUARE = '1:1',
-    CLASSIC = '4:3',
     VERTICAL = '3:4',
-}
-
-export enum VideoLength {
-    SHORT = '15 seconds',
-    MEDIUM = '30 seconds',
-    LONG = '60 seconds',
+    CLASSIC = '4:3',
 }
 
 export enum VisualStyle {
-    PHOTOREALISTIC = 'Photorealistic',
-    CINEMATIC = 'Cinematic',
-    ANIME = 'Anime',
-    WATERCOLOR = 'Watercolor',
-    CLAYMATION = 'Claymation',
-    PIXEL_ART = 'Pixel Art',
+    PHOTOREALISTIC = 'photorealistic',
+    CINEMATIC = 'cinematic',
+    ANIME = 'anime',
+    WATERCOLOR = 'watercolor',
+    CLAYMATION = 'claymation',
+    PIXEL_ART = 'pixel-art',
+}
+
+export enum VideoLength {
+    SHORT = 'short',
+    MEDIUM = 'medium',
+    LONG = 'long',
 }
 
 export enum Mood {
-    FAST_PACED = 'Fast-paced & Energetic',
-    EMOTIONAL = 'Slow & Emotional',
-    MYSTERIOUS = 'Mysterious & Suspenseful',
-    COMEDIC = 'Comedic & Lighthearted',
-    EPIC = 'Epic & Grandiose',
+    FAST_PACED = 'fast-paced',
+    EMOTIONAL = 'emotional',
+    MYSTERIOUS = 'mysterious',
+    COMEDIC = 'comedic',
+    EPIC = 'epic',
 }
 
 export enum MediaArtStyle {
-    SUBTLE_MOTION = 'Subtle Motion',
-    PARALLAX = 'Parallax',
-    DREAMLIKE = 'Dreamlike',
-    ELEMENTAL = 'Elemental',
+    SUBTLE_MOTION = 'subtle-motion',
+    PARALLAX = 'parallax',
+    DREAMLIKE = 'dreamlike',
+    ELEMENTAL = 'elemental',
+}
+
+export enum AppMode {
+    DESCRIPTION = 'description',
+    STORYBOARD = 'storyboard',
+    MEDIA_ART = 'media-art',
 }
 
 export interface FamousPainting {
@@ -58,14 +57,6 @@ export interface FamousPainting {
     artistKey: string;
     year: string;
     imageUrl: string;
-}
-
-export interface ProductDetails {
-    productName: string;
-    keyFeatures: string;
-    targetAudience?: string;
-    tone: Tone;
-    language: string;
 }
 
 export interface StoryboardConfig {
@@ -80,64 +71,56 @@ export interface StoryboardConfig {
     videoModel: string;
 }
 
-export interface StoryboardPanel {
-    description: string;
-    imageUrl: string; // Can be a base64 data URL, blob URL, 'error', or empty string
-    isLoadingImage: boolean;
-    videoUrl?: string; // Can be a blob URL, 'error', or undefined
-    isLoadingVideo?: boolean;
-    sceneDuration?: number; // Duration in seconds for the video clip
-}
-
-export interface DetailedStoryboardPanel {
-    description: string;
-    imageUrl: string; // Can be a base64 data URL, blob URL, 'error', or empty string
-    isLoadingImage: boolean;
-    videoUrl?: string;
-    isLoadingVideo?: boolean;
-    sceneDuration?: number; // Duration in seconds for the video clip
-}
-
-export interface MediaArtState {
-    selectedPaintingId: string | null;
-    animationStyle: MediaArtStyle;
-    videoUrl: string | null; // Can be blob URL, 'error', or null
-}
-
-// App state structure for saving/loading
-export interface AppState {
-    mode: AppMode;
+export interface SampleProduct {
     productName: string;
     keyFeatures: string;
     targetAudience: string;
     tone: Tone;
-    descriptionLanguage: string;
-    storyIdea: string;
-    storyboardConfig: StoryboardConfig;
-    description: string;
-    storyboardPanels: StoryboardPanel[];
-    descriptionModel: string;
-    mediaArtState: MediaArtState;
-}
-
-// Structure for a saved project in the gallery
-export interface Project {
-    id: string; // Unique ID, e.g., timestamp
-    title: string;
-    timestamp: number;
-    thumbnailUrl: string; // First panel's image as a blob URL for quick preview
-    appState: AppState;
-}
-
-export interface SampleProduct {
-  productName: string;
-  keyFeatures: string;
-  targetAudience: string;
-  tone: Tone;
 }
 
 export interface SampleStory {
     keyword: string;
     idea: string;
     config: StoryboardConfig;
+}
+
+export interface StoryboardPanel {
+    description: string;
+    imageUrl: string | null;
+    isLoadingImage: boolean;
+    videoUrl: string | null;
+    isLoadingVideo: boolean;
+    sceneDuration: number;
+}
+
+export interface DetailedStoryboardPanel {
+    description: string;
+    imageUrl?: string | null;
+    isLoadingImage?: boolean;
+}
+
+export interface Project {
+    id: string;
+    timestamp: number;
+    title: string;
+    thumbnailUrl: string | null;
+    mode: AppMode;
+    // Description mode state
+    productName?: string;
+    keyFeatures?: string;
+    targetAudience?: string;
+    tone?: Tone;
+    descriptionLanguage?: string;
+    descriptionModel?: string;
+    description?: string;
+    // Storyboard mode state
+    storyIdea?: string;
+    storyboardConfig?: StoryboardConfig;
+    panels?: StoryboardPanel[];
+    // Media Art state
+    mediaArt?: {
+        sourceImageUrl: string;
+        resultImageUrl: string;
+        prompt: string;
+    }
 }
