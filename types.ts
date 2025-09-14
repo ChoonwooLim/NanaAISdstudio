@@ -1,4 +1,4 @@
-// FIX: Removed circular dependency import of AppState, as it is defined within this file.
+// FIX: Removed circular self-import of types defined within this file to resolve type declaration conflicts.
 
 export enum Tone {
     PROFESSIONAL = 'PROFESSIONAL',
@@ -101,4 +101,17 @@ export interface Project {
     timestamp: number;
     thumbnailUrl: string; // First panel's image as a blob URL for quick preview
     appState: AppState;
+}
+
+export interface SampleProduct {
+  productName: string;
+  keyFeatures: string;
+  targetAudience: string;
+  tone: Tone;
+}
+
+export interface SampleStory {
+    keyword: string;
+    idea: string;
+    config: StoryboardConfig;
 }

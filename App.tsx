@@ -10,7 +10,9 @@ import {
     Mood,
     DetailedStoryboardPanel,
     Project,
-    AppState
+    AppState,
+    SampleProduct,
+    SampleStory
 } from './types';
 import {
     generateDescription,
@@ -33,6 +35,8 @@ import StoryboardDisplay from './components/StoryboardDisplay';
 import DetailedStoryboardModal from './components/DetailedStoryboardModal';
 import VideoDisplay from './components/VideoDisplay';
 import GalleryModal from './components/GalleryModal';
+import SampleGalleryModal from './components/SampleGalleryModal';
+
 
 import { sampleProducts, sampleStoryIdeas } from './sampleData';
 
@@ -75,6 +79,8 @@ const App: React.FC = () => {
     const [isModalLoading, setIsModalLoading] = useState(false);
     const [modalError, setModalError] = useState<string | null>(null);
     const [expandingSceneIndex, setExpandingSceneIndex] = useState<number | null>(null);
+    const [isSampleModalOpen, setIsSampleModalOpen] = useState(false);
+    const [sampleModalType, setSampleModalType] = useState<'product' | 'story'>('product');
     
     // Gallery State
     const [isGalleryOpen, setIsGalleryOpen] = useState(false);
@@ -402,18 +408,32 @@ const App: React.FC = () => {
         generateVideoForSinglePanel(index);
     };
 
-    const loadSampleProduct = () => {
-        const sample = sampleProducts[Math.floor(Math.random() * sampleProducts.length)];
+    const openSampleProductModal = () => {
+        setSampleModalType('product');
+        setIsSampleModalOpen(true);
+    };
+
+    const openSampleStoryModal = () => {
+        setSampleModalType('story');
+        setIsSampleModalOpen(true);
+    };
+
+    const handleSelectSampleProduct = (sample: SampleProduct) => {
         setProductName(sample.productName);
         setKeyFeatures(sample.keyFeatures);
         setTargetAudience(sample.targetAudience);
         setTone(sample.tone);
+        setDescription('');
+        setError(null);
+        setIsSampleModalOpen(false);
     };
 
-    const loadSampleStory = () => {
-        const sample = sampleStoryIdeas[Math.floor(Math.random() * sampleStoryIdeas.length)];
+    const handleSelectSampleStory = (sample: SampleStory) => {
         setStoryIdea(sample.idea);
         setStoryboardConfig(sample.config);
+        setStoryboardPanels([]);
+        setError(null);
+        setIsSampleModalOpen(false);
     };
 
     const handleExportProjects = async () => {
@@ -503,7 +523,7 @@ const App: React.FC = () => {
                     {mode === AppMode.DESCRIPTION ? (
                         <>
                             <div className="flex justify-end mb-4 -mt-2">
-                                <button onClick={loadSampleProduct} className="text-xs text-blue-400 hover:underline">
+                                <button onClick={openSampleProductModal} className="text-xs text-blue-400 hover:underline">
                                     Load Sample Product
                                 </button>
                             </div>
@@ -530,7 +550,7 @@ const App: React.FC = () => {
                     ) : (
                          <>
                             <div className="flex justify-end mb-4 -mt-2">
-                                <button onClick={loadSampleStory} className="text-xs text-blue-400 hover:underline">
+                                <button onClick={openSampleStoryModal} className="text-xs text-blue-400 hover:underline">
                                     Load Sample Story
                                 </button>
                             </div>
@@ -628,6 +648,16 @@ const App: React.FC = () => {
                 onDelete={handleDeleteProject}
                 onExport={handleExportProjects}
                 onImport={handleImportProjects}
+            />
+
+            <SampleGalleryModal
+                isOpen={isSampleModalOpen}
+                onClose={() => setIsSampleModalOpen(false)}
+                type={sampleModalType}
+                products={sampleProducts}
+                stories={sampleStoryIdeas}
+                onSelectProduct={handleSelectSampleProduct}
+                onSelectStory={handleSelectSampleStory}
             />
         </div>
     );
