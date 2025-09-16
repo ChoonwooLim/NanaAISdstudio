@@ -650,7 +650,8 @@ const App: React.FC = () => {
                     {mode === AppMode.STORYBOARD && panels.length > 0 && (
                         <>
                             <StoryboardDisplay 
-                                panels={panels} 
+                                panels={panels}
+                                storyIdea={storyIdea}
                                 onExpandScene={handleOpenExpandScene}
                                 onSceneDurationChange={handleSceneDurationChange}
                                 onRegenerateVideo={handleRegenerateVideo}

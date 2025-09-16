@@ -4,9 +4,15 @@ import LoadingSpinner from './LoadingSpinner';
 import RefreshIcon from './icons/RefreshIcon';
 import { useTranslation } from '../i18n/LanguageContext';
 import DeleteIcon from './icons/DeleteIcon';
+import DownloadIcon from './icons/DownloadIcon';
+
+// Add declarations for CDN libraries
+declare const jspdf: any;
+declare const html2canvas: any;
 
 interface StoryboardDisplayProps {
     panels: StoryboardPanel[];
+    storyIdea: string;
     onExpandScene: (sceneDescription: string, index: number) => void;
     onSceneDurationChange: (index: number, duration: number) => void;
     onRegenerateVideo: (index: number) => void;
@@ -15,13 +21,107 @@ interface StoryboardDisplayProps {
     isGeneratingImages: boolean;
 }
 
-const StoryboardDisplay: React.FC<StoryboardDisplayProps> = ({ panels, onExpandScene, onSceneDurationChange, onRegenerateVideo, onRegenerateImage, onDeletePanel, isGeneratingImages }) => {
+const StoryboardDisplay: React.FC<StoryboardDisplayProps> = ({ panels, storyIdea, onExpandScene, onSceneDurationChange, onRegenerateVideo, onRegenerateImage, onDeletePanel, isGeneratingImages }) => {
     const { t } = useTranslation();
+    const [isExportingPdf, setIsExportingPdf] = React.useState(false);
     const currentlyGeneratingIndex = panels.findIndex(p => p.isLoadingImage && !p.imageUrl);
+    const allImagesLoaded = panels.length > 0 && panels.every(p => p.imageUrl && !p.isLoadingImage);
+
+    const handleExportPDF = async () => {
+        if (!allImagesLoaded) {
+            alert("Please wait for all images to generate before exporting.");
+            return;
+        }
+        setIsExportingPdf(true);
+        try {
+            const { jsPDF } = jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4'); // portrait, mm, a4
+            const a4Width = 210;
+            const a4Height = 297;
+            const margin = 15;
+
+            // Create a hidden element for rendering
+            const pdfContainer = document.createElement('div');
+            pdfContainer.style.position = 'absolute';
+            pdfContainer.style.left = '-9999px';
+            pdfContainer.style.width = `${a4Width}mm`;
+            pdfContainer.style.background = '#0f172a'; // bg-slate-900
+            pdfContainer.style.color = 'white';
+            pdfContainer.style.fontFamily = `'Inter', sans-serif`;
+            pdfContainer.style.padding = `${margin}mm`;
+            pdfContainer.style.boxSizing = 'border-box';
+            document.body.appendChild(pdfContainer);
+
+            // --- Title Page ---
+            const escapedStoryIdea = storyIdea.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            pdfContainer.innerHTML = `
+                <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: ${a4Height - (margin * 2)}mm; text-align: center;">
+                    <h1 style="font-size: 24pt; font-weight: bold; margin: 0; color: white;">Storyboard</h1>
+                    <p style="font-size: 14pt; margin-top: 20px; color: #94a3b8;">${escapedStoryIdea}</p>
+                    <p style="font-size: 10pt; color: #64748b; position: absolute; bottom: 30px;">Generated with Artifex.AI Studio Pro</p>
+                </div>
+            `;
+            
+            const titleCanvas = await html2canvas(pdfContainer, { scale: 2, backgroundColor: '#0f172a' });
+            const titleImgData = titleCanvas.toDataURL('image/png');
+            doc.addImage(titleImgData, 'PNG', 0, 0, a4Width, a4Height);
+
+            // --- Panels Pages ---
+            const panelsPerPage = 2;
+            for (let i = 0; i < panels.length; i += panelsPerPage) {
+                const pagePanels = panels.slice(i, i + panelsPerPage);
+                
+                pdfContainer.innerHTML = pagePanels.map((panel, index) => {
+                    const escapedDescription = panel.description.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                    return `
+                    <div style="margin-bottom: 15mm; height: ${((a4Height - (margin*2))/panelsPerPage) - 7.5}mm; display: flex; flex-direction: column;">
+                        <h2 style="font-size: 12pt; font-weight: 600; margin-bottom: 8px; color: white;">Scene ${i + index + 1}</h2>
+                        ${panel.imageUrl && panel.imageUrl.startsWith('data') ? `<img src="${panel.imageUrl}" style="width: 100%; height: auto; object-fit: cover; aspect-ratio: 16/9; border-radius: 8px; margin-bottom: 8px;" />` : `<div style="width: 100%; aspect-ratio: 16/9; background: #1e293b; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 10pt; color: #94a3b8; margin-bottom: 8px;">No Image</div>`}
+                        <p style="font-size: 9pt; color: #cbd5e1; line-height: 1.5; white-space: pre-wrap;">${escapedDescription}</p>
+                    </div>
+                `}).join('');
+
+                doc.addPage();
+                const panelCanvas = await html2canvas(pdfContainer, { scale: 2, backgroundColor: '#0f172a' });
+                const panelImgData = panelCanvas.toDataURL('image/png');
+                doc.addImage(panelImgData, 'PNG', 0, 0, a4Width, a4Height);
+            }
+
+            // --- Cleanup and Save ---
+            document.body.removeChild(pdfContainer);
+            const safeTitle = storyIdea.substring(0, 20).replace(/[^a-z0-9]/gi, '_').toLowerCase();
+            doc.save(`storyboard-${safeTitle || 'project'}.pdf`);
+            
+        } catch (e) {
+            console.error("Failed to export PDF:", e);
+            alert("Sorry, there was an error creating the PDF.");
+        } finally {
+            setIsExportingPdf(false);
+        }
+    };
     
     return (
         <div className="mt-8">
-            <h2 className="text-xl font-semibold text-slate-200 mb-4">{t('storyboardDisplay.title')}</h2>
+            <div className="flex justify-between items-center mb-4">
+                 <h2 className="text-xl font-semibold text-slate-200">{t('storyboardDisplay.title')}</h2>
+                 <button
+                    onClick={handleExportPDF}
+                    disabled={!allImagesLoaded || isExportingPdf}
+                    className="flex items-center justify-center bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-600 font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    {isExportingPdf ? (
+                        <>
+                           <LoadingSpinner />
+                           <span className="ml-2 text-sm">{t('storyboardDisplay.exportingPdf')}</span>
+                        </>
+                    ) : (
+                        <>
+                            <DownloadIcon className="w-4 h-4" />
+                            <span className="ml-2 text-sm">{t('storyboardDisplay.exportPdf')}</span>
+                        </>
+                    )}
+                </button>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {panels.map((panel, index) => {
                     const canGenerateVideo = !panel.isLoadingImage && panel.imageUrl && panel.imageUrl.startsWith('data:image');

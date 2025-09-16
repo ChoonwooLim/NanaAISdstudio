@@ -78,6 +78,8 @@
   },
   "storyboardDisplay": {
     "title": "생성된 스토리보드",
+    "exportPdf": "PDF로 내보내기",
+    "exportingPdf": "내보내는 중...",
     "drawingPanel": "{{index}}번 패널 그리는 중...",
     "queued": "그리기 대기 중...",
     "imageError": "이미지 생성에 실패했습니다. 다시 시도해주세요.",
@@ -179,6 +181,26 @@
     "theScream": { "title": "절규", "artist": "에드바르 뭉크" },
     "americanGothic": { "title": "아메리칸 고딕", "artist": "그랜트 우드" },
     "theNightWatch": { "title": "야경", "artist": "렘브란트 판 레인" },
-    "luncheonBoatingParty": { "title": "뱃놀이 일행의 오찬", "artist": "피에르 오귀스트 르누아르" }
+    "luncheonBoatingParty": { "title": "뱃놀이 일행의 오찬", "artist": "피에르 오귀스트 르누아르" },
+    "persistenceOfMemory": { "title": "기억의 지속", "artist": "살바도르 달리" },
+    "theKiss": { "title": "키스", "artist": "구스타프 클림트" },
+    "arnolfiniPortrait": { "title": "아르놀피니 부부의 초상", "artist": "얀 반 에이크" },
+    "gardenOfEarthlyDelights": { "title": "세속적인 쾌락의 정원", "artist": "히에로니무스 보스" },
+    "aSundayAfternoon": { "title": "그랑드자트섬의 일요일 오후", "artist": "조르주 쇠라" },
+    "theFightingTemeraire": { "title": "전함 테메레르", "artist": "J. M. W. 터너" },
+    "libertyLeadingThePeople": { "title": "민중을 이끄는 자유의 여신", "artist": "외젠 들라크루아" },
+    "lasMeninas": { "title": "시녀들", "artist": "디에고 벨라스케스" },
+    "theSchoolOfAthens": { "title": "아테네 학당", "artist": "라파엘로" },
+    "nighthawks": { "title": "밤을 새우는 사람들", "artist": "에드워드 호퍼" },
+    "creationOfAdam": { "title": "아담의 창조", "artist": "미켈란젤로" },
+    "whistlersMother": { "title": "회색과 검은색의 편곡 제1번", "artist": "제임스 맥닐 휘슬러" },
+    "impressionSunrise": { "title": "인상, 해돋이", "artist": "클로드 모네" },
+    "theSwing": { "title": "그네", "artist": "장오노레 프라고나르" },
+    "saturnDevouringHisSon": { "title": "아들을 잡아먹는 사투르누스", "artist": "프란시스코 고야" },
+    "anatomyLesson": { "title": "니콜라스 튈프 박사의 해부학 강의", "artist": "렘브란트" },
+    "towerOfBabel": { "title": "바벨탑", "artist": "피터르 브뤼헐 더 아우더" },
+    "sleepingGypsy": { "title": "잠자는 집시", "artist": "앙리 루소" },
+    "bacchus": { "title": "바쿠스", "artist": "카라바조" },
+    "thirdOfMay": { "title": "1808년 5월 3일", "artist": "프란시스코 고야" }
   }
 }

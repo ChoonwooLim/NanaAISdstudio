@@ -430,7 +430,6 @@ export const sampleProductsData: { [key: string]: Localized<SampleProduct> } = {
   },
 };
 
-// FIX: Updated all sample story configurations to use guideline-compliant AI models.
 export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
     'asmr-unboxing': {
         en: {
@@ -937,7 +936,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 visualStyle: VisualStyle.CINEMATIC,
                 videoLength: VideoLength.MEDIUM,
                 mood: Mood.EMOTIONAL,
-                descriptionLanguage: 'Japanese',
+                descriptionLanguage: 'Korean',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: 'veo-2.0-generate-001',
@@ -1001,7 +1000,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 visualStyle: VisualStyle.PHOTOREALISTIC,
                 videoLength: VideoLength.SHORT,
                 mood: Mood.FAST_PACED,
-                descriptionLanguage: 'French',
+                descriptionLanguage: 'Korean',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: 'veo-2.0-generate-001',

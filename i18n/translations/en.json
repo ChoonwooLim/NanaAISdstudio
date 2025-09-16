@@ -78,6 +78,8 @@
   },
   "storyboardDisplay": {
     "title": "Generated Storyboard",
+    "exportPdf": "Export PDF",
+    "exportingPdf": "Exporting...",
     "drawingPanel": "Drawing panel {{index}}...",
     "queued": "Queued for drawing...",
     "imageError": "Image generation failed. Please try regenerating.",
@@ -179,6 +181,26 @@
     "theScream": { "title": "The Scream", "artist": "Edvard Munch" },
     "americanGothic": { "title": "American Gothic", "artist": "Grant Wood" },
     "theNightWatch": { "title": "The Night Watch", "artist": "Rembrandt van Rijn" },
-    "luncheonBoatingParty": { "title": "Luncheon of the Boating Party", "artist": "Pierre-Auguste Renoir" }
+    "luncheonBoatingParty": { "title": "Luncheon of the Boating Party", "artist": "Pierre-Auguste Renoir" },
+    "persistenceOfMemory": { "title": "The Persistence of Memory", "artist": "Salvador Dalí" },
+    "theKiss": { "title": "The Kiss", "artist": "Gustav Klimt" },
+    "arnolfiniPortrait": { "title": "The Arnolfini Portrait", "artist": "Jan van Eyck" },
+    "gardenOfEarthlyDelights": { "title": "The Garden of Earthly Delights", "artist": "Hieronymus Bosch" },
+    "aSundayAfternoon": { "title": "A Sunday Afternoon on the Island of La Grande Jatte", "artist": "Georges Seurat" },
+    "theFightingTemeraire": { "title": "The Fighting Temeraire", "artist": "J. M. W. Turner" },
+    "libertyLeadingThePeople": { "title": "Liberty Leading the People", "artist": "Eugène Delacroix" },
+    "lasMeninas": { "title": "Las Meninas", "artist": "Diego Velázquez" },
+    "theSchoolOfAthens": { "title": "The School of Athens", "artist": "Raphael" },
+    "nighthawks": { "title": "Nighthawks", "artist": "Edward Hopper" },
+    "creationOfAdam": { "title": "The Creation of Adam", "artist": "Michelangelo" },
+    "whistlersMother": { "title": "Arrangement in Grey and Black No. 1", "artist": "James McNeill Whistler" },
+    "impressionSunrise": { "title": "Impression, Sunrise", "artist": "Claude Monet" },
+    "theSwing": { "title": "The Swing", "artist": "Jean-Honoré Fragonard" },
+    "saturnDevouringHisSon": { "title": "Saturn Devouring His Son", "artist": "Francisco Goya" },
+    "anatomyLesson": { "title": "The Anatomy Lesson of Dr. Nicolaes Tulp", "artist": "Rembrandt" },
+    "towerOfBabel": { "title": "The Tower of Babel", "artist": "Pieter Bruegel the Elder" },
+    "sleepingGypsy": { "title": "The Sleeping Gypsy", "artist": "Henri Rousseau" },
+    "bacchus": { "title": "Bacchus", "artist": "Caravaggio" },
+    "thirdOfMay": { "title": "The Third of May 1808", "artist": "Francisco Goya" }
   }
 }
