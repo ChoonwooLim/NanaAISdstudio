@@ -1,4 +1,4 @@
-import { Tone, AspectRatio, VisualStyle, VideoLength, Mood, MediaArtStyle, FamousPainting } from './types';
+import { Tone, AspectRatio, VisualStyle, VideoLength, Mood, MediaArtStyle, FamousPainting, VisualArtEffect } from './types';
 
 export const TONE_OPTIONS: { value: Tone; label: string }[] = [
     { value: Tone.PROFESSIONAL, label: 'Professional' },
@@ -65,6 +65,15 @@ export const MEDIA_ART_STYLE_OPTIONS: { value: MediaArtStyle, labelKey: string, 
     { value: MediaArtStyle.DREAMLIKE, labelKey: 'dreamlike', descriptionKey: 'dreamlikeDesc' },
     { value: MediaArtStyle.ELEMENTAL, labelKey: 'elemental', descriptionKey: 'elementalDesc' },
 ];
+
+export const VISUAL_ART_EFFECT_OPTIONS: { value: VisualArtEffect, labelKey: string, descriptionKey: string }[] = [
+    { value: VisualArtEffect.GLITCH, labelKey: 'glitch', descriptionKey: 'glitchDesc' },
+    { value: VisualArtEffect.KALEIDOSCOPE, labelKey: 'kaleidoscope', descriptionKey: 'kaleidoscopeDesc' },
+    { value: VisualArtEffect.LIQUID_CHROMATIC, labelKey: 'liquidChromatic', descriptionKey: 'liquidChromaticDesc' },
+    { value: VisualArtEffect.PIXEL_SORT, labelKey: 'pixelSort', descriptionKey: 'pixelSortDesc' },
+    { value: VisualArtEffect.ASCII_STORM, labelKey: 'asciiStorm', descriptionKey: 'asciiStormDesc' },
+];
+
 
 export const FAMOUS_PAINTINGS: FamousPainting[] = [
     { 

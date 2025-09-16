@@ -1,95 +1,83 @@
-import React from 'react';
-import LoadingSpinner from './LoadingSpinner';
-import { StoryboardConfig } from '../types';
+import React, { useState } from 'react';
 import StoryboardSettings from './StoryboardSettings';
+import { StoryboardConfig } from '../types';
+import LoadingSpinner from './LoadingSpinner';
 import { useTranslation } from '../i18n/LanguageContext';
-import SaveIcon from './icons/SaveIcon';
-import DownloadIcon from './icons/DownloadIcon';
 
 interface StoryboardInputFormProps {
-    storyIdea: string;
-    setStoryIdea: (value: string) => void;
+    onGenerate: (idea: string, config: StoryboardConfig) => void;
+    isLoading: boolean;
     config: StoryboardConfig;
     setConfig: (config: StoryboardConfig) => void;
-    onSubmit: () => void;
-    isLoading: boolean;
-    storyIdeaIsKorean: boolean;
-    onSave: () => void;
-    onExport: () => void;
-    canSave: boolean;
+    onShowSampleGallery: () => void;
 }
 
-const StoryboardInputForm: React.FC<StoryboardInputFormProps> = ({
-    storyIdea,
-    setStoryIdea,
-    config,
-    setConfig,
-    onSubmit,
-    isLoading,
-    storyIdeaIsKorean,
-    onSave,
-    onExport,
-    canSave,
-}) => {
+const StoryboardInputForm: React.FC<StoryboardInputFormProps> = ({ onGenerate, isLoading, config, setConfig, onShowSampleGallery }) => {
     const { t } = useTranslation();
+    const [idea, setIdea] = useState('');
+    const [showSettings, setShowSettings] = useState(false);
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (idea.trim()) {
+            onGenerate(idea, config);
+        }
+    };
+    
     return (
-        <form onSubmit={(e) => { e.preventDefault(); onSubmit(); }} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-                <label htmlFor="storyIdea" className="block text-sm font-medium text-slate-300 mb-2">
-                    {t('storyboardForm.storyIdea')} <span className="text-red-400">*</span>
+                <label htmlFor="story-idea" className="block text-sm font-medium text-slate-300 mb-2">
+                    {t('storyboardForm.ideaLabel')}
                 </label>
                 <textarea
-                    id="storyIdea"
+                    id="story-idea"
                     rows={4}
-                    value={storyIdea}
-                    onChange={(e) => setStoryIdea(e.target.value)}
-                    placeholder={t('storyboardForm.storyIdeaPlaceholder')}
-                    required
-                    className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                ></textarea>
-                 {storyIdeaIsKorean && <p className="text-xs text-cyan-400 mt-1">{t('common.koreanDetectedIdea')}</p>}
-                <p className="text-xs text-slate-500 mt-1">{t('storyboardForm.storyIdeaHint')}</p>
+                    value={idea}
+                    onChange={(e) => setIdea(e.target.value)}
+                    placeholder={t('storyboardForm.ideaPlaceholder')}
+                    className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
             </div>
             
-            <StoryboardSettings config={config} setConfig={setConfig} />
+            <div className="flex justify-between items-center">
+                <button
+                    type="button"
+                    onClick={() => setShowSettings(!showSettings)}
+                    className="text-sm text-blue-400 hover:text-blue-300"
+                >
+                    {showSettings ? t('storyboardForm.hideSettings') : t('storyboardForm.showSettings')}
+                </button>
+            </div>
 
-            <div className="pt-2 flex items-center gap-4">
+            {showSettings && (
+                <div className="animate-fade-in">
+                    <StoryboardSettings config={config} setConfig={setConfig} />
+                </div>
+            )}
+            
+            <div className="pt-2 flex flex-col sm:flex-row gap-4">
                 <button
                     type="submit"
-                    disabled={isLoading}
-                    className="w-full flex items-center justify-center bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
+                    disabled={isLoading || !idea.trim()}
+                    className="w-full sm:w-auto flex-grow flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
                 >
                     {isLoading ? (
                         <>
-                            <LoadingSpinner />
-                            <span className="ml-2">{t('storyboardForm.loadingMessage')}</span>
+                           <LoadingSpinner />
+                           <span className="ml-2">{t('storyboardForm.generating')}</span>
                         </>
                     ) : (
-                        t('storyboardForm.generateButton')
+                       t('storyboardForm.generateButton')
                     )}
                 </button>
-                <div className="flex-shrink-0 flex items-center gap-2">
-                    <button
-                        type="button"
-                        onClick={onSave}
-                        disabled={!canSave}
-                        className="flex items-center justify-center bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-600 font-medium py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        title={t('tooltips.saveToGallery')}
-                    >
-                        <SaveIcon className="w-5 h-5" />
-                        <span className="hidden sm:inline ml-2">{t('common.saveToGallery')}</span>
-                    </button>
-                    <button
-                        type="button"
-                        onClick={onExport}
-                        disabled={!canSave}
-                        className="flex items-center justify-center bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-600 font-medium py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        title={t('tooltips.exportProject')}
-                    >
-                        <DownloadIcon className="w-5 h-5" />
-                        <span className="hidden sm:inline ml-2">{t('common.export')}</span>
-                    </button>
-                </div>
+                 <button
+                    type="button"
+                    onClick={onShowSampleGallery}
+                    className="w-full sm:w-auto bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-600 font-medium py-3 px-6 rounded-lg transition-colors"
+                >
+                    {t('storyboardForm.loadSample')}
+                </button>
             </div>
         </form>
     );
