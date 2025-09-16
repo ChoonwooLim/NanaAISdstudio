@@ -1,11 +1,11 @@
 import React from 'react';
 import { useTranslation } from '../i18n/LanguageContext';
 import UploadIcon from './icons/UploadIcon';
-// FIX: Corrected the import to use the existing 'MediaArtSourceImage' type as suggested by the error.
+// Corrected: Import the existing 'MediaArtSourceImage' type to resolve type errors.
 import { MediaArtSourceImage } from '../types';
 
 interface ImageUploaderProps {
-    // FIX: Updated the type to 'MediaArtSourceImage'.
+    // Corrected: Updated the prop type to 'MediaArtSourceImage'.
     onImageSelect: (image: MediaArtSourceImage) => void;
 }
 
@@ -17,7 +17,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelect }) => {
         if (file) {
             const reader = new FileReader();
             reader.onloadend = () => {
-                // FIX: Updated the object to match the 'MediaArtSourceImage' interface.
+                // Corrected: Ensure the created object matches the 'MediaArtSourceImage' interface.
                 onImageSelect({
                     type: 'upload',
                     url: reader.result as string,

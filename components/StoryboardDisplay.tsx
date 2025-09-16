@@ -8,7 +8,7 @@ import DownloadIcon from './icons/DownloadIcon';
 
 // Add declarations for window-loaded scripts to satisfy TypeScript
 declare const html2canvas: any;
-// FIX: Add declaration for jspdf on the window object to resolve TypeScript error.
+// Corrected: Add declaration for jspdf on the window object to resolve TypeScript error.
 declare global {
     interface Window {
         jspdf: any;

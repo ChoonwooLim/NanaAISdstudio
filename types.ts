@@ -1,7 +1,6 @@
 import { Modality } from "@google/genai";
 
-// FIX: Define all necessary types for the application.
-
+// Defines all necessary types for the application.
 export enum AppMode {
     DESCRIPTION = 'DESCRIPTION',
     STORYBOARD = 'STORYBOARD',

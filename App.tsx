@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -334,7 +335,6 @@ const App: React.FC = () => {
         }
     };
     
-    // FIX: Add handler for regenerating a single media art image panel.
     const handleRegenerateMediaArtImage = async (index: number) => {
         const panels = [...mediaArtState.panels];
         if (!panels[index]) return;
@@ -429,20 +429,16 @@ const App: React.FC = () => {
                         )}
                         {mode === AppMode.MEDIA_ART && (
                             <div className="max-w-5xl mx-auto">
+                                {/* FIX: Removed unused props (`onGenerateClip`, `onGenerateAllClips`, `onSave`, `onExport`, `canSave`) to align with the component's defined interface and fix the type error. */}
                                 <MediaArtGenerator 
                                     state={mediaArtState}
                                     setState={setMediaArtState}
                                     onOpenImageSelector={() => setIsImageSelectorOpen(true)}
                                     onGenerateScenes={handleGenerateMediaArtScenes}
-                                    onGenerateClip={() => {}} // Simplified for now
-                                    onGenerateAllClips={() => {}} // Simplified for now
                                     onRegenerateImage={handleRegenerateMediaArtImage}
                                     onDeletePanel={(index) => setMediaArtState(s => ({ ...s, panels: s.panels.filter((_, i) => i !== index)}))}
                                     isLoading={isGeneratingMediaArtScenes}
                                     error={mediaArtError}
-                                    onSave={() => {}}
-                                    onExport={() => {}}
-                                    canSave={mediaArtState.panels.length > 0}
                                 />
                             </div>
                         )}

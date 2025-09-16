@@ -1,8 +1,8 @@
 import { GoogleGenAI, Type, GenerateContentResponse, Modality } from "@google/genai";
 import { AspectRatio, DescriptionConfig, StoryboardConfig, VisualStyle, MediaArtStyle, VisualArtEffect, MediaArtSourceImage, MediaArtStyleParams, DataCompositionParams, DigitalNatureParams, AiDataSculptureParams, LightAndSpaceParams, KineticMirrorsParams, GenerativeBotanyParams, QuantumPhantasmParams, ArchitecturalProjectionParams } from "../types";
 
-// FIX: Initialize GoogleGenAI with a named apiKey parameter
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+// Corrected: Initialize GoogleGenAI with a named apiKey parameter as per the guidelines.
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 const aspectRatiosMap: Record<AspectRatio, string> = {
     [AspectRatio.LANDSCAPE]: "16:9",
@@ -58,12 +58,12 @@ export const generateDescription = async (config: DescriptionConfig): Promise<st
     
     The description should be concise, engaging, and highlight the key benefits for the target audience. Do not include a title or header.`;
     
-    // FIX: Use ai.models.generateContent as per guidelines
+    // Corrected: Use ai.models.generateContent as per guidelines
     const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: prompt,
     });
-    // FIX: Access text directly from response.text property
+    // Corrected: Access text directly from response.text property
     return response.text;
 };
 
@@ -88,7 +88,7 @@ export const generateStoryboard = async (idea: string, config: StoryboardConfig)
     
     Return the result as a JSON array of objects.`;
 
-    // FIX: Use ai.models.generateContent with responseSchema for JSON output
+    // Corrected: Use ai.models.generateContent with responseSchema for JSON output
     const response = await ai.models.generateContent({
         model: config.textModel,
         contents: prompt,
@@ -149,7 +149,7 @@ export const generateImageForPanel = async (description: string, config: { image
     const visualStylePrompt = config.visualStyle === VisualStyle.PHOTOREALISTIC ? 'photorealistic, cinematic' : config.visualStyle;
     const prompt = `${description}, ${visualStylePrompt} style, high detail`;
 
-    // FIX: Use ai.models.generateImages for image generation
+    // Corrected: Use ai.models.generateImages for image generation as per guidelines.
     const response = await ai.models.generateImages({
         model: config.imageModel,
         prompt,
@@ -163,12 +163,12 @@ export const generateImageForPanel = async (description: string, config: { image
     if (!response.generatedImages || response.generatedImages.length === 0) {
         throw new Error("Image generation failed, no images returned.");
     }
-    // FIX: Access generated image bytes from the correct response property
+    // Corrected: Access generated image bytes from the correct response property.
     return response.generatedImages[0].image.imageBytes;
 };
 
 export const generateVideoForPanel = async (prompt: string, imageBase64: string, videoModel: string): Promise<string> => {
-    // FIX: Use ai.models.generateVideos for video generation
+    // Corrected: Use ai.models.generateVideos for video generation as per guidelines.
     let operation = await ai.models.generateVideos({
         model: videoModel,
         prompt: prompt,
@@ -181,20 +181,20 @@ export const generateVideoForPanel = async (prompt: string, imageBase64: string,
         }
     });
 
-    // FIX: Implement polling logic for long-running video operations
+    // Corrected: Implement polling logic for long-running video operations.
     while (!operation.done) {
         await new Promise(resolve => setTimeout(resolve, 10000)); // Poll every 10 seconds
-        // FIX: Use correct operation polling method
+        // Corrected: Use correct operation polling method as per guidelines.
         operation = await ai.operations.getVideosOperation({ operation: operation });
     }
 
-    // FIX: Access download URI from the operation response
+    // Corrected: Access download URI from the operation response.
     const downloadLink = operation.response?.generatedVideos?.[0]?.video?.uri;
     if (!downloadLink) {
         throw new Error("Video generation completed, but no download link was found.");
     }
     
-    // FIX: Append API key to the download link before fetching
+    // Corrected: Append API key to the download link before fetching as required by the API.
     const videoResponse = await fetch(`${downloadLink}&key=${process.env.API_KEY}`);
     if (!videoResponse.ok) {
         throw new Error(`Failed to download video: ${videoResponse.statusText}`);
