@@ -1,379 +1,300 @@
 {
-    "header": {
-        "title": "Artifex.AI Studio Pro",
-        "subtitle": "AI 기반 크리에이티브 스위트로, 매력적인 제품 설명을 생성하고 상세한 스토리보드와 비디오 클립으로 아이디어를 시각화하세요.",
-        "newProject": "새로 만들기",
-        "importProject": "가져오기",
-        "openGallery": "갤러리"
-    },
-    "tooltips": {
-        "newProject": "새로운 빈 프로젝트 시작하기",
-        "importProjectFile": "프로젝트 파일 가져오기",
-        "openGallery": "프로젝트 갤러리 열기",
-        "saveProject": "현재 프로젝트 저장하기",
-        "exportProject": "현재 프로젝트를 파일로 내보내기"
-    },
-    "modeSwitcher": {
-        "productDescription": "제품 설명 생성기",
-        "storyboard": "스토리보드 생성기",
-        "mediaArt": "미디어 아트 생성기",
-        "visualArt": "비주얼 아트 생성기"
-    },
-    "inputForm": {
-        "productName": "제품명",
-        "productNamePlaceholder": "예: 네뷸라 스마트 프로젝터",
-        "targetAudience": "타겟 고객",
-        "targetAudiencePlaceholder": "예: 영화 애호가, 가족",
-        "keyFeatures": "핵심 기능",
-        "keyFeaturesPlaceholder": "예: 4K 해상도, 5시간 배터리, 휴대 가능",
-        "tone": "글의 톤",
-        "language": "출력 언어",
-        "generateButton": "설명 생성하기",
-        "generating": "생성 중...",
-        "loadSample": "샘플 불러오기"
-    },
-    "descriptionDisplay": {
-        "title": "생성된 설명",
-        "copyToClipboard": "클립보드에 복사"
-    },
-    "storyboardForm": {
-        "ideaLabel": "스토리 아이디어를 설명해주세요",
-        "ideaPlaceholder": "예: 미래형 비행 자동차에 대한 웅장한 시네마틱 트레일러",
-        "showSettings": "고급 설정 보기",
-        "hideSettings": "고급 설정 숨기기",
-        "generateButton": "스토리보드 생성하기",
-        "generating": "스토리 생성 중...",
-        "loadSample": "샘플 아이디어 불러오기"
-    },
-    "storyboardSettings": {
-        "title": "스토리보드 설정",
-        "storySection": "스토리 & 텍스트",
-        "scenes": "장면 수",
-        "moodPacing": "분위기",
-        "pacing": "비디오 속도",
-        "descriptionLanguage": "설명 언어",
-        "textModel": "텍스트 모델",
-        "imageSection": "이미지 & 비주얼",
-        "aspectRatio": "화면 비율",
-        "visualStyle": "비주얼 스타일",
-        "imageModel": "이미지 모델",
-        "videoSection": "비디오",
-        "videoModel": "비디오 모델",
-        "videoNote": "각 패널의 비디오 생성은 이미지가 생성된 후 수동으로 시작됩니다."
-    },
-    "storyboardDisplay": {
-        "title": "나의 스토리보드",
-        "drawingPanel": "{{index}}번 패널 그리는 중...",
-        "queued": "생성 대기 중...",
-        "imageError": "이미지 생성에 실패했습니다.",
-        "quotaErrorTitle": "요청 한도 도달",
-        "quotaError": "이미지 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.",
-        "quotaErrorCheckPlan": "{{link}}에서 플랜을 확인하세요.",
-        "googleAIStudio": "Google AI Studio",
-        "duration": "길이 (초)",
-        "regenerateImage": "이미지 재생성",
-        "deletePanel": "패널 삭제",
-        "expandScene": "장면 확장",
-        "videoClip": "비디오 클립",
-        "generateClipTitle": "이 장면을 위한 짧은 비디오 클립을 생성합니다.",
-        "generateClip": "클립 생성",
-        "regenerateVideo": "비디오 재생성",
-        "generatingClip": "클립 생성 중...",
-        "generatingClipHint": "몇 분 정도 소요될 수 있습니다.",
-        "clipFailed": "클립 생성에 실패했습니다.",
-        "generateClipPrompt": "클립을 생성하여 여기에서 확인하세요.",
-        "playingScene": "장면 {{current}} / {{total}}",
-        "exportPdf": "PDF로 내보내기",
-        "exportingPdf": "내보내는 중..."
-    },
-    "detailedModal": {
-        "title": "장면 확장하기",
-        "originalPrefix": "원본:",
-        "loadingMessage": "3개의 상세 컷을 생성 중입니다...\n잠시만 기다려주세요.",
-        "drawingShot": "{{index}}번 컷 그리는 중...",
-        "saveButton": "저장 및 삽입"
-    },
-    "videoDisplay": {
-        "title": "생성된 비디오 미리보기",
-        "playingScene": "장면 재생 중 {{current}} / {{total}}"
-    },
-    "apiKeyInstructions": {
-        "title": "API 키가 필요합니다",
-        "welcome": "Artifex.AI Studio를 사용하려면 Google Gemini API 키를 제공해야 합니다.",
-        "howTo": "키를 얻는 방법:",
-        "step1": "{{link}}로 이동하여 'API 키 만들기'를 클릭하세요.",
-        "step2": "Secrets (환경 변수) 탭에서 {{apiKey}}라는 새 변수를 만드세요.",
-        "step3": "API 키를 값으로 붙여넣고 저장한 후 이 페이지를 새로고침하세요.",
-        "disclaimer": "API 키는 안전하게 저장되며 브라우저에서 요청하는 데에만 사용됩니다."
-    },
-    "sampleModal": {
-        "productTitle": "샘플 제품 불러오기",
-        "storyTitle": "샘플 스토리 아이디어 불러오기",
-        "productSearchPlaceholder": "제품 검색...",
-        "storySearchPlaceholder": "아이디어 검색...",
-        "noResults": "'{{searchTerm}}'에 대한 결과가 없습니다."
-    },
-    "galleryModal": {
-        "title": "프로젝트 갤러리",
-        "noProjects": "저장된 프로젝트가 없습니다.",
-        "noPreview": "미리보기 없음",
-        "load": "불러오기",
-        "delete": "삭제"
-    },
-    "mediaArt": {
-        "sourceImageTitle": "소스 이미지 선택",
-        "changeImage": "이미지 변경",
-        "selectImageCTA": "시작하려면 이미지를 선택하세요",
-        "selectImageHint": "유명 명화 갤러리에서 선택하거나 직접 업로드하세요.",
-        "styleTitle": "애니메이션 스타일 선택",
-        "paramsTitle": "스타일 변수 조정",
-        "generateScenes": "아트 장면 생성하기",
-        "generating": "아트 생성 중...",
-        "resultsTitle": "생성된 장면",
-        "exportPdf": "PDF로 내보내기",
-        "exportingPdf": "내보내는 중..."
-    },
-    "mediaArtStyles": {
-        "dataComposition": "데이터 구성",
-        "dataCompositionDesc": "데이터 시각화, 글리치, 바이너리 패턴. (료지 이케다 스타일)",
-        "digitalNature": "디지털 자연",
-        "digitalNatureDesc": "상호작용하는 입자 시스템: 꽃, 빛. (팀랩 스타일)",
-        "aiDataSculpture": "AI 데이터 조각",
-        "aiDataSculptureDesc": "유기적인 유체 데이터 시각화. (레픽 아나돌 스타일)",
-        "lightAndSpace": "빛과 공간",
-        "lightAndSpaceDesc": "스트로브, 그리드, 구조적인 빛 패턴. (NONOTAK 스타일)",
-        "kineticMirrors": "키네틱 미러",
-        "kineticMirrorsDesc": "반사되고 분열된 이미지를 사용한 움직이는 조각.",
-        "generativeBotany": "생성적 식물학",
-        "generativeBotanyDesc": "알고리즘으로 성장하는 초현실적인 식물과 꽃.",
-        "quantumPhantasm": "양자 환영",
-        "quantumPhantasmDesc": "양자 물리학에서 영감을 받은 불확실하고 반짝이는 시각 효과.",
-        "architecturalProjection": "건축적 프로젝션",
-        "architecturalProjectionDesc": "해체되고 기하학적 구조에 재투사된 이미지."
-    },
-    "mediaArtParams": {
-        "dataDensity": "데이터 밀도",
-        "glitchIntensity": "글리치 강도",
-        "colorPalette": "색상 팔레트",
-        "particleSystem": "입자 시스템",
-        "interactivity": "상호작용성",
-        "bloomEffect": "블룸 효과",
-        "fluidity": "유동성",
-        "colorScheme": "색상 테마",
-        "complexity": "복잡도",
-        "pattern": "패턴",
-        "speed": "속도",
-        "color": "색상",
-        "fragmentation": "파편화",
-        "motionSpeed": "움직임 속도",
-        "reflection": "반사",
-        "growthSpeed": "성장 속도",
-        "plantType": "식물 유형",
-        "density": "밀도",
-        "particleSize": "입자 크기",
-        "shimmerSpeed": "반짝임 속도",
-        "deconstruction": "해체",
-        "lightSource": "광원",
-        "texture": "질감",
-        "options": {
-            "monochrome": "단색",
-            "binary": "바이너리",
-            "signalNoise": "신호 노이즈",
-            "flowers": "꽃",
-            "butterflies": "나비",
-            "lightTrails": "빛의 궤적",
-            "leaves": "나뭇잎",
-            "nebula": "성운",
-            "oceanic": "바다",
-            "moltenMetal": "녹은 금속",
-            "crystal": "수정",
-            "strobes": "스트로브",
-            "grids": "그리드",
-            "waves": "파도",
-            "beams": "광선",
-            "white": "흰색",
-            "electricBlue": "일렉트릭 블루",
-            "laserRed": "레이저 레드",
-            "sharp": "선명함",
-            "distorted": "왜곡됨",
-            "prismatic": "프리즘",
-            "alienFlora": "외계 식물",
-            "crystalFlowers": "수정 꽃",
-            "glowingFungi": "빛나는 균류",
-            "ethereal": "천상",
-            "iridescent": "무지갯빛",
-            "void": "공허",
-            "internal": "내부",
-            "external": "외부",
-            "volumetric": "볼류메트릭",
-            "wireframe": "와이어프레임",
-            "holographic": "홀로그래픽",
-            "concrete": "콘크리트"
-        }
-    },
-    "imageModal": {
-        "title": "이미지 소스 선택",
-        "fromGallery": "갤러리에서 선택",
-        "uploadImage": "이미지 업로드",
-        "uploadCTA": "이미지를 업로드하려면 클릭하세요",
-        "uploadHint": "최대 4MB의 PNG, JPG, 또는 WEBP 파일"
-    },
-    "visualArt": {
-        "title": "텍스트로 비주얼 아트 생성하기",
-        "textInputLabel": "텍스트 입력",
-        "textInputPlaceholder": "예: 미래는 지금이다",
-        "styleTitle": "시각 효과 선택",
-        "generateButton": "비디오 생성하기",
-        "generating": "생성 중...",
-        "resultTitle": "나의 작품"
-    },
-    "visualArtEffects": {
-        "glitch": "글리치 아트",
-        "kaleidoscope": "만화경",
-        "liquidChromatic": "액체 색수차",
-        "pixelSort": "픽셀 정렬",
-        "asciiStorm": "ASCII 스톰"
-    },
-    "imageUploader": {
-        "cta": "이미지 업로드",
-        "hint": "파일을 드래그 앤 드롭하거나 클릭하여 선택하세요"
-    },
-    "common": {
-        "errorPrefix": "오류:",
-        "save": "저장",
-        "export": "내보내기",
-        "exportAll": "모두 내보내기",
-        "generating": "생성 중...",
-        "regenerate": "재생성"
-    },
-    "errors": {
-        "descriptionGeneration": "설명 생성에 실패했습니다. 다시 시도해주세요.",
-        "storyboardGeneration": "스토리보드 생성에 실패했습니다. 아이디어와 설정을 확인해주세요.",
-        "sceneExpansion": "장면 확장에 실패했습니다. 모델이 바쁠 수 있습니다.",
-        "videoGeneration": "비디오 생성에 실패했습니다. 이 기능은 실험적이며 실패할 수 있습니다.",
-        "mediaArtGeneration": "미디어 아트 장면 생성에 실패했습니다. 다시 시도해주세요.",
-        "visualArtGeneration": "비주얼 아트 생성에 실패했습니다. 다시 시도해주세요."
-    },
-    "paintings": {
-        "starryNight": {
-            "title": "별이 빛나는 밤",
-            "artist": "빈센트 반 고흐"
-        },
-        "greatWave": {
-            "title": "가나가와 해변의 높은 파도 아래",
-            "artist": "가쓰시카 호쿠사이"
-        },
-        "pearlEarring": {
-            "title": "진주 귀걸이를 한 소녀",
-            "artist": "요하네스 페르메이르"
-        },
-        "monaLisa": {
-            "title": "모나리자",
-            "artist": "레오나르도 다빈치"
-        },
-        "wandererSeaFog": {
-            "title": "안개 바다 위의 방랑자",
-            "artist": "카스파르 다비트 프리드리히"
-        },
-        "birthOfVenus": {
-            "title": "비너스의 탄생",
-            "artist": "산드로 보티첼리"
-        },
-        "theScream": {
-            "title": "절규",
-            "artist": "에드바르 뭉크"
-        },
-        "americanGothic": {
-            "title": "아메리칸 고딕",
-            "artist": "그랜트 우드"
-        },
-        "theNightWatch": {
-            "title": "야경",
-            "artist": "렘브란트 판 레인"
-        },
-        "luncheonBoatingParty": {
-            "title": "뱃놀이하는 사람들의 점심",
-            "artist": "피에르 오귀스트 르누아르"
-        },
-        "persistenceOfMemory": {
-            "title": "기억의 지속",
-            "artist": "살바도르 달리"
-        },
-        "theKiss": {
-            "title": "입맞춤",
-            "artist": "구스타프 클림트"
-        },
-        "arnolfiniPortrait": {
-            "title": "아르놀피니 부부의 초상",
-            "artist": "얀 판 에이크"
-        },
-        "gardenOfEarthlyDelights": {
-            "title": "세속적인 쾌락의 정원",
-            "artist": "히에로니무스 보스"
-        },
-        "aSundayAfternoon": {
-            "title": "그랑드자트섬의 일요일 오후",
-            "artist": "조르주 쇠라"
-        },
-        "theFightingTemeraire": {
-            "title": "전함 테메레르",
-            "artist": "J. M. W. 터너"
-        },
-        "libertyLeadingThePeople": {
-            "title": "민중을 이끄는 자유의 여신",
-            "artist": "외젠 들라크루아"
-        },
-        "lasMeninas": {
-            "title": "시녀들",
-            "artist": "디에고 벨라스케스"
-        },
-        "theSchoolOfAthens": {
-            "title": "아테네 학당",
-            "artist": "라파엘로"
-        },
-        "nighthawks": {
-            "title": "밤을 지새우는 사람들",
-            "artist": "에드워드 호퍼"
-        },
-        "creationOfAdam": {
-            "title": "아담의 창조",
-            "artist": "미켈란젤로"
-        },
-        "whistlersMother": {
-            "title": "휘슬러의 어머니",
-            "artist": "제임스 맥닐 휘슬러"
-        },
-        "impressionSunrise": {
-            "title": "인상, 해돋이",
-            "artist": "클로드 모네"
-        },
-        "theSwing": {
-            "title": "그네",
-            "artist": "장 오노레 프라고나르"
-        },
-        "saturnDevouringHisSon": {
-            "title": "아들을 잡아먹는 사투르누스",
-            "artist": "프란시스코 고야"
-        },
-        "anatomyLesson": {
-            "title": "니콜라스 튈프 박사의 해부학 강의",
-            "artist": "렘브란트 판 레인"
-        },
-        "towerOfBabel": {
-            "title": "바벨탑",
-            "artist": "피터르 브뤼헐 더 아우더"
-        },
-        "sleepingGypsy": {
-            "title": "잠자는 집시",
-            "artist": "앙리 루소"
-        },
-        "bacchus": {
-            "title": "바쿠스",
-            "artist": "카라바조"
-        },
-        "thirdOfMay": {
-            "title": "1808년 5월 3일",
-            "artist": "프란시스코 고야"
-        }
+  "header": {
+    "title": "Artifex.AI Studio Pro",
+    "subtitle": "AI 기반 크리에이티브 스위트로, 매력적인 제품 설명을 생성하고 상세한 스토리보드와 비디오 클립으로 아이디어를 시각화하세요.",
+    "newProject": "새로 만들기",
+    "importProject": "가져오기",
+    "openGallery": "갤러리"
+  },
+  "tooltips": {
+    "newProject": "새로운 빈 프로젝트 시작하기",
+    "importProjectFile": "프로젝트 파일 가져오기",
+    "openGallery": "프로젝트 갤러리 열기",
+    "regenerateImage": "이미지 재생성",
+    "generateVideo": "비디오 클립 생성",
+    "expandScene": "장면을 더 많은 샷으로 확장",
+    "deletePanel": "패널 삭제"
+  },
+  "modeSwitcher": {
+    "productDescription": "제품 설명",
+    "storyboard": "스토리보드 생성기",
+    "mediaArt": "미디어 아트 생성기",
+    "visualArt": "비주얼 아트 생성기"
+  },
+  "inputForm": {
+    "productName": "제품명",
+    "productNamePlaceholder": "예: 네뷸라 스마트 프로젝터",
+    "targetAudience": "타겟 고객",
+    "targetAudiencePlaceholder": "예: 영화 애호가, 가족",
+    "keyFeatures": "핵심 기능 / 키워드",
+    "keyFeaturesPlaceholder": "예: 4K 해상도, 휴대성, 긴 배터리 수명...",
+    "tone": "글의 톤",
+    "language": "출력 언어",
+    "generating": "생성 중...",
+    "generateButton": "설명 생성하기",
+    "loadSample": "샘플 불러오기"
+  },
+  "descriptionDisplay": {
+    "title": "생성된 설명",
+    "copyToClipboard": "클립보드에 복사"
+  },
+  "storyboardForm": {
+    "ideaLabel": "스토리 아이디어를 설명해주세요",
+    "ideaPlaceholder": "예: 사이버펑크 도시에서 개인 비행 자동차의 시네마틱 트레일러.",
+    "hideSettings": "고급 설정 숨기기",
+    "showSettings": "고급 설정 보기",
+    "generating": "스토리보드 생성 중...",
+    "generateButton": "스토리보드 생성하기",
+    "loadSample": "샘플 아이디어 불러오기"
+  },
+  "storyboardSettings": {
+    "title": "고급 설정",
+    "storySection": "스토리 및 텍스트",
+    "scenes": "장면 수",
+    "moodPacing": "분위기",
+    "pacing": "속도",
+    "descriptionLanguage": "설명 언어",
+    "textModel": "텍스트 모델",
+    "imageSection": "이미지 생성",
+    "aspectRatio": "화면 비율",
+    "visualStyle": "비주얼 스타일",
+    "imageModel": "이미지 모델",
+    "videoSection": "비디오 생성",
+    "videoModel": "비디오 모델",
+    "videoNote": "비디오 생성은 실험적인 기능이며 클립당 몇 분이 소요될 수 있습니다."
+  },
+  "storyboardDisplay": {
+    "title": "생성된 스토리보드",
+    "scenes": "{{count}}개 장면",
+    "estimatedLength": "예상 길이: {{duration}}초",
+    "generatingScenes": "장면 설명을 생성 중입니다...\n잠시만 기다려주세요.",
+    "scene": "장면 #{{index}}",
+    "generatingImage": "이미지 생성 중...",
+    "imageError": "이미지 생성에 실패했습니다.",
+    "quotaErrorTitle": "할당량 도달",
+    "checkPlan": "플랜을 확인하거나 나중에 다시 시도해주세요.",
+    "generatingClip": "클립 생성 중...",
+    "generatingClipHint": "몇 분 정도 소요될 수 있습니다.",
+    "videoErrorTitle": "비디오 오류",
+    "videoError": "비디오 생성에 실패했습니다.",
+    "duration": "길이",
+    "googleAIStudio": "Google AI Studio"
+  },
+  "detailedModal": {
+    "title": "장면 확장",
+    "originalPrefix": "원본:",
+    "loadingMessage": "새로운 상세 샷과 이미지를 생성 중입니다...",
+    "drawingShot": "샷 #{{index}} 그리는 중...",
+    "saveButton": "변경사항 저장"
+  },
+  "videoDisplay": {
+    "title": "생성된 비디오 미리보기",
+    "playingScene": "장면 {{current}} / {{total}} 재생 중"
+  },
+  "apiKeyInstructions": {
+    "title": "API 키가 필요합니다",
+    "welcome": "Artifex.AI Studio에 오신 것을 환영합니다! 시작하려면 Google Gemini API 키를 설정해야 합니다.",
+    "howTo": "API 키를 받고 설정하는 방법:",
+    "step1": "{{link}}로 이동하여 API 키를 생성하세요.",
+    "step2": "프로젝트 환경에서 {{apiKey}} 변수를 새로 생성한 키로 설정하세요.",
+    "step3": "이 페이지를 새로고침하세요. 애플리케이션이 자동으로 키를 인식합니다.",
+    "disclaimer": "API 키는 브라우저에 로컬로 저장되며 저희 서버로 전송되지 않습니다.",
+    "googleAIStudio": "Google AI Studio"
+  },
+  "sampleModal": {
+    "productTitle": "샘플 제품 불러오기",
+    "storyTitle": "샘플 스토리 아이디어 불러오기",
+    "productSearchPlaceholder": "제품명 또는 기능으로 검색...",
+    "storySearchPlaceholder": "키워드로 아이디어 검색...",
+    "noResults": "\"{{searchTerm}}\"에 대한 결과가 없습니다."
+  },
+  "galleryModal": {
+    "title": "프로젝트 갤러리",
+    "noProjects": "저장된 프로젝트가 아직 없습니다.",
+    "noPreview": "미리보기 없음",
+    "load": "불러오기",
+    "delete": "삭제"
+  },
+  "mediaArt": {
+    "sourceImageTitle": "1. 소스 이미지 선택",
+    "changeImage": "이미지 변경",
+    "selectImageCTA": "시작하려면 이미지 선택",
+    "selectImageHint": "직접 업로드하거나 명화를 선택하세요.",
+    "styleTitle": "2. 애니메이션 스타일 선택",
+    "paramsTitle": "3. 스타일 변수 조정",
+    "generateScenes": "아트 장면 생성하기",
+    "generating": "생성 중...",
+    "resultsTitle": "4. 애니메이션 및 다듬기",
+    "exportPdf": "PDF로 내보내기",
+    "exportingPdf": "내보내는 중..."
+  },
+  "mediaArtStyles": {
+    "dataComposition": "데이터 구성",
+    "dataCompositionDesc": "데이터 시각화, 글리치, 바이너리 패턴. (료지 이케다 스타일)",
+    "digitalNature": "디지털 자연",
+    "digitalNatureDesc": "상호작용하는 입자 시스템: 꽃, 빛. (팀랩 스타일)",
+    "aiDataSculpture": "AI 데이터 조각",
+    "aiDataSculptureDesc": "유기적인 유체 데이터 시각화. (레픽 아나돌 스타일)",
+    "lightAndSpace": "빛과 공간",
+    "lightAndSpaceDesc": "스트로브, 그리드, 구조적인 빛 패턴. (NONOTAK 스타일)",
+    "kineticMirrors": "키네틱 미러",
+    "kineticMirrorsDesc": "반사되고 분열된 이미지를 활용한 움직이는 조각.",
+    "generativeBotany": "생성적 식물학",
+    "generativeBotanyDesc": "알고리즘으로 생성된 초현실적인 식물과 꽃.",
+    "quantumPhantasm": "양자 환영",
+    "quantumPhantasmDesc": "양자 물리학에서 영감을 받은 불안정하고 반짝이는 시각 효과.",
+    "architecturalProjection": "건축적 프로젝션",
+    "architecturalProjectionDesc": "복잡한 기하학적 구조 위에 해체되고 투사된 이미지."
+  },
+  "mediaArtParams": {
+    "dataDensity": "데이터 밀도",
+    "glitchIntensity": "글리치 강도",
+    "colorPalette": "색상 팔레트",
+    "interactivity": "상호작용성",
+    "bloomEffect": "블룸 효과",
+    "particleSystem": "입자 시스템",
+    "fluidity": "유동성",
+    "complexity": "복잡성",
+    "colorScheme": "색상 테마",
+    "speed": "속도",
+    "pattern": "패턴",
+    "color": "색상",
+    "fragmentation": "파편화",
+    "motionSpeed": "움직임 속도",
+    "reflection": "반사",
+    "growthSpeed": "성장 속도",
+    "density": "밀도",
+    "plantType": "식물 유형",
+    "particleSize": "입자 크기",
+    "shimmerSpeed": "반짝임 속도",
+    "deconstruction": "해체",
+    "lightSource": "광원",
+    "texture": "질감",
+    "options": {
+      "dataCompositionPalettes": {
+        "monochrome": "모노크롬",
+        "binary": "바이너리 (녹색/검정)",
+        "signal_noise": "신호 노이즈"
+      },
+      "digitalNatureSystems": {
+        "flowers": "꽃",
+        "butterflies": "나비",
+        "light_trails": "빛의 궤적",
+        "leaves": "나뭇잎"
+      },
+      "aiDataSculptureSchemes": {
+        "nebula": "성운",
+        "oceanic": "바다",
+        "molten_metal": "녹은 금속",
+        "crystal": "크리스탈"
+      },
+      "lightAndSpacePatterns": {
+        "strobes": "스트로브",
+        "grids": "그리드",
+        "waves": "파도",
+        "beams": "광선"
+      },
+      "lightAndSpaceColors": {
+        "white": "흰색",
+        "electric_blue": "일렉트릭 블루",
+        "laser_red": "레이저 레드"
+      },
+      "kineticMirrorsReflections": {
+        "sharp": "선명하게",
+        "distorted": "왜곡되게",
+        "prismatic": "프리즘처럼"
+      },
+      "generativeBotanyTypes": {
+        "alien_flora": "외계 식물",
+        "crystal_flowers": "수정 꽃",
+        "glowing_fungi": "빛나는 균류"
+      },
+      "quantumPhantasmPalettes": {
+        "ethereal": "천상",
+        "iridescent": "무지갯빛",
+        "void": "공허"
+      },
+      "architecturalProjectionLightSources": {
+        "internal": "내부",
+        "external": "외부",
+        "volumetric": "볼륨"
+      },
+      "architecturalProjectionTextures": {
+        "wireframe": "와이어프레임",
+        "holographic": "홀로그램",
+        "concrete": "콘크리트"
+      }
     }
+  },
+  "imageModal": {
+    "title": "소스 이미지 선택",
+    "fromGallery": "갤러리에서 선택",
+    "uploadImage": "이미지 업로드",
+    "uploadCTA": "클릭하여 이미지 업로드",
+    "uploadHint": "PNG, JPG, 또는 WEBP. 최대 5MB."
+  },
+  "visualArt": {
+    "title": "비주얼 아트 생성기",
+    "textInputLabel": "애니메이션에 사용할 텍스트 입력",
+    "textInputPlaceholder": "여기에 텍스트를 입력하세요...",
+    "styleTitle": "시각 효과 선택",
+    "generateButton": "비디오 생성하기",
+    "generating": "생성 중...",
+    "resultTitle": "생성된 비디오"
+  },
+  "visualArtEffects": {
+    "glitch": "글리치 아트",
+    "kaleidoscope": "만화경",
+    "liquidChromatic": "액체 색수차",
+    "pixelSort": "픽셀 정렬",
+    "asciiStorm": "아스키 스톰"
+  },
+  "imageUploader": {
+    "cta": "클릭하여 이미지 업로드",
+    "hint": "PNG, JPG, 또는 WEBP. 최대 5MB."
+  },
+  "common": {
+    "errorPrefix": "오류:",
+    "exportAll": "모두 내보내기"
+  },
+  "paintings": {
+    "starryNight": { "title": "별이 빛나는 밤", "artist": "빈센트 반 고흐" },
+    "greatWave": { "title": "가나가와 해변의 높은 파도 아래", "artist": "호쿠사이" },
+    "pearlEarring": { "title": "진주 귀걸이를 한 소녀", "artist": "요하네스 페르메이르" },
+    "monaLisa": { "title": "모나리자", "artist": "레오나르도 다 빈치" },
+    "wandererSeaFog": { "title": "안개 바다 위의 방랑자", "artist": "카스파르 다비트 프리드리히" },
+    "birthOfVenus": { "title": "비너스의 탄생", "artist": "산드로 보티첼리" },
+    "theScream": { "title": "절규", "artist": "에드바르 뭉크" },
+    "americanGothic": { "title": "아메리칸 고딕", "artist": "그랜트 우드" },
+    "theNightWatch": { "title": "야경", "artist": "렘브란트 판 레인" },
+    "luncheonBoatingParty": { "title": "뱃놀이하는 사람들의 점심", "artist": "피에르 오귀스트 르누아르" },
+    "persistenceOfMemory": { "title": "기억의 지속", "artist": "살바도르 달리" },
+    "theKiss": { "title": "키스", "artist": "구스타프 클림트" },
+    "arnolfiniPortrait": { "title": "아르놀피니 부부의 초상", "artist": "얀 반 에이크" },
+    "gardenOfEarthlyDelights": { "title": "세속적인 쾌락의 동산", "artist": "히에로니무스 보스" },
+    "aSundayAfternoon": { "title": "그랑드 자트 섬의 일요일 오후", "artist": "조르주 쇠라" },
+    "theFightingTemeraire": { "title": "전함 테메레르", "artist": "J. M. W. 터너" },
+    "libertyLeadingThePeople": { "title": "민중을 이끄는 자유의 여신", "artist": "외젠 들라크루아" },
+    "lasMeninas": { "title": "시녀들", "artist": "디에고 벨라스케스" },
+    "theSchoolOfAthens": { "title": "아테네 학당", "artist": "라파엘로" },
+    "nighthawks": { "title": "밤을 지새우는 사람들", "artist": "에드워드 호퍼" },
+    "creationOfAdam": { "title": "아담의 창조", "artist": "미켈란젤로" },
+    "whistlersMother": { "title": "휘슬러의 어머니", "artist": "제임스 애벗 맥닐 휘슬러" },
+    "impressionSunrise": { "title": "인상, 해돋이", "artist": "클로드 모네" },
+    "theSwing": { "title": "그네", "artist": "장 오노레 프라고나르" },
+    "saturnDevouringHisSon": { "title": "아들을 잡아먹는 사투르누스", "artist": "프란시스코 고야" },
+    "anatomyLesson": { "title": "니콜라스 튈프 박사의 해부학 강의", "artist": "렘브란트 판 레인" },
+    "towerOfBabel": { "title": "바벨탑", "artist": "피터르 브뤼헐 더 아우더" },
+    "sleepingGypsy": { "title": "잠자는 집시", "artist": "앙리 루소" },
+    "bacchus": { "title": "바쿠스", "artist": "카라바조" },
+    "thirdOfMay": { "title": "1808년 5월 3일", "artist": "프란시스코 고야" }
+  },
+  "errors": {
+    "descriptionGeneration": "설명 생성에 실패했습니다. 다시 시도해주세요.",
+    "storyboardGeneration": "스토리보드 생성에 실패했습니다. 입력을 확인하고 다시 시도해주세요.",
+    "sceneExpansion": "장면 확장에 실패했습니다. 다시 시도해주세요.",
+    "videoGeneration": "비디오 클립 생성에 실패했습니다.",
+    "mediaArtGeneration": "미디어 아트 장면 생성에 실패했습니다. 다시 시도해주세요.",
+    "visualArtGeneration": "비주얼 아트 비디오 생성에 실패했습니다. 다시 시도해주세요."
+  }
 }
