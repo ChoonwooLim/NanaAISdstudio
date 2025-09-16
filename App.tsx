@@ -334,6 +334,29 @@ const App: React.FC = () => {
         }
     };
     
+    // FIX: Add handler for regenerating a single media art image panel.
+    const handleRegenerateMediaArtImage = async (index: number) => {
+        const panels = [...mediaArtState.panels];
+        if (!panels[index]) return;
+    
+        const updatedPanels = [...panels];
+        updatedPanels[index] = { ...updatedPanels[index], imageUrl: undefined, isLoadingImage: true };
+        setMediaArtState(s => ({ ...s, panels: updatedPanels }));
+    
+        try {
+            const imageBase64 = await geminiService.generateImageForPanel(updatedPanels[index].description, {
+                imageModel: 'imagen-4.0-generate-001',
+                aspectRatio: AspectRatio.LANDSCAPE,
+                visualStyle: VisualStyle.CINEMATIC
+            });
+            updatedPanels[index] = { ...updatedPanels[index], imageUrl: `data:image/jpeg;base64,${imageBase64}`, isLoadingImage: false };
+        } catch (e) {
+            updatedPanels[index] = { ...updatedPanels[index], imageUrl: 'error', isLoadingImage: false };
+        } finally {
+            setMediaArtState(s => ({ ...s, panels: [...updatedPanels] }));
+        }
+    };
+
     // Visual Art Handlers
     const handleGenerateVisualArt = async () => {
         setVisualArtState(s => ({ ...s, isLoading: true, error: null, resultVideoUrl: null }));
@@ -413,7 +436,7 @@ const App: React.FC = () => {
                                     onGenerateScenes={handleGenerateMediaArtScenes}
                                     onGenerateClip={() => {}} // Simplified for now
                                     onGenerateAllClips={() => {}} // Simplified for now
-                                    onRegenerateImage={() => {}} // Simplified for now
+                                    onRegenerateImage={handleRegenerateMediaArtImage}
                                     onDeletePanel={(index) => setMediaArtState(s => ({ ...s, panels: s.panels.filter((_, i) => i !== index)}))}
                                     isLoading={isGeneratingMediaArtScenes}
                                     error={mediaArtError}
