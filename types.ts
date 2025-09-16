@@ -48,10 +48,14 @@ export enum Mood {
 }
 
 export enum MediaArtStyle {
-    SUBTLE_MOTION = 'subtle motion',
-    PARALLAX = 'parallax effect',
-    DREAMLIKE = 'dreamlike and ethereal',
-    ELEMENTAL = 'elemental forces',
+    DATA_COMPOSITION = 'data_composition',
+    DIGITAL_NATURE = 'digital_nature',
+    AI_DATA_SCULPTURE = 'ai_data_sculpture',
+    LIGHT_AND_SPACE = 'light_and_space',
+    KINETIC_MIRRORS = 'kinetic_mirrors',
+    GENERATIVE_BOTANY = 'generative_botany',
+    QUANTUM_PHANTASM = 'quantum_phantasm',
+    ARCHITECTURAL_PROJECTION = 'architectural_projection',
 }
 
 export enum VisualArtEffect {
@@ -135,9 +139,70 @@ export interface MediaArtSourceImage {
     artist?: string;
 }
 
+// Media Art Style Parameters
+export interface DataCompositionParams {
+    dataDensity: number; // 0-100
+    glitchIntensity: number; // 0-100
+    colorPalette: 'monochrome' | 'binary' | 'signal_noise';
+}
+
+export interface DigitalNatureParams {
+    particleSystem: 'flowers' | 'butterflies' | 'light_trails' | 'leaves';
+    interactivity: number; // 0-100
+    bloomEffect: number; // 0-100
+}
+
+export interface AiDataSculptureParams {
+    fluidity: number; // 0-100
+    colorScheme: 'nebula' | 'oceanic' | 'molten_metal' | 'crystal';
+    complexity: number; // 0-100
+}
+
+export interface LightAndSpaceParams {
+    pattern: 'strobes' | 'grids' | 'waves' | 'beams';
+    speed: number; // 0-100
+    color: 'white' | 'electric_blue' | 'laser_red';
+}
+
+export interface KineticMirrorsParams {
+    fragmentation: number; // 0-100
+    motionSpeed: number; // 0-100
+    reflection: 'sharp' | 'distorted' | 'prismatic';
+}
+
+export interface GenerativeBotanyParams {
+    growthSpeed: number; // 0-100
+    plantType: 'alien_flora' | 'crystal_flowers' | 'glowing_fungi';
+    density: number; // 0-100
+}
+
+export interface QuantumPhantasmParams {
+    particleSize: number; // 0-100
+    shimmerSpeed: number; // 0-100
+    colorPalette: 'ethereal' | 'iridescent' | 'void';
+}
+
+export interface ArchitecturalProjectionParams {
+    deconstruction: number; // 0-100
+    lightSource: 'internal' | 'external' | 'volumetric';
+    texture: 'wireframe' | 'holographic' | 'concrete';
+}
+
+export type MediaArtStyleParams =
+    | DataCompositionParams
+    | DigitalNatureParams
+    | AiDataSculptureParams
+    | LightAndSpaceParams
+    | KineticMirrorsParams
+    | GenerativeBotanyParams
+    | QuantumPhantasmParams
+    | ArchitecturalProjectionParams;
+
+
 export interface MediaArtState {
     sourceImage: MediaArtSourceImage | null;
     style: MediaArtStyle;
+    styleParams: MediaArtStyleParams;
     panels: StoryboardPanel[];
 }
 

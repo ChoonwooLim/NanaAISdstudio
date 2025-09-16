@@ -1,5 +1,17 @@
 import React from 'react';
-import { MediaArtState, MediaArtStyle } from '../types';
+import { 
+    MediaArtState, 
+    MediaArtStyle, 
+    DataCompositionParams,
+    DigitalNatureParams,
+    AiDataSculptureParams,
+    LightAndSpaceParams,
+    KineticMirrorsParams,
+    GenerativeBotanyParams,
+    QuantumPhantasmParams,
+    ArchitecturalProjectionParams,
+    MediaArtStyleParams
+} from '../types';
 import { MEDIA_ART_STYLE_OPTIONS } from '../constants';
 import LoadingSpinner from './LoadingSpinner';
 import { useTranslation } from '../i18n/LanguageContext';
@@ -25,6 +37,114 @@ interface MediaArtGeneratorProps {
     canSave: boolean;
 }
 
+const StyleParameters: React.FC<{
+    style: MediaArtStyle;
+    params: MediaArtStyleParams;
+    setParams: (params: MediaArtStyleParams) => void;
+}> = ({ style, params, setParams }) => {
+    const { t } = useTranslation();
+
+    const handleParamChange = (key: string, value: any) => {
+        setParams({ ...params, [key]: value });
+    };
+
+    const renderSlider = (key: string, label: string, value: number) => (
+        <div>
+            <label className="block text-xs font-medium text-slate-400">{label}</label>
+            <div className="flex items-center gap-3">
+                <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={value}
+                    onChange={(e) => handleParamChange(key, parseInt(e.target.value, 10))}
+                    className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer"
+                />
+                <span className="text-xs font-semibold text-slate-300 w-8 text-center">{value}</span>
+            </div>
+        </div>
+    );
+    
+    const renderSelect = (key: string, label: string, value: string, options: {value: string, label: string}[]) => (
+        <div>
+            <label className="block text-xs font-medium text-slate-400 mb-1">{label}</label>
+            <select
+                value={value}
+                onChange={(e) => handleParamChange(key, e.target.value)}
+                className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+                {options.map(opt => <option key={opt.value} value={opt.value} className="bg-slate-800">{opt.label}</option>)}
+            </select>
+        </div>
+    )
+
+    switch (style) {
+        case MediaArtStyle.DATA_COMPOSITION:
+            const p1 = params as DataCompositionParams;
+            return (
+                <div className="space-y-4">
+                    {renderSlider('dataDensity', t('mediaArtParams.dataDensity'), p1.dataDensity)}
+                    {renderSlider('glitchIntensity', t('mediaArtParams.glitchIntensity'), p1.glitchIntensity)}
+                    {renderSelect('colorPalette', t('mediaArtParams.colorPalette'), p1.colorPalette, [
+                        {value: 'monochrome', label: t('mediaArtParams.monochrome')},
+                        {value: 'binary', label: t('mediaArtParams.binary')},
+                        {value: 'signal_noise', label: t('mediaArtParams.signal_noise')}
+                    ])}
+                </div>
+            );
+        case MediaArtStyle.DIGITAL_NATURE:
+            const p2 = params as DigitalNatureParams;
+            return (
+                <div className="space-y-4">
+                    {renderSelect('particleSystem', t('mediaArtParams.particleSystem'), p2.particleSystem, [
+                         {value: 'flowers', label: t('mediaArtParams.flowers')},
+                         {value: 'butterflies', label: t('mediaArtParams.butterflies')},
+                         {value: 'light_trails', label: t('mediaArtParams.light_trails')},
+                         {value: 'leaves', label: t('mediaArtParams.leaves')}
+                    ])}
+                    {renderSlider('interactivity', t('mediaArtParams.interactivity'), p2.interactivity)}
+                    {renderSlider('bloomEffect', t('mediaArtParams.bloomEffect'), p2.bloomEffect)}
+                </div>
+            );
+        case MediaArtStyle.AI_DATA_SCULPTURE:
+            const p3 = params as AiDataSculptureParams;
+            return (
+                 <div className="space-y-4">
+                    {renderSlider('fluidity', t('mediaArtParams.fluidity'), p3.fluidity)}
+                    {renderSlider('complexity', t('mediaArtParams.complexity'), p3.complexity)}
+                    {renderSelect('colorScheme', t('mediaArtParams.colorScheme'), p3.colorScheme, [
+                        {value: 'nebula', label: t('mediaArtParams.nebula')},
+                        {value: 'oceanic', label: t('mediaArtParams.oceanic')},
+                        {value: 'molten_metal', label: t('mediaArtParams.molten_metal')},
+                        {value: 'crystal', label: t('mediaArtParams.crystal')}
+                    ])}
+                </div>
+            );
+         case MediaArtStyle.LIGHT_AND_SPACE:
+            const p4 = params as LightAndSpaceParams;
+            return (
+                 <div className="space-y-4">
+                    {renderSlider('speed', t('mediaArtParams.speed'), p4.speed)}
+                     {renderSelect('pattern', t('mediaArtParams.pattern'), p4.pattern, [
+                        {value: 'grids', label: t('mediaArtParams.grids')},
+                        {value: 'beams', label: t('mediaArtParams.beams')},
+                        {value: 'waves', label: t('mediaArtParams.waves')},
+                        {value: 'strobes', label: t('mediaArtParams.strobes')}
+                    ])}
+                    {renderSelect('color', t('mediaArtParams.color'), p4.color, [
+                        {value: 'white', label: t('mediaArtParams.white')},
+                        {value: 'electric_blue', label: t('mediaArtParams.electric_blue')},
+                        {value: 'laser_red', label: t('mediaArtParams.laser_red')}
+                    ])}
+                </div>
+            );
+        // ... add cases for other styles
+        default:
+            return null;
+    }
+};
+
+
 const MediaArtGenerator: React.FC<MediaArtGeneratorProps> = ({
     state,
     setState,
@@ -41,10 +161,21 @@ const MediaArtGenerator: React.FC<MediaArtGeneratorProps> = ({
     canSave,
 }) => {
     const { t } = useTranslation();
-    const { sourceImage, style, panels } = state;
+    const { sourceImage, style, styleParams, panels } = state;
 
     const handleStyleChange = (newStyle: MediaArtStyle) => {
-        setState(s => ({ ...s, style: newStyle }));
+        const styleConfig = MEDIA_ART_STYLE_OPTIONS.find(opt => opt.value === newStyle);
+        if (styleConfig) {
+            setState(s => ({ 
+                ...s, 
+                style: newStyle,
+                styleParams: styleConfig.defaultParams
+            }));
+        }
+    };
+    
+    const handleParamsChange = (newParams: MediaArtStyleParams) => {
+        setState(s => ({ ...s, styleParams: newParams }));
     };
 
     const isGenerateScenesDisabled = isLoading || !sourceImage;
@@ -52,10 +183,12 @@ const MediaArtGenerator: React.FC<MediaArtGeneratorProps> = ({
     const areAllImagesGenerated = hasGeneratedScenes && panels.every(p => p.imageUrl && p.imageUrl !== 'error');
     const areAnyClipsGenerating = hasGeneratedScenes && panels.some(p => p.isLoadingVideo);
     
+    const selectedStyleConfig = MEDIA_ART_STYLE_OPTIONS.find(opt => opt.value === style);
+
     return (
         <div className="space-y-8">
             {/* 1. Source Image & Settings */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                 <div className="space-y-4">
                     <label className="block text-sm font-medium text-slate-300">
                         {t('mediaArt.sourceImageTitle')}
@@ -84,21 +217,33 @@ const MediaArtGenerator: React.FC<MediaArtGeneratorProps> = ({
                     <label className="block text-sm font-medium text-slate-300">
                         {t('mediaArt.styleTitle')}
                     </label>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {MEDIA_ART_STYLE_OPTIONS.map(option => (
                             <button
                                 key={option.value}
                                 type="button"
                                 onClick={() => handleStyleChange(option.value)}
-                                className={`p-3 rounded-lg border-2 transition-all duration-200 text-left ${style === option.value ? 'bg-blue-500/20 border-blue-500' : 'bg-slate-700/50 border-slate-600 hover:border-slate-500'}`}
+                                className={`p-3 rounded-lg border-2 transition-all duration-200 text-left flex items-center gap-3 ${style === option.value ? 'bg-blue-500/20 border-blue-500' : 'bg-slate-700/50 border-slate-600 hover:border-slate-500'}`}
                             >
-                                <h4 className="font-semibold text-sm text-slate-200">{t(`mediaArtStyles.${option.labelKey}`)}</h4>
-                                <p className="text-xs text-slate-400 mt-1">{t(`mediaArtStyles.${option.descriptionKey}`)}</p>
+                                <span className="text-2xl">{option.icon}</span>
+                                <div>
+                                    <h4 className="font-semibold text-sm text-slate-200">{t(`mediaArtStyles.${option.labelKey}`)}</h4>
+                                    <p className="text-xs text-slate-400 mt-1">{t(`mediaArtStyles.${option.descriptionKey}`)}</p>
+                                </div>
                             </button>
                         ))}
                     </div>
                 </div>
             </div>
+
+            {/* Style Parameters */}
+             {selectedStyleConfig && (
+                <div className="animate-fade-in bg-slate-900/50 border border-slate-700 rounded-xl p-4">
+                    <h3 className="text-sm font-semibold text-slate-300 mb-4">{t('mediaArt.styleParameters')}</h3>
+                    <StyleParameters style={style} params={styleParams} setParams={handleParamsChange} />
+                </div>
+            )}
+
 
             {/* 2. Generate Scenes Button */}
             <div className="pt-2 flex items-center gap-4">

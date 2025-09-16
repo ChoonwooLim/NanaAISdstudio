@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type, GenerateContentResponse, Modality } from "@google/genai";
-import { AspectRatio, DescriptionConfig, StoryboardConfig, VisualStyle, MediaArtStyle, VisualArtEffect, MediaArtSourceImage } from "../types";
+import { AspectRatio, DescriptionConfig, StoryboardConfig, VisualStyle, MediaArtStyle, VisualArtEffect, MediaArtSourceImage, MediaArtStyleParams, DataCompositionParams, DigitalNatureParams, AiDataSculptureParams, LightAndSpaceParams, KineticMirrorsParams, GenerativeBotanyParams, QuantumPhantasmParams, ArchitecturalProjectionParams } from "../types";
 
 // FIX: Initialize GoogleGenAI with a named apiKey parameter
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
@@ -203,15 +203,50 @@ export const generateVideoForPanel = async (prompt: string, imageBase64: string,
     return URL.createObjectURL(blob);
 };
 
-export const generateMediaArtStoryboard = async (sourceImage: MediaArtSourceImage, style: MediaArtStyle, language: string) => {
-    const prompt = `Analyze the provided image (${sourceImage.title}). Based on its content and composition, generate a 4-scene storyboard for a short, artistic video. The video's style should be "${style}". Each scene description must be a creative interpretation of the original image, transformed through the lens of the chosen style.
+const getStylePrompt = (style: MediaArtStyle, params: MediaArtStyleParams): string => {
+    switch (style) {
+        case MediaArtStyle.DATA_COMPOSITION:
+            const p1 = params as DataCompositionParams;
+            return `The style is 'Data Composition', inspired by Ryoji Ikeda. It must feature dense, flowing data visualizations, glitch effects, and stark digital patterns. Parameters: Data Density=${p1.dataDensity}%, Glitch Intensity=${p1.glitchIntensity}%, Color Palette=${p1.colorPalette}.`;
+        case MediaArtStyle.DIGITAL_NATURE:
+            const p2 = params as DigitalNatureParams;
+            return `The style is 'Digital Nature', inspired by teamLab. It must feature interactive particle systems that form natural elements. The scene should feel alive and responsive. Parameters: Particle System=${p2.particleSystem}, Interactivity Level=${p2.interactivity}%, Bloom Effect=${p2.bloomEffect}%.`;
+        case MediaArtStyle.AI_DATA_SCULPTURE:
+            const p3 = params as AiDataSculptureParams;
+            return `The style is 'AI Data Sculpture', inspired by Refik Anadol. It must be a fluid, organic, and complex data visualization that resembles a living sculpture. Parameters: Fluidity=${p3.fluidity}%, Color Scheme=${p3.colorScheme}, Structural Complexity=${p3.complexity}%.`;
+        case MediaArtStyle.LIGHT_AND_SPACE:
+            const p4 = params as LightAndSpaceParams;
+            return `The style is 'Light and Space', inspired by NONOTAK Studio. It must use geometric, structural patterns of light like beams, grids, and strobes to define the space. The mood is minimalist and intense. Parameters: Light Pattern=${p4.pattern}, Speed=${p4.speed}%, Color=${p4.color}.`;
+        case MediaArtStyle.KINETIC_MIRRORS:
+            const p5 = params as KineticMirrorsParams;
+            return `The style is 'Kinetic Mirrors'. It should depict the original image as if reflected and fractured across a field of moving, robotic mirrors. Parameters: Fragmentation=${p5.fragmentation}%, Motion Speed=${p5.motionSpeed}%, Reflection Type=${p5.reflection}.`;
+        case MediaArtStyle.GENERATIVE_BOTANY:
+            const p6 = params as GenerativeBotanyParams;
+            return `The style is 'Generative Botany'. It must show surreal, algorithmically-grown plants and flowers overgrowing the original image's subject. Parameters: Growth Speed=${p6.growthSpeed}%, Plant Type=${p6.plantType}, Density=${p6.density}%.`;
+        case MediaArtStyle.QUANTUM_PHANTASM:
+            const p7 = params as QuantumPhantasmParams;
+            return `The style is 'Quantum Phantasm'. It must visualize the image as an unstable, shimmering field of quantum particles, constantly phasing in and out of existence. Parameters: Particle Size=${p7.particleSize}%, Shimmer Speed=${p7.shimmerSpeed}%, Color Palette=${p7.colorPalette}.`;
+        case MediaArtStyle.ARCHITECTURAL_PROJECTION:
+            const p8 = params as ArchitecturalProjectionParams;
+            return `The style is 'Architectural Projection'. The image's content should be deconstructed and projection-mapped onto complex geometric structures, creating a sense of fragmented, volumetric light. Parameters: Deconstruction=${p8.deconstruction}%, Light Source=${p8.lightSource}, Texture=${p8.texture}.`;
+        default:
+            return '';
+    }
+};
 
-    **Instructions:**
-    1.  Create exactly 4 scene descriptions.
-    2.  Each description should be highly visual and evocative, suitable for an AI image generation model.
+export const generateMediaArtStoryboard = async (sourceImage: MediaArtSourceImage, style: MediaArtStyle, params: MediaArtStyleParams, language: string) => {
+    const styleInstruction = getStylePrompt(style, params);
+
+    const prompt = `Analyze the provided image (${sourceImage.title}). Based on its content and composition, generate a 4-scene storyboard for a short, artistic video. Each scene description must be a creative interpretation of the original image, transformed through the lens of the chosen style.
+
+    **Style Instructions:**
+    ${styleInstruction}
+
+    **General Instructions:**
+    1.  Create exactly 4 scene descriptions that form a cohesive visual arc.
+    2.  Each description should be highly visual and evocative, suitable for an AI image generation model, and must incorporate the specific style parameters.
     3.  The descriptions must be in ${language}.
-    4.  Focus on creating a narrative or thematic arc across the 4 scenes.
-
+    
     Return the result as a JSON array of objects.`;
     
     const imagePart = await (async () => {

@@ -40,6 +40,7 @@ import * as geminiService from './services/geminiService';
 import * as db from './services/db';
 import { useTranslation } from './i18n/LanguageContext';
 import { sampleProductsData, sampleStoryIdeasData } from './sampleData';
+import { MEDIA_ART_STYLE_OPTIONS } from './constants';
 
 const API_KEY = process.env.API_KEY;
 
@@ -83,7 +84,8 @@ const App: React.FC = () => {
     // Media Art Mode State
     const initialMediaArtState: MediaArtState = {
         sourceImage: null,
-        style: MediaArtStyle.SUBTLE_MOTION,
+        style: MediaArtStyle.DATA_COMPOSITION,
+        styleParams: MEDIA_ART_STYLE_OPTIONS.find(opt => opt.value === MediaArtStyle.DATA_COMPOSITION)!.defaultParams,
         panels: [],
     };
     const [mediaArtState, setMediaArtState] = useState<MediaArtState>(initialMediaArtState);
@@ -306,7 +308,8 @@ const App: React.FC = () => {
         setMediaArtState(s => ({ ...s, panels: [] }));
 
         try {
-            const panels = await geminiService.generateMediaArtStoryboard(mediaArtState.sourceImage, mediaArtState.style, language);
+            const { sourceImage, style, styleParams } = mediaArtState;
+            const panels = await geminiService.generateMediaArtStoryboard(sourceImage, style, styleParams, language);
             const initialPanels: StoryboardPanel[] = panels.map(p => ({ ...p, isLoadingImage: true, sceneDuration: 4 }));
             setMediaArtState(s => ({ ...s, panels: initialPanels }));
             

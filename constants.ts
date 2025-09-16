@@ -1,4 +1,14 @@
-import { Tone, AspectRatio, VisualStyle, VideoLength, Mood, MediaArtStyle, FamousPainting, VisualArtEffect } from './types';
+import { 
+    Tone, 
+    AspectRatio, 
+    VisualStyle, 
+    VideoLength, 
+    Mood, 
+    MediaArtStyle, 
+    FamousPainting, 
+    VisualArtEffect,
+    MediaArtStyleParams
+} from './types';
 
 export const TONE_OPTIONS: { value: Tone; label: string }[] = [
     { value: Tone.PROFESSIONAL, label: 'Professional' },
@@ -59,12 +69,65 @@ export const VIDEO_MODEL_OPTIONS: { value: string; label: string; description: s
 ];
 
 
-export const MEDIA_ART_STYLE_OPTIONS: { value: MediaArtStyle, labelKey: string, descriptionKey: string }[] = [
-    { value: MediaArtStyle.SUBTLE_MOTION, labelKey: 'subtleMotion', descriptionKey: 'subtleMotionDesc' },
-    { value: MediaArtStyle.PARALLAX, labelKey: 'parallax', descriptionKey: 'parallaxDesc' },
-    { value: MediaArtStyle.DREAMLIKE, labelKey: 'dreamlike', descriptionKey: 'dreamlikeDesc' },
-    { value: MediaArtStyle.ELEMENTAL, labelKey: 'elemental', descriptionKey: 'elementalDesc' },
+export const MEDIA_ART_STYLE_OPTIONS: { value: MediaArtStyle; labelKey: string; descriptionKey: string; icon: string; defaultParams: MediaArtStyleParams }[] = [
+    {
+        value: MediaArtStyle.DATA_COMPOSITION,
+        labelKey: 'dataComposition',
+        descriptionKey: 'dataCompositionDesc',
+        icon: '📊',
+        defaultParams: { dataDensity: 50, glitchIntensity: 20, colorPalette: 'binary' },
+    },
+    {
+        value: MediaArtStyle.DIGITAL_NATURE,
+        labelKey: 'digitalNature',
+        descriptionKey: 'digitalNatureDesc',
+        icon: '🦋',
+        defaultParams: { particleSystem: 'flowers', interactivity: 40, bloomEffect: 60 },
+    },
+    {
+        value: MediaArtStyle.AI_DATA_SCULPTURE,
+        labelKey: 'aiDataSculpture',
+        descriptionKey: 'aiDataSculptureDesc',
+        icon: '🌊',
+        defaultParams: { fluidity: 70, colorScheme: 'nebula', complexity: 50 },
+    },
+    {
+        value: MediaArtStyle.LIGHT_AND_SPACE,
+        labelKey: 'lightAndSpace',
+        descriptionKey: 'lightAndSpaceDesc',
+        icon: '🔦',
+        defaultParams: { pattern: 'grids', speed: 60, color: 'electric_blue' },
+    },
+    {
+        value: MediaArtStyle.KINETIC_MIRRORS,
+        labelKey: 'kineticMirrors',
+        descriptionKey: 'kineticMirrorsDesc',
+        icon: '💎',
+        defaultParams: { fragmentation: 40, motionSpeed: 50, reflection: 'prismatic' },
+    },
+    {
+        value: MediaArtStyle.GENERATIVE_BOTANY,
+        labelKey: 'generativeBotany',
+        descriptionKey: 'generativeBotanyDesc',
+        icon: '🌿',
+        defaultParams: { growthSpeed: 50, plantType: 'alien_flora', density: 60 },
+    },
+    {
+        value: MediaArtStyle.QUANTUM_PHANTASM,
+        labelKey: 'quantumPhantasm',
+        descriptionKey: 'quantumPhantasmDesc',
+        icon: '✨',
+        defaultParams: { particleSize: 30, shimmerSpeed: 70, colorPalette: 'iridescent' },
+    },
+    {
+        value: MediaArtStyle.ARCHITECTURAL_PROJECTION,
+        labelKey: 'architecturalProjection',
+        descriptionKey: 'architecturalProjectionDesc',
+        icon: '🏛️',
+        defaultParams: { deconstruction: 60, lightSource: 'volumetric', texture: 'holographic' },
+    },
 ];
+
 
 export const VISUAL_ART_EFFECT_OPTIONS: { value: VisualArtEffect, labelKey: string, descriptionKey: string }[] = [
     { value: VisualArtEffect.GLITCH, labelKey: 'glitch', descriptionKey: 'glitchDesc' },
