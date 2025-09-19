@@ -353,7 +353,7 @@ const MediaArtGenerator: React.FC<MediaArtGeneratorProps> = ({
             {error && <p className="text-red-400 mt-4 text-center">{error}</p>}
 
             {/* --- Results --- */}
-            {(panels.length > 0) && (
+            {(panels.length > 0 || isLoading) && (
                  <div className="mt-8 animate-fade-in">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-xl font-bold text-slate-200">{t('mediaArt.resultsTitle')}</h2>
@@ -384,19 +384,39 @@ const MediaArtGenerator: React.FC<MediaArtGeneratorProps> = ({
                                  <div className="grid grid-cols-2 gap-px bg-slate-700">
                                      <div className="relative aspect-video bg-slate-800 flex flex-col items-center justify-center">
                                          <p className="absolute top-2 left-2 bg-black/50 text-white text-xs font-bold px-2 py-1 rounded">{t('mediaArt.startFrame')}</p>
-                                         {(panel.imageUrl && panel.imageUrl !== 'error') ? (
+                                        {panel.imageUrl && panel.imageUrl !== 'error' && panel.imageUrl !== 'quota_error' && (
                                             <img src={panel.imageUrl} alt={`${t('mediaArt.startFrame')} ${index + 1}`} className="w-full h-full object-cover" />
-                                         ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-red-400 text-xs p-2 text-center">{t('storyboardDisplay.imageError')}</div>
-                                         )}
+                                        )}
+                                        {panel.imageUrl === 'error' && (
+                                            <div className="text-red-400 text-center p-2">
+                                                <p className="font-semibold">Oops!</p>
+                                                <p className="text-xs">{t('storyboardDisplay.imageError')}</p>
+                                            </div>
+                                        )}
+                                        {panel.imageUrl === 'quota_error' && (
+                                            <div className="text-yellow-400 text-center p-2">
+                                                <p className="font-semibold">{t('storyboardDisplay.quotaErrorTitle')}</p>
+                                                <p className="text-xs mt-1 text-slate-400">{t('storyboardDisplay.checkPlan')}</p>
+                                            </div>
+                                        )}
                                      </div>
                                       <div className="relative aspect-video bg-slate-800 flex flex-col items-center justify-center">
                                          <p className="absolute top-2 left-2 bg-black/50 text-white text-xs font-bold px-2 py-1 rounded">{t('mediaArt.endFrame')}</p>
-                                         {(panel.endImageUrl && panel.endImageUrl !== 'error') ? (
+                                        {panel.endImageUrl && panel.endImageUrl !== 'error' && panel.endImageUrl !== 'quota_error' && (
                                             <img src={panel.endImageUrl} alt={`${t('mediaArt.endFrame')} ${index + 1}`} className="w-full h-full object-cover" />
-                                         ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-red-400 text-xs p-2 text-center">{t('storyboardDisplay.imageError')}</div>
-                                         )}
+                                        )}
+                                        {panel.endImageUrl === 'error' && (
+                                            <div className="text-red-400 text-center p-2">
+                                                <p className="font-semibold">Oops!</p>
+                                                <p className="text-xs">{t('storyboardDisplay.imageError')}</p>
+                                            </div>
+                                        )}
+                                        {panel.endImageUrl === 'quota_error' && (
+                                            <div className="text-yellow-400 text-center p-2">
+                                                <p className="font-semibold">{t('storyboardDisplay.quotaErrorTitle')}</p>
+                                                <p className="text-xs mt-1 text-slate-400">{t('storyboardDisplay.checkPlan')}</p>
+                                            </div>
+                                        )}
                                      </div>
                                  </div>
                                  <div className="p-4 flex-grow flex flex-col">
@@ -435,7 +455,7 @@ const MediaArtGenerator: React.FC<MediaArtGeneratorProps> = ({
                                             onClick={() => onRegenerateVideo(index)}
                                             title={t('mediaArt.generateTransition')}
                                             className="p-2 bg-slate-700 hover:bg-slate-600 rounded-md transition-colors disabled:opacity-50 flex items-center gap-2 text-xs px-3"
-                                            disabled={panel.isLoadingVideo || !panel.imageUrl || panel.imageUrl === 'error'}
+                                            disabled={panel.isLoadingVideo || !panel.imageUrl || panel.imageUrl === 'error' || panel.imageUrl === 'quota_error'}
                                         >
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-300"><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/></svg>
                                             <span className="hidden sm:inline">{t('mediaArt.generateTransition')}</span>

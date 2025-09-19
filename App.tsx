@@ -100,6 +100,7 @@ const App: React.FC = () => {
     // Visual Art Mode State
     const initialVisualArtState: VisualArtState = {
         inputText: '',
+        sourceImage: null,
         effect: VisualArtEffect.GLITCH,
         resultVideoUrl: null,
         isLoading: false,
@@ -519,29 +520,38 @@ const App: React.FC = () => {
                 throw new Error("Not enough keyframe prompts were generated to create transitions.");
             }
 
-            // Step 2: Generate all keyframe images in parallel
-            const keyframeImages = await Promise.all(keyframePrompts.map(prompt =>
-                geminiService.generateImageForPanel(prompt, {
-                    imageModel: config.imageModel,
-                    aspectRatio: config.aspectRatio,
-                    visualStyle: config.visualStyle,
-                }).then(imageBase64 => `data:image/jpeg;base64,${imageBase64}`).catch(() => 'error')
-            ));
-
-            // Step 3: Construct final transition panels
-            const transitionPanels: StoryboardPanel[] = [];
-            for (let i = 0; i < keyframeImages.length - 1; i++) {
-                if (keyframeImages[i] !== 'error' && keyframeImages[i + 1] !== 'error') {
-                    transitionPanels.push({
-                        description: keyframePrompts[i + 1], // Description is the target state
-                        imageUrl: keyframeImages[i], // imageUrl is the start frame
-                        endImageUrl: keyframeImages[i + 1], // endImageUrl is the end frame
-                        isLoadingImage: false,
-                        sceneDuration: 5,
-                    });
-                }
+            // Step 2: Generate keyframe images sequentially to avoid rate limiting.
+            let previousImage: string;
+            try {
+                const img0 = await geminiService.generateImageForPanel(keyframePrompts[0], { ...config });
+                previousImage = `data:image/jpeg;base64,${img0}`;
+            } catch (e: any) {
+                const isQuota = e.message?.includes('429') || e.toString().includes('429');
+                previousImage = isQuota ? 'quota_error' : 'error';
             }
-            setMediaArtState(s => ({ ...s, panels: transitionPanels }));
+
+            // Generate subsequent images and create panels progressively
+            for (let i = 1; i < keyframePrompts.length; i++) {
+                let currentImage: string;
+                 try {
+                    const img = await geminiService.generateImageForPanel(keyframePrompts[i], { ...config });
+                    currentImage = `data:image/jpeg;base64,${img}`;
+                } catch (e: any) {
+                    const isQuota = e.message?.includes('429') || e.toString().includes('429');
+                    currentImage = isQuota ? 'quota_error' : 'error';
+                }
+
+                const newPanel: StoryboardPanel = {
+                    description: keyframePrompts[i],
+                    imageUrl: previousImage,
+                    endImageUrl: currentImage,
+                    isLoadingImage: false,
+                    sceneDuration: 5,
+                };
+
+                setMediaArtState(s => ({ ...s, panels: [...s.panels, newPanel] }));
+                previousImage = currentImage;
+            }
 
         } catch (e: any) {
             setMediaArtError(e.message || t('errors.mediaArtGeneration'));
@@ -576,7 +586,8 @@ const App: React.FC = () => {
     const handleGenerateVisualArt = async () => {
         setVisualArtState(s => ({ ...s, isLoading: true, error: null, resultVideoUrl: null }));
         try {
-            const resultUrl = await geminiService.generateVisualArtVideo(visualArtState.inputText, visualArtState.effect);
+            const { inputText, effect, sourceImage } = visualArtState;
+            const resultUrl = await geminiService.generateVisualArtVideo(inputText, effect, sourceImage);
             setVisualArtState(s => ({ ...s, resultVideoUrl: resultUrl }));
         } catch (e: any) {
             setVisualArtState(s => ({ ...s, error: e.message || t('errors.visualArtGeneration') }));

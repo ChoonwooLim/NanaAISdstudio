@@ -1,8 +1,9 @@
 import React from 'react';
-import { VisualArtState, VisualArtEffect } from '../types';
+import { VisualArtState, VisualArtEffect, MediaArtSourceImage } from '../types';
 import { VISUAL_ART_EFFECT_OPTIONS } from '../constants';
 import LoadingSpinner from './LoadingSpinner';
 import { useTranslation } from '../i18n/LanguageContext';
+import ImageUploader from './ImageUploader';
 
 interface VisualArtGeneratorProps {
     state: VisualArtState;
@@ -12,34 +13,67 @@ interface VisualArtGeneratorProps {
 
 const VisualArtGenerator: React.FC<VisualArtGeneratorProps> = ({ state, setState, onGenerate }) => {
     const { t } = useTranslation();
-    const { inputText, effect, resultVideoUrl, isLoading, error } = state;
+    const { inputText, effect, resultVideoUrl, isLoading, error, sourceImage } = state;
 
     const handleEffectChange = (newEffect: VisualArtEffect) => {
         setState(s => ({ ...s, effect: newEffect }));
     };
+    
+    const handleImageSelect = (image: MediaArtSourceImage) => {
+        setState(s => ({ ...s, sourceImage: image, resultVideoUrl: null, error: null }));
+    };
 
-    const isGenerateDisabled = isLoading || !inputText.trim();
+    const handleRemoveImage = () => {
+        setState(s => ({ ...s, sourceImage: null }));
+    };
+
+    const isGenerateDisabled = isLoading || (!inputText.trim() && !sourceImage);
 
     return (
-        <div className="space-y-8 max-w-2xl mx-auto">
-            <h2 className="text-2xl font-bold text-slate-200 text-center">{t('visualArt.title')}</h2>
-            
-            <div className="space-y-4">
-                <label htmlFor="visual-art-input" className="block text-sm font-medium text-slate-300">
-                    {t('visualArt.textInputLabel')}
-                </label>
-                <textarea
-                    id="visual-art-input"
-                    rows={3}
-                    value={inputText}
-                    onChange={(e) => setState(s => ({ ...s, inputText: e.target.value, resultVideoUrl: null, error: null }))}
-                    placeholder={t('visualArt.textInputPlaceholder')}
-                    className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                />
+        <div className="space-y-8 max-w-3xl mx-auto">
+            <div className="text-center">
+                <h2 className="text-2xl font-bold text-slate-200">{t('visualArt.title')}</h2>
+                <p className="text-sm text-slate-400 mt-2">{t('visualArt.instruction')}</p>
             </div>
             
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                {/* Image Input */}
+                <div className="space-y-2">
+                    <label className="block text-xs font-medium text-slate-400">
+                        {t('visualArt.imageInputLabel')}
+                    </label>
+                    {sourceImage ? (
+                        <div className="relative group">
+                            <img src={sourceImage.url} alt={sourceImage.title} className="w-full rounded-xl shadow-lg" />
+                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-xl">
+                                <button onClick={handleRemoveImage} className="bg-red-500/80 backdrop-blur-sm text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-500 transition-colors">
+                                    {t('visualArt.removeImage')}
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <ImageUploader onImageSelect={handleImageSelect} />
+                    )}
+                </div>
+                
+                {/* Text Input */}
+                <div className="space-y-2">
+                    <label htmlFor="visual-art-input" className="block text-xs font-medium text-slate-400">
+                        {t('visualArt.textInputLabel')}
+                    </label>
+                    <textarea
+                        id="visual-art-input"
+                        rows={5}
+                        value={inputText}
+                        onChange={(e) => setState(s => ({ ...s, inputText: e.target.value, resultVideoUrl: null, error: null }))}
+                        placeholder={t('visualArt.textInputPlaceholder')}
+                        className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                    />
+                </div>
+            </div>
+
             <div className="animate-fade-in space-y-8">
-                {/* 2. Effect Selection */}
+                {/* Effect Selection */}
                 <div className="space-y-4">
                      <label className="block text-sm font-medium text-slate-300 text-center">{t('visualArt.styleTitle')}</label>
                      <div className="flex flex-wrap justify-center gap-3">
@@ -56,7 +90,7 @@ const VisualArtGenerator: React.FC<VisualArtGeneratorProps> = ({ state, setState
                     </div>
                 </div>
                 
-                {/* 3. Generate Button */}
+                {/* Generate Button */}
                 <div className="pt-2">
                     <button
                         type="button"
@@ -75,7 +109,7 @@ const VisualArtGenerator: React.FC<VisualArtGeneratorProps> = ({ state, setState
                     </button>
                 </div>
 
-                 {/* 4. Result */}
+                 {/* Result */}
                 {(resultVideoUrl || isLoading || error) && (
                     <div className="space-y-4 pt-4">
                         <h3 className="text-xl font-semibold text-slate-200 text-center">{t('visualArt.resultTitle')}</h3>

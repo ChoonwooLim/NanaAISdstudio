@@ -209,6 +209,7 @@ export interface MediaArtState {
 
 export interface VisualArtState {
     inputText: string;
+    sourceImage: MediaArtSourceImage | null;
     effect: VisualArtEffect;
     resultVideoUrl: string | null;
     isLoading: boolean;

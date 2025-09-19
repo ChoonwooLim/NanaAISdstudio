@@ -37,7 +37,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         let isMounted = true;
         const loadTranslations = async () => {
             const langCode = languageToCodeMap[language] || 'en';
-            const path = `/i18n/translations/${langCode}.json`;
+            const path = `/i18n/${langCode}.json`;
             try {
                 const response = await fetch(path);
                 if (!response.ok) {
@@ -52,7 +52,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 if (isMounted && langCode !== 'en') {
                     // Try fetching English as a fallback
                     try {
-                        const fallbackResponse = await fetch(`/i18n/translations/en.json`);
+                        const fallbackResponse = await fetch(`/i18n/en.json`);
                         const fallbackData = await fallbackResponse.json();
                         setTranslations(fallbackData);
                     } catch (fallbackError) {

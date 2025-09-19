@@ -1,0 +1,316 @@
+{
+  "header": {
+    "title": "Artifex.AI Studio Pro",
+    "subtitle": "An AI-powered creative suite to generate compelling product descriptions and visualize ideas with detailed storyboards and video clips.",
+    "newProject": "New",
+    "importProject": "Import",
+    "exportProject": "Export",
+    "openGallery": "Gallery"
+  },
+  "tooltips": {
+    "newProject": "Start a new blank project",
+    "importProjectFile": "Import a project file",
+    "exportProjectFile": "Export current project to a file",
+    "openGallery": "Open project gallery",
+    "regenerateImage": "Regenerate Image",
+    "generateVideo": "Generate Video Clip",
+    "expandScene": "Expand Scene into more shots",
+    "deletePanel": "Delete Panel"
+  },
+  "modeSwitcher": {
+    "productDescription": "Product Description",
+    "storyboard": "Storyboard Generator",
+    "mediaArt": "Media Art Generator",
+    "visualArt": "Visual Art Generator"
+  },
+  "inputForm": {
+    "productName": "Product Name",
+    "productNamePlaceholder": "e.g., Nebula Smart Projector",
+    "targetAudience": "Target Audience",
+    "targetAudiencePlaceholder": "e.g., Movie lovers, families",
+    "keyFeatures": "Key Features / Keywords",
+    "keyFeaturesPlaceholder": "e.g., 4K resolution, portable, long battery life...",
+    "tone": "Tone of Voice",
+    "language": "Output Language",
+    "generating": "Generating...",
+    "generateButton": "Generate Description",
+    "loadSample": "Load Sample"
+  },
+  "descriptionDisplay": {
+    "title": "Generated Description",
+    "copyToClipboard": "Copy to clipboard"
+  },
+  "storyboardForm": {
+    "ideaLabel": "Describe your story idea",
+    "ideaPlaceholder": "e.g., A cinematic trailer for a personal flying car in a cyberpunk city.",
+    "hideSettings": "Hide Advanced Settings",
+    "showSettings": "Show Advanced Settings",
+    "generating": "Generating Storyboard...",
+    "generateButton": "Generate Storyboard",
+    "loadSample": "Load Sample Idea"
+  },
+  "storyboardSettings": {
+    "title": "Advanced Settings",
+    "storySection": "Story & Text",
+    "scenes": "Scenes",
+    "moodPacing": "Mood",
+    "pacing": "Pacing",
+    "descriptionLanguage": "Description Language",
+    "textModel": "Text Model",
+    "imageSection": "Image Generation",
+    "aspectRatio": "Aspect Ratio",
+    "visualStyle": "Visual Style",
+    "imageModel": "Image Model",
+    "videoSection": "Video Generation",
+    "videoModel": "Video Model",
+    "videoNote": "Video generation is an experimental feature and may take several minutes per clip."
+  },
+  "storyboardDisplay": {
+    "title": "Generated Storyboard",
+    "scenes": "{{count}} Scenes",
+    "estimatedLength": "Est. Length: {{duration}}s",
+    "generatingScenes": "Generating scene descriptions...\nThis may take a moment.",
+    "scene": "Scene #{{index}}",
+    "generatingImage": "Generating image...",
+    "imageError": "Image generation failed.",
+    "quotaErrorTitle": "Quota Reached",
+    "checkPlan": "Please check your plan or try again later.",
+    "generatingClip": "Generating Clip...",
+    "generatingClipHint": "This may take a few minutes.",
+    "videoErrorTitle": "Video Error",
+    "videoError": "Video generation failed.",
+    "duration": "Duration",
+    "googleAIStudio": "Google AI Studio",
+    "exportPdf": "Export PDF",
+    "exportingPdf": "Exporting..."
+  },
+  "detailedModal": {
+    "title": "Expand Scene",
+    "originalPrefix": "Original:",
+    "loadingMessage": "Generating new detailed shots and images...",
+    "drawingShot": "Drawing shot #{{index}}...",
+    "saveButton": "Save Changes"
+  },
+  "videoDisplay": {
+    "title": "Generated Video Preview",
+    "playingScene": "Playing Scene {{current}} of {{total}}",
+    "selectClip": "Select a clip to play",
+    "sceneButton": "Scene {{index}}"
+  },
+  "apiKeyInstructions": {
+    "title": "API Key Required",
+    "welcome": "Welcome to Artifex.AI Studio! To get started, you need to set up your Google Gemini API key.",
+    "howTo": "How to get and set your API key:",
+    "step1": "Go to {{link}} and create your API key.",
+    "step2": "In your project environment, set the {{apiKey}} variable to your newly created key.",
+    "step3": "Refresh this page. The application will automatically pick it up.",
+    "disclaimer": "Your API key is stored locally in your browser and is never sent to our servers.",
+    "googleAIStudio": "Google AI Studio"
+  },
+  "sampleModal": {
+    "productTitle": "Load a Sample Product",
+    "storyTitle": "Load a Sample Story Idea",
+    "productSearchPlaceholder": "Search products by name or feature...",
+    "storySearchPlaceholder": "Search ideas by keyword...",
+    "noResults": "No results found for \"{{searchTerm}}\""
+  },
+  "galleryModal": {
+    "title": "Project Gallery",
+    "noProjects": "You have no saved projects yet.",
+    "noPreview": "No preview available",
+    "load": "Load",
+    "delete": "Delete"
+  },
+  "mediaArt": {
+    "sourceImageTitle": "1. Select Source Image",
+    "changeImage": "Change Image",
+    "selectImageCTA": "Select an Image to Begin",
+    "selectImageHint": "Upload your own or choose a classic painting.",
+    "styleTitle": "2. Choose Animation Style",
+    "paramsTitle": "3. Adjust Style Parameters",
+    "generateScenes": "Generate Art Scenes",
+    "generating": "Generating...",
+    "resultsTitle": "4. Animation & Refinement",
+    "exportPdf": "Export PDF",
+    "exportingPdf": "Exporting...",
+    "generateTransition": "Generate Transition",
+    "startFrame": "Start Frame",
+    "endFrame": "End Frame",
+    "transitionPrompt": "Transition Prompt",
+    "transition": "Transition"
+  },
+  "mediaArtStyles": {
+    "dataComposition": "Data Composition",
+    "dataCompositionDesc": "Data visualization, glitch, binary patterns. (Ryoji Ikeda style)",
+    "digitalNature": "Digital Nature",
+    "digitalNatureDesc": "Interactive particle systems: flowers, light. (teamLab style)",
+    "aiDataSculpture": "AI Data Sculpture",
+    "aiDataSculptureDesc": "Fluid, organic data visualization. (Refik Anadol style)",
+    "lightAndSpace": "Light & Space",
+    "lightAndSpaceDesc": "Strobes, grids, structural light patterns. (NONOTAK style)",
+    "kineticMirrors": "Kinetic Mirrors",
+    "kineticMirrorsDesc": "Moving sculptures using reflected, fragmented images.",
+    "generativeBotany": "Generative Botany",
+    "generativeBotanyDesc": "Algorithmically grown, surrealistic plants and flowers.",
+    "quantumPhantasm": "Quantum Phantasm",
+    "quantumPhantasmDesc": "Uncertain, shimmering visual effects inspired by quantum physics.",
+    "architecturalProjection": "Architectural Projection",
+    "architecturalProjectionDesc": "Deconstructed, reprojected images onto geometric structures."
+  },
+  "mediaArtParams": {
+    "dataDensity": "Data Density",
+    "glitchIntensity": "Glitch Intensity",
+    "colorPalette": "Color Palette",
+    "interactivity": "Interactivity",
+    "bloomEffect": "Bloom Effect",
+    "particleSystem": "Particle System",
+    "fluidity": "Fluidity",
+    "complexity": "Complexity",
+    "colorScheme": "Color Scheme",
+    "speed": "Speed",
+    "pattern": "Pattern",
+    "color": "Color",
+    "fragmentation": "Fragmentation",
+    "motionSpeed": "Motion Speed",
+    "reflection": "Reflection",
+    "growthSpeed": "Growth Speed",
+    "density": "Density",
+    "plantType": "Plant Type",
+    "particleSize": "Particle Size",
+    "shimmerSpeed": "Shimmer Speed",
+    "deconstruction": "Deconstruction",
+    "lightSource": "Light Source",
+    "texture": "Texture",
+    "options": {
+      "dataCompositionPalettes": {
+        "monochrome": "Monochrome",
+        "binary": "Binary (Green/Black)",
+        "signal_noise": "Signal Noise"
+      },
+      "digitalNatureSystems": {
+        "flowers": "Flowers",
+        "butterflies": "Butterflies",
+        "light_trails": "Light Trails",
+        "leaves": "Leaves"
+      },
+      "aiDataSculptureSchemes": {
+        "nebula": "Nebula",
+        "oceanic": "Oceanic",
+        "molten_metal": "Molten Metal",
+        "crystal": "Crystal"
+      },
+      "lightAndSpacePatterns": {
+        "strobes": "Strobes",
+        "grids": "Grids",
+        "waves": "Waves",
+        "beams": "Beams"
+      },
+      "lightAndSpaceColors": {
+        "white": "White",
+        "electric_blue": "Electric Blue",
+        "laser_red": "Laser Red"
+      },
+      "kineticMirrorsReflections": {
+        "sharp": "Sharp",
+        "distorted": "Distorted",
+        "prismatic": "Prismatic"
+      },
+      "generativeBotanyTypes": {
+        "alien_flora": "Alien Flora",
+        "crystal_flowers": "Crystal Flowers",
+        "glowing_fungi": "Glowing Fungi"
+      },
+      "quantumPhantasmPalettes": {
+        "ethereal": "Ethereal",
+        "iridescent": "Iridescent",
+        "void": "Void"
+      },
+      "architecturalProjectionLightSources": {
+        "internal": "Internal",
+        "external": "External",
+        "volumetric": "Volumetric"
+      },
+      "architecturalProjectionTextures": {
+        "wireframe": "Wireframe",
+        "holographic": "Holographic",
+        "concrete": "Concrete"
+      }
+    }
+  },
+  "imageModal": {
+    "title": "Select Source Image",
+    "fromGallery": "From Gallery",
+    "uploadImage": "Upload Image",
+    "uploadCTA": "Click to upload an image",
+    "uploadHint": "PNG, JPG, or WEBP. Max 5MB."
+  },
+  "visualArt": {
+    "title": "Visual Art Generator",
+    "instruction": "Provide text, an image, or both to generate a video.",
+    "imageInputLabel": "Image (Optional)",
+    "removeImage": "Remove Image",
+    "textInputLabel": "Text (Optional)",
+    "textInputPlaceholder": "Type your text here...",
+    "styleTitle": "Choose Visual Effect",
+    "generateButton": "Generate Video",
+    "generating": "Generating...",
+    "resultTitle": "Generated Video"
+  },
+  "visualArtEffects": {
+    "glitch": "Glitch Art",
+    "kaleidoscope": "Kaleidoscope",
+    "liquidChromatic": "Liquid Chromatic",
+    "pixelSort": "Pixel Sort",
+    "asciiStorm": "ASCII Storm"
+  },
+  "imageUploader": {
+    "cta": "Click to upload an image",
+    "hint": "PNG, JPG, or WEBP. Max 5MB."
+  },
+  "common": {
+    "errorPrefix": "Error:",
+    "exportAll": "Export All"
+  },
+  "paintings": {
+    "starryNight": { "title": "The Starry Night", "artist": "Vincent van Gogh" },
+    "greatWave": { "title": "The Great Wave off Kanagawa", "artist": "Hokusai" },
+    "pearlEarring": { "title": "Girl with a Pearl Earring", "artist": "Johannes Vermeer" },
+    "monaLisa": { "title": "Mona Lisa", "artist": "Leonardo da Vinci" },
+    "wandererSeaFog": { "title": "Wanderer above the Sea of Fog", "artist": "Caspar David Friedrich" },
+    "birthOfVenus": { "title": "The Birth of Venus", "artist": "Sandro Botticelli" },
+    "theScream": { "title": "The Scream", "artist": "Edvard Munch" },
+    "americanGothic": { "title": "American Gothic", "artist": "Grant Wood" },
+    "theNightWatch": { "title": "The Night Watch", "artist": "Rembrandt van Rijn" },
+    "luncheonBoatingParty": { "title": "Luncheon of the Boating Party", "artist": "Pierre-Auguste Renoir" },
+    "persistenceOfMemory": { "title": "The Persistence of Memory", "artist": "Salvador Dalí" },
+    "theKiss": { "title": "The Kiss", "artist": "Gustav Klimt" },
+    "arnolfiniPortrait": { "title": "The Arnolfini Portrait", "artist": "Jan van Eyck" },
+    "gardenOfEarthlyDelights": { "title": "The Garden of Earthly Delights", "artist": "Hieronymus Bosch" },
+    "aSundayAfternoon": { "title": "A Sunday Afternoon on the Island of La Grande Jatte", "artist": "Georges Seurat" },
+    "theFightingTemeraire": { "title": "The Fighting Temeraire", "artist": "J. M. W. Turner" },
+    "libertyLeadingThePeople": { "title": "Liberty Leading the People", "artist": "Eugène Delacroix" },
+    "lasMeninas": { "title": "Las Meninas", "artist": "Diego Velázquez" },
+    "theSchoolOfAthens": { "title": "The School of Athens", "artist": "Raphael" },
+    "nighthawks": { "title": "Nighthawks", "artist": "Edward Hopper" },
+    "creationOfAdam": { "title": "The Creation of Adam", "artist": "Michelangelo" },
+    "whistlersMother": { "title": "Whistler's Mother", "artist": "James Abbott McNeill Whistler" },
+    "impressionSunrise": { "title": "Impression, Sunrise", "artist": "Claude Monet" },
+    "theSwing": { "title": "The Swing", "artist": "Jean-Honoré Fragonard" },
+    "saturnDevouringHisSon": { "title": "Saturn Devouring His Son", "artist": "Francisco Goya" },
+    "anatomyLesson": { "title": "The Anatomy Lesson of Dr. Nicolaes Tulp", "artist": "Rembrandt van Rijn" },
+    "towerOfBabel": { "title": "The Tower of Babel", "artist": "Pieter Bruegel the Elder" },
+    "sleepingGypsy": { "title": "The Sleeping Gypsy", "artist": "Henri Rousseau" },
+    "bacchus": { "title": "Bacchus", "artist": "Caravaggio" },
+    "thirdOfMay": { "title": "The Third of May 1808", "artist": "Francisco Goya" }
+  },
+  "errors": {
+    "descriptionGeneration": "Failed to generate description. Please try again.",
+    "storyboardGeneration": "Failed to generate storyboard. Please check your input and try again.",
+    "sceneExpansion": "Failed to expand scene. Please try again.",
+    "videoGeneration": "Failed to generate video clip.",
+    "mediaArtGeneration": "Failed to generate media art scenes. Please try again.",
+    "visualArtGeneration": "Failed to generate visual art video. Please try again.",
+    "projectImport": "Failed to import project. The file may be invalid or corrupted.",
+    "projectExport": "Failed to export project."
+  }
+}

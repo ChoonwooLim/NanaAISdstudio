@@ -48,6 +48,35 @@ const safeJsonParse = (jsonString: string) => {
     }
 };
 
+// Helper to get base64 data and mime type from a MediaArtSourceImage
+const getImageData = async (sourceImage: MediaArtSourceImage): Promise<{data: string, mimeType: string}> => {
+    if (sourceImage.url.startsWith('data:')) {
+        return {
+            data: sourceImage.url.split(',')[1],
+            mimeType: sourceImage.url.match(/:(.*?);/)?.[1] || 'image/jpeg'
+        };
+    }
+    
+    // Handle remote URL by fetching and converting to base64
+    const response = await fetch(sourceImage.url);
+    if (!response.ok) {
+        throw new Error(`Failed to fetch image from URL: ${sourceImage.url}`);
+    }
+    const blob = await response.blob();
+    
+    const data = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve((reader.result as string).split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+    });
+
+    return {
+        data,
+        mimeType: blob.type || 'image/jpeg'
+    };
+};
+
 export const generateDescription = async (config: DescriptionConfig): Promise<string> => {
     const prompt = `Generate a compelling product description.
     - Product Name: ${config.productName}
@@ -256,59 +285,33 @@ const getStylePrompt = (style: MediaArtStyle, params: MediaArtStyleParams): stri
 
 export const generateMediaArtKeyframePrompts = async (sourceImage: MediaArtSourceImage, style: MediaArtStyle, params: MediaArtStyleParams, config: StoryboardConfig): Promise<string[]> => {
     const styleInstruction = getStylePrompt(style, params);
-    // A user-selected "scene count" of N corresponds to N transitions, which requires N+1 keyframes.
     const numberOfKeyframes = config.sceneCount + 1;
 
-    const prompt = `Analyze the provided source image (${sourceImage.title}). Your task is to generate prompts for exactly ${numberOfKeyframes} keyframes for a visual animation. This animation begins as a highly abstract artistic piece and smoothly resolves into the original, realistic image.
+    // This prompt has been optimized to be more concise and structured, reducing the likelihood of token limit errors.
+    const prompt = `
+**Task**: Generate a JSON array of exactly ${numberOfKeyframes} image prompts for an animation.
+**Animation Concept**: The animation starts as an abstract interpretation of the provided image ("${sourceImage.title}") and gradually transitions to become a photorealistic copy of it.
 
-**Core Artistic Style:**
-The abstract style is: ${styleInstruction}
+**Parameters**:
+- **Core Abstract Style**: ${styleInstruction}
+- **Mood**: ${config.mood}
+- **Language**: ${config.descriptionLanguage}
 
-**Overall Mood:**
-The mood of the animation sequence should be ${config.mood}.
+**JSON Output Requirements**:
+- The output MUST be a valid JSON array.
+- The array MUST contain exactly ${numberOfKeyframes} string elements.
 
-**Instructions for Generating ${numberOfKeyframes} Keyframe Prompts:**
-1.  **Generate exactly ${numberOfKeyframes} prompts** for an AI image generator. The output MUST be a JSON array containing ${numberOfKeyframes} strings.
-2.  The prompts must represent a smooth, linear interpolation from pure abstraction to perfect reality. The visual change between any two consecutive keyframes should be gradual and consistent.
-3.  **Keyframe 1 (Most Abstract):** This must be a radical artistic interpretation. Only 10-20% of the original image's subject should be recognizable. The Core Artistic Style must be the absolute focus.
-4.  **Intermediate Keyframes:** For each step between the first and last, you must gradually and evenly increase the realism and fidelity to the original image, while simultaneously decreasing the intensity of the Core Artistic Style.
-5.  **Keyframe ${numberOfKeyframes} (Most Realistic):** This prompt MUST describe the original source image with 100% fidelity. The subject, composition, and colors must be perfectly reproduced. The Core Artistic Style should be completely absent here.
-6.  Each prompt must be a single, detailed, and visually rich paragraph.
-7.  All descriptions must be in ${config.descriptionLanguage}.
-
-Return the result as a JSON array of strings, containing exactly ${numberOfKeyframes} elements.`;
+**Keyframe Prompt Instructions**:
+1.  **Keyframe 1 (Most Abstract)**: A radical artistic interpretation based on the Core Style. Only 10-20% of the original image should be recognizable.
+2.  **Intermediate Keyframes**: Gradually and evenly decrease abstraction and increase realism towards the original image across the remaining intermediate prompts.
+3.  **Keyframe ${numberOfKeyframes} (Most Realistic)**: A perfect, photorealistic description of the original source image. The Core Style must be completely absent.
+4.  Each prompt in the array must be a single, visually rich paragraph.
+`;
     
-    const imagePart = await (async () => {
-        if (sourceImage.url.startsWith('data:')) {
-            return {
-                inlineData: {
-                    data: sourceImage.url.split(',')[1],
-                    mimeType: sourceImage.url.match(/:(.*?);/)?.[1] || 'image/jpeg'
-                }
-            };
-        }
-        
-        // Handle remote URL by fetching and converting to base64
-        const response = await fetch(sourceImage.url);
-        if (!response.ok) {
-            throw new Error(`Failed to fetch image from URL: ${sourceImage.url}`);
-        }
-        const blob = await response.blob();
-        
-        const data = await new Promise<string>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve((reader.result as string).split(',')[1]);
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
-        });
-
-        return {
-            inlineData: {
-                data,
-                mimeType: blob.type || 'image/jpeg'
-            }
-        };
-    })();
+    const { data, mimeType } = await getImageData(sourceImage);
+    const imagePart = {
+        inlineData: { data, mimeType }
+    };
     
     const response = await ai.models.generateContent({
         model: config.textModel,
@@ -332,16 +335,37 @@ Return the result as a JSON array of strings, containing exactly ${numberOfKeyfr
     return parsed;
 };
 
-export const generateVisualArtVideo = async (text: string, effect: VisualArtEffect): Promise<string> => {
-    const prompt = `Create a dynamic, visually striking motion graphics video.
-    - Text: "${text}"
-    - Visual Effect: ${effect}
-    - Style: Abstract, high-energy, and suitable for a short social media clip.
-    The text should be the central focus, animated with the chosen effect. The background should be complementary and dynamic.`;
+export const generateVisualArtVideo = async (text: string, effect: VisualArtEffect, image?: MediaArtSourceImage | null): Promise<string> => {
+    let prompt = `Create a dynamic, visually striking motion graphics video based on the following parameters. The style should be abstract, high-energy, and suitable for a short social media clip.
+
+- Visual Effect: ${effect}
+`;
+
+    if (image && text) {
+        prompt += `- Source Image: The visuals should be heavily inspired by the provided image.\n`;
+        prompt += `- Text: Animate the text "${text}" with the specified effect, integrating it smoothly with the image-inspired visuals.`;
+    } else if (image) {
+        prompt += `- Source Image: Animate the provided image itself using the specified visual effect. There is no text to display.`;
+    } else if (text) {
+        prompt += `- Text: The text "${text}" should be the central focus. Animate it with the chosen effect. The background should be complementary and dynamic.`;
+    } else {
+        // This case should be prevented by the UI
+        prompt += `- Generate a generic abstract animation with the specified effect.`;
+    }
+
+    let imagePart;
+    if (image) {
+        const { data, mimeType } = await getImageData(image);
+        imagePart = {
+            imageBytes: data,
+            mimeType: mimeType,
+        };
+    }
 
     let operation = await ai.models.generateVideos({
         model: 'veo-2.0-generate-001',
         prompt: prompt,
+        ...(imagePart && { image: imagePart }),
         config: {
             numberOfVideos: 1,
         }
