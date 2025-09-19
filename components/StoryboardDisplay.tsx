@@ -4,6 +4,7 @@ import LoadingSpinner from './LoadingSpinner';
 import { useTranslation } from '../i18n/LanguageContext';
 import RefreshIcon from './icons/RefreshIcon';
 import DeleteIcon from './icons/DeleteIcon';
+import DownloadIcon from './icons/DownloadIcon';
 
 interface StoryboardDisplayProps {
     panels: StoryboardPanel[];
@@ -14,6 +15,8 @@ interface StoryboardDisplayProps {
     onRegenerateImage: (index: number) => void;
     onDeletePanel: (index: number) => void;
     isGeneratingImages: boolean;
+    onExportPdf: () => void;
+    isExportingPdf: boolean;
 }
 
 const StoryboardDisplay: React.FC<StoryboardDisplayProps> = ({
@@ -24,7 +27,9 @@ const StoryboardDisplay: React.FC<StoryboardDisplayProps> = ({
     onRegenerateVideo,
     onRegenerateImage,
     onDeletePanel,
-    isGeneratingImages
+    isGeneratingImages,
+    onExportPdf,
+    isExportingPdf
 }) => {
     const { t } = useTranslation();
 
@@ -33,12 +38,34 @@ const StoryboardDisplay: React.FC<StoryboardDisplayProps> = ({
     }
 
     const totalDuration = panels.reduce((acc, panel) => acc + (panel.sceneDuration || 4), 0);
+    const canExportPdf = panels.length > 0 && !panels.some(p => !p.imageUrl || p.imageUrl === 'error');
 
     return (
         <div className="mt-8 animate-fade-in">
             <div className="mb-6 p-4 bg-slate-800/50 border border-slate-700 rounded-lg">
-                <h2 className="text-xl font-bold text-slate-200">{t('storyboardDisplay.title')}</h2>
-                <p className="text-sm text-slate-400 mt-1">"{storyIdea}"</p>
+                <div className="flex justify-between items-start">
+                    <div>
+                        <h2 className="text-xl font-bold text-slate-200">{t('storyboardDisplay.title')}</h2>
+                        <p className="text-sm text-slate-400 mt-1">"{storyIdea}"</p>
+                    </div>
+                    <button
+                        onClick={onExportPdf}
+                        disabled={!canExportPdf || isExportingPdf}
+                        className="flex items-center gap-2 bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-600 font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {isExportingPdf ? (
+                            <>
+                                <LoadingSpinner />
+                                <span>{t('storyboardDisplay.exportingPdf')}</span>
+                            </>
+                        ) : (
+                            <>
+                                <DownloadIcon className="w-4 h-4" />
+                                <span>{t('storyboardDisplay.exportPdf')}</span>
+                            </>
+                        )}
+                    </button>
+                </div>
                 <div className="mt-3 text-xs text-slate-500 flex items-center gap-4">
                     <span>{t('storyboardDisplay.scenes', { count: panels.length })}</span>
                     <span>{t('storyboardDisplay.estimatedLength', { duration: totalDuration })}</span>

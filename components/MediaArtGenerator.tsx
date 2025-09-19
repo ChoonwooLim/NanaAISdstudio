@@ -95,6 +95,7 @@ const StyleParameterControls: React.FC<{
             return <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {renderSlider('mediaArtParams.fragmentation', 'fragmentation', p.fragmentation, 0, 100, 1)}
                 {renderSlider('mediaArtParams.motionSpeed', 'motionSpeed', p.motionSpeed, 0, 100, 1)}
+                {/* FIX: Corrected property access from p.kineticMirrorsReflections to p.reflection and added missing arguments to match other renderSelect calls. */}
                 {renderSelect('mediaArtParams.reflection', 'reflection', p.reflection, 'kineticMirrorsReflections')}
             </div>;
         }
@@ -160,53 +161,95 @@ const MediaArtGenerator: React.FC<MediaArtGeneratorProps> = ({
     const handleExportPdf = async () => {
         if (panels.length === 0) return;
         setIsExportingPdf(true);
-
+        const pdfContainer = document.createElement('div');
         try {
             const { jsPDF } = jspdf;
             const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
-            const pdfWidth = 210;
-            const pdfHeight = 297;
-            const margin = 15;
-            const contentWidth = pdfWidth - (margin * 2);
-            let yPos = margin;
+            const pdfWidthMm = 210;
+            const pdfHeightMm = 297;
+            const marginMm = 15;
 
-            // Cover page
-            pdf.setFillColor(15, 23, 42); // slate-900
-            pdf.rect(0, 0, pdfWidth, pdfHeight, 'F');
-            pdf.setFontSize(28);
-            pdf.setTextColor(255, 255, 255);
-            pdf.text('Media Art Storyboard', pdfWidth / 2, 40, { align: 'center' });
-            if (sourceImage) {
-                pdf.setFontSize(14);
-                pdf.setTextColor(148, 163, 184); // slate-400
-                pdf.text(`Source: ${sourceImage.title}`, pdfWidth / 2, 50, { align: 'center' });
+            pdfContainer.style.position = 'absolute';
+            pdfContainer.style.left = '-9999px';
+            pdfContainer.style.top = '0px';
+            const pageWidthPx = 794;
+            const pageHeightPx = 1123;
+            pdfContainer.style.width = `${pageWidthPx}px`;
+            pdfContainer.style.height = `${pageHeightPx}px`;
+            pdfContainer.style.fontFamily = "'Noto Sans KR', 'Inter', sans-serif";
+            document.body.appendChild(pdfContainer);
+
+            // --- Cover Page ---
+            const sourceImageInfo = sourceImage ? `<p style="font-size: 16px; color: #94a3b8; margin-top: 16px;">Source: ${sourceImage.title}</p>` : '';
+            pdfContainer.innerHTML = `
+                <div style="background-color: #0f172a; color: white; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px; box-sizing: border-box; text-align: center;">
+                    <h1 style="font-size: 36px; font-weight: bold; line-height: 1.3;">Media Art Storyboard</h1>
+                    ${sourceImageInfo}
+                </div>
+            `;
+            const coverCanvas = await html2canvas(pdfContainer.firstElementChild as HTMLElement, { scale: 2 });
+            pdf.addImage(coverCanvas.toDataURL('image/png'), 'PNG', 0, 0, pdfWidthMm, pdfHeightMm);
+
+            // --- Storyboard Pages ---
+            if (panels.length > 0) pdf.addPage();
+            
+            const pageWrapper = document.createElement('div');
+            pageWrapper.style.backgroundColor = '#0f172a';
+            pageWrapper.style.color = 'white';
+            pageWrapper.style.width = '100%';
+            pageWrapper.style.minHeight = '100%';
+            pageWrapper.style.padding = `${(marginMm / pdfWidthMm) * pageWidthPx}px`;
+            pageWrapper.style.boxSizing = 'border-box';
+            pdfContainer.innerHTML = '';
+            pdfContainer.appendChild(pageWrapper);
+
+            for (let i = 0; i < panels.length; i++) {
+                const panel = panels[i];
+                const panelEl = document.createElement('div');
+                panelEl.innerHTML = `
+                    <div style="border: 1px solid #334155; border-radius: 8px; overflow: hidden; margin-bottom: 20px;">
+                        <div style="padding: 12px; background-color: #1e293b;">
+                            <h3 style="font-size: 16px; font-weight: bold;">Transition ${i + 1}</h3>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background-color: #334155;">
+                            <div style="position: relative; background-color: #0f172a; aspect-ratio: 16/9;">
+                                <div style="position: absolute; top: 8px; left: 8px; background-color: rgba(0,0,0,0.5); color: white; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px;">Start Frame</div>
+                                <img src="${panel.imageUrl || ''}" style="width: 100%; height: 100%; object-fit: cover;" />
+                            </div>
+                            <div style="position: relative; background-color: #0f172a; aspect-ratio: 16/9;">
+                                 <div style="position: absolute; top: 8px; left: 8px; background-color: rgba(0,0,0,0.5); color: white; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px;">End Frame</div>
+                                <img src="${panel.endImageUrl || ''}" style="width: 100%; height: 100%; object-fit: cover;" />
+                            </div>
+                        </div>
+                        <div style="padding: 16px; background-color: #1e293b;">
+                            <p style="font-size: 12px; color: #94a3b8; margin-bottom: 4px;">Transition Prompt:</p>
+                            <p style="font-size: 14px; line-height: 1.6; color: #cbd5e1; white-space: pre-wrap; word-wrap: break-word;">${panel.description}</p>
+                        </div>
+                    </div>`;
+
+                pageWrapper.appendChild(panelEl);
+
+                if (pageWrapper.offsetHeight > pageHeightPx && pageWrapper.children.length > 1) {
+                    pageWrapper.removeChild(panelEl);
+                    const pageCanvas = await html2canvas(pageWrapper, { scale: 2 });
+                    pdf.addImage(pageCanvas.toDataURL('image/png'), 'PNG', 0, 0, pdfWidthMm, pdfHeightMm);
+                    pdf.addPage();
+                    pageWrapper.innerHTML = '';
+                    pageWrapper.appendChild(panelEl);
+                }
+            }
+
+            if (pageWrapper.children.length > 0) {
+                const lastPageCanvas = await html2canvas(pageWrapper, { scale: 2 });
+                pdf.addImage(lastPageCanvas.toDataURL('image/png'), 'PNG', 0, 0, pdfWidthMm, pdfHeightMm);
             }
             
-            const panelElements = document.querySelectorAll('.media-art-panel-pdf');
-
-            for (let i = 0; i < panelElements.length; i++) {
-                const panelEl = panelElements[i] as HTMLElement;
-                const canvas = await html2canvas(panelEl, { backgroundColor: '#1e293b', scale: 2 });
-                const imgData = canvas.toDataURL('image/png');
-                const imgProps = pdf.getImageProperties(imgData);
-                const imgHeight = (imgProps.height * contentWidth) / imgProps.width;
-
-                const requiredSpace = imgHeight + 10;
-                if (yPos > margin && yPos + requiredSpace > pdfHeight - margin) {
-                    pdf.addPage();
-                    yPos = margin;
-                }
-                
-                pdf.addImage(imgData, 'PNG', margin, yPos, contentWidth, imgHeight);
-                yPos += imgHeight + 10;
-            }
-
             const safeTitle = sourceImage?.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'export';
             pdf.save(`media-art-${safeTitle}.pdf`);
-
         } catch (err) {
             console.error("Failed to export PDF:", err);
         } finally {
+            if (pdfContainer) document.body.removeChild(pdfContainer);
             setIsExportingPdf(false);
         }
     };
@@ -311,7 +354,7 @@ const MediaArtGenerator: React.FC<MediaArtGeneratorProps> = ({
                     </div>
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                          {panels.map((panel, index) => (
-                             <div key={index} className="media-art-panel-pdf bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden flex flex-col">
+                             <div key={index} className="bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden flex flex-col">
                                  <div className="p-3">
                                      <h4 className="text-sm font-semibold text-slate-300">{t('mediaArt.transition')} {index + 1}</h4>
                                  </div>

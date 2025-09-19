@@ -4,14 +4,16 @@ import { DESCRIPTION_LANGUAGE_OPTIONS } from '../constants';
 import UploadIcon from './icons/UploadIcon';
 import PlusIcon from './icons/PlusIcon';
 import GalleryIcon from './icons/GalleryIcon';
+import SaveIcon from './icons/SaveIcon';
 
 interface HeaderProps {
     onOpenGallery: () => void;
     onNewProject: () => void;
     onImport: () => void;
+    onExportProject: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onOpenGallery, onNewProject, onImport }) => {
+const Header: React.FC<HeaderProps> = ({ onOpenGallery, onNewProject, onImport, onExportProject }) => {
     const { t, language, setLanguage } = useTranslation();
     const title = t('header.title');
     const subtitle = t('header.subtitle');
@@ -34,6 +36,7 @@ const Header: React.FC<HeaderProps> = ({ onOpenGallery, onNewProject, onImport }
                             <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M5.516 7.548c.436-.446 1.043-.481 1.576 0L10 10.405l2.908-2.857c.533-.481 1.141-.446 1.574 0 .436.445.408 1.197 0 1.615l-3.712 3.667a1.109 1.109 0 0 1-1.576 0L5.516 9.163c-.409-.418-.436-1.17 0-1.615z"/></svg>
                         </div>
                     </div>
+                    <div className="h-6 w-px bg-slate-600"></div>
                     <button 
                         onClick={onNewProject}
                         className="bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-600 font-medium py-2 px-3 sm:px-4 rounded-lg transition-colors flex items-center gap-2"
@@ -49,6 +52,14 @@ const Header: React.FC<HeaderProps> = ({ onOpenGallery, onNewProject, onImport }
                     >
                         <UploadIcon className="w-4 h-4 flex-shrink-0" />
                         <span className="hidden sm:inline">{t('header.importProject')}</span>
+                    </button>
+                    <button 
+                        onClick={onExportProject}
+                        className="bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-600 font-medium py-2 px-3 sm:px-4 rounded-lg transition-colors flex items-center gap-2"
+                        title={t('tooltips.exportProjectFile')}
+                    >
+                        <SaveIcon className="w-4 h-4 flex-shrink-0" />
+                        <span className="hidden sm:inline">{t('header.exportProject')}</span>
                     </button>
                     <button 
                         onClick={onOpenGallery}

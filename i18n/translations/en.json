@@ -4,11 +4,13 @@
     "subtitle": "An AI-powered creative suite to generate compelling product descriptions and visualize ideas with detailed storyboards and video clips.",
     "newProject": "New",
     "importProject": "Import",
+    "exportProject": "Export",
     "openGallery": "Gallery"
   },
   "tooltips": {
     "newProject": "Start a new blank project",
     "importProjectFile": "Import a project file",
+    "exportProjectFile": "Export current project to a file",
     "openGallery": "Open project gallery",
     "regenerateImage": "Regenerate Image",
     "generateVideo": "Generate Video Clip",
@@ -78,7 +80,9 @@
     "videoErrorTitle": "Video Error",
     "videoError": "Video generation failed.",
     "duration": "Duration",
-    "googleAIStudio": "Google AI Studio"
+    "googleAIStudio": "Google AI Studio",
+    "exportPdf": "Export PDF",
+    "exportingPdf": "Exporting..."
   },
   "detailedModal": {
     "title": "Expand Scene",
@@ -302,6 +306,8 @@
     "sceneExpansion": "Failed to expand scene. Please try again.",
     "videoGeneration": "Failed to generate video clip.",
     "mediaArtGeneration": "Failed to generate media art scenes. Please try again.",
-    "visualArtGeneration": "Failed to generate visual art video. Please try again."
+    "visualArtGeneration": "Failed to generate visual art video. Please try again.",
+    "projectImport": "Failed to import project. The file may be invalid or corrupted.",
+    "projectExport": "Failed to export project."
   }
 }
