@@ -254,28 +254,26 @@ const getStylePrompt = (style: MediaArtStyle, params: MediaArtStyleParams): stri
     }
 };
 
-export const generateMediaArtKeyframePrompts = async (sourceImage: MediaArtSourceImage, style: MediaArtStyle, params: MediaArtStyleParams, language: string): Promise<string[]> => {
+export const generateMediaArtKeyframePrompts = async (sourceImage: MediaArtSourceImage, style: MediaArtStyle, params: MediaArtStyleParams, config: StoryboardConfig): Promise<string[]> => {
     const styleInstruction = getStylePrompt(style, params);
 
-    const prompt = `Analyze the provided source image (${sourceImage.title}). Your task is to generate a 4-step visual storyboard that creates a natural, significant, and visually compelling transformation. The sequence starts with a highly abstract artistic interpretation and gradually, smoothly resolves back into the original image.
+    const prompt = `Analyze the provided source image (${sourceImage.title}). Your task is to generate a ${config.sceneCount}-step visual storyboard. This storyboard will define an animation that starts as a highly abstract artistic piece and smoothly resolves into the original image.
 
-    **Style Instructions:**
-    The core artistic style for the transformation is as follows:
-    ${styleInstruction}
+    **Core Style:**
+    The artistic style for the abstract steps is: ${styleInstruction}
 
-    **Keyframe Evolution Instructions:**
-    You must create exactly 4 detailed and visually rich prompts for an AI image generator. These prompts represent keyframes in a continuous animation that starts highly abstract and ends with a faithful representation of the source image. Each keyframe must describe a complete, distinct scene.
+    **Overall Mood:**
+    The mood of the sequence should be ${config.mood}.
 
-    *   **Keyframe 1 (Maximum Abstraction):** This is a radical artistic interpretation. Deconstruct the source image almost completely. Only **10-20%** of the original subject/composition should be hinted at. The artistic style must be the absolute focus. The result should be visually stunning but barely recognizable as the source.
-    *   **Keyframe 2 (Emerging Forms):** The scene is still highly stylized, but recognizable forms and shapes from the source image begin to emerge from the abstraction. About **30-50%** of the original image's features should be identifiable, acting as a bridge between pure art and the source.
-    *   **Keyframe 3 (Artistic Overlay):** The source image is now clearly the primary subject. The artistic style acts as a beautiful, complex overlay or filter, rather than the core structure. About **60-80%** of the original image should be clear and distinct.
-    *   **Keyframe 4 (Faithful Rendition):** This prompt must describe the original source image with near-perfect accuracy (**95-100%** fidelity). The subject, composition, colors, and lighting should be faithfully reproduced. Any remaining stylistic influence must be minimal to non-existent, just a subtle artistic echo.
+    **Instructions for ${config.sceneCount} Keyframes:**
+    1.  Generate exactly ${config.sceneCount} prompts for an AI image generator.
+    2.  The prompts must represent a smooth, linear interpolation from almost pure abstraction to almost perfect reality.
+    3.  **Keyframe 1 (Most Abstract):** This should be a radical artistic interpretation. Only 10-20% of the original subject should be hinted at. The Core Style must be the absolute focus.
+    4.  **Intermediate Keyframes:** For each step between the first and last, gradually increase the fidelity to the original image and decrease the intensity of the Core Style. The visual change between any two consecutive steps should be roughly equal.
+    5.  **Keyframe ${config.sceneCount} (Most Realistic):** This prompt must describe the original source image with 95-100% fidelity. The subject, composition, and colors should be faithfully reproduced. The Core Style should be minimal to non-existent.
+    6.  Each prompt must be a single, detailed, and visually rich paragraph.
+    7.  The descriptions must be in ${config.descriptionLanguage}.
 
-    **Output Instructions:**
-    1.  Ensure the prompts create a smooth and logical visual transition with significant change between steps.
-    2.  Each prompt must be a single, detailed paragraph.
-    3.  The descriptions must be in ${language}.
-    
     Return the result as a JSON array of strings.`;
     
     const imagePart = await (async () => {
@@ -311,7 +309,7 @@ export const generateMediaArtKeyframePrompts = async (sourceImage: MediaArtSourc
     })();
     
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: config.textModel,
         contents: { parts: [{ text: prompt }, imagePart] },
         config: {
             responseMimeType: "application/json",

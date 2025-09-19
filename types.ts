@@ -204,6 +204,7 @@ export interface MediaArtState {
     style: MediaArtStyle;
     styleParams: MediaArtStyleParams;
     panels: StoryboardPanel[];
+    config: StoryboardConfig;
 }
 
 export interface VisualArtState {

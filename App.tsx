@@ -91,6 +91,7 @@ const App: React.FC = () => {
         style: MediaArtStyle.DATA_COMPOSITION,
         styleParams: MEDIA_ART_STYLE_OPTIONS.find(opt => opt.value === MediaArtStyle.DATA_COMPOSITION)!.defaultParams,
         panels: [],
+        config: initialStoryboardConfig,
     };
     const [mediaArtState, setMediaArtState] = useState<MediaArtState>(initialMediaArtState);
     const [isGeneratingMediaArtScenes, setIsGeneratingMediaArtScenes] = useState(false);
@@ -465,7 +466,15 @@ const App: React.FC = () => {
                     setDescription(projectData.description || '');
                     setStoryboardConfig(projectData.storyboardConfig || initialStoryboardConfig);
                     setStoryIdea(projectData.storyIdea || '');
-                    setMediaArtState(projectData.mediaArtState || initialMediaArtState);
+                    
+                    const loadedMediaArtState = projectData.mediaArtState ? 
+                        { ...initialMediaArtState, ...projectData.mediaArtState } : 
+                        initialMediaArtState;
+                    if (!loadedMediaArtState.config) {
+                        loadedMediaArtState.config = initialStoryboardConfig;
+                    }
+                    setMediaArtState(loadedMediaArtState);
+
                     setVisualArtState(projectData.visualArtState || initialVisualArtState);
 
                     const panelsToLoad = projectData.storyboardPanels || [];
@@ -503,9 +512,9 @@ const App: React.FC = () => {
         setMediaArtState(s => ({ ...s, panels: [] }));
 
         try {
-            const { sourceImage, style, styleParams } = mediaArtState;
+            const { sourceImage, style, styleParams, config } = mediaArtState;
             // Step 1: Generate keyframe prompts
-            const keyframePrompts = await geminiService.generateMediaArtKeyframePrompts(sourceImage, style, styleParams, language);
+            const keyframePrompts = await geminiService.generateMediaArtKeyframePrompts(sourceImage, style, styleParams, config);
             if (keyframePrompts.length < 2) {
                 throw new Error("Not enough keyframe prompts were generated to create transitions.");
             }
@@ -513,8 +522,9 @@ const App: React.FC = () => {
             // Step 2: Generate all keyframe images in parallel
             const keyframeImages = await Promise.all(keyframePrompts.map(prompt =>
                 geminiService.generateImageForPanel(prompt, {
-                    imageModel: 'imagen-4.0-generate-001',
-                    aspectRatio: AspectRatio.LANDSCAPE,
+                    imageModel: config.imageModel,
+                    aspectRatio: config.aspectRatio,
+                    visualStyle: config.visualStyle,
                 }).then(imageBase64 => `data:image/jpeg;base64,${imageBase64}`).catch(() => 'error')
             ));
 
@@ -551,7 +561,7 @@ const App: React.FC = () => {
         try {
             const imageBase64 = panel.imageUrl.split(',')[1];
             // The panel description is now the prompt for the *end* frame, which is what the video model needs.
-            const videoUrl = await geminiService.generateVideoForPanel(panel.description, imageBase64, 'veo-2.0-generate-001', true);
+            const videoUrl = await geminiService.generateVideoForPanel(panel.description, imageBase64, mediaArtState.config.videoModel, true);
             panels[index].videoUrl = videoUrl;
         } catch (e: any) {
             panels[index].videoUrl = 'error';

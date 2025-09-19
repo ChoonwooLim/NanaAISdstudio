@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { MediaArtState, MediaArtStyle, MediaArtStyleParams, DataCompositionParams, DigitalNatureParams, AiDataSculptureParams, LightAndSpaceParams, KineticMirrorsParams, GenerativeBotanyParams, QuantumPhantasmParams, ArchitecturalProjectionParams } from '../types';
+import { MediaArtState, MediaArtStyle, MediaArtStyleParams, DataCompositionParams, DigitalNatureParams, AiDataSculptureParams, LightAndSpaceParams, KineticMirrorsParams, GenerativeBotanyParams, QuantumPhantasmParams, ArchitecturalProjectionParams, StoryboardConfig } from '../types';
 import { MEDIA_ART_STYLE_OPTIONS } from '../constants';
 import { useTranslation } from '../i18n/LanguageContext';
 import LoadingSpinner from './LoadingSpinner';
 import UploadIcon from './icons/UploadIcon';
 import DownloadIcon from './icons/DownloadIcon';
+import StoryboardSettings from './StoryboardSettings';
 
 declare var jspdf: any;
 declare var html2canvas: any;
@@ -95,7 +96,6 @@ const StyleParameterControls: React.FC<{
             return <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {renderSlider('mediaArtParams.fragmentation', 'fragmentation', p.fragmentation, 0, 100, 1)}
                 {renderSlider('mediaArtParams.motionSpeed', 'motionSpeed', p.motionSpeed, 0, 100, 1)}
-                {/* FIX: Corrected property access from p.kineticMirrorsReflections to p.reflection and added missing arguments to match other renderSelect calls. */}
                 {renderSelect('mediaArtParams.reflection', 'reflection', p.reflection, 'kineticMirrorsReflections')}
             </div>;
         }
@@ -140,6 +140,7 @@ const MediaArtGenerator: React.FC<MediaArtGeneratorProps> = ({
     const { t } = useTranslation();
     const { sourceImage, style, styleParams, panels } = state;
     const [isExportingPdf, setIsExportingPdf] = useState(false);
+    const [showSettings, setShowSettings] = useState(false);
 
     const handleStyleChange = (newStyle: MediaArtStyle) => {
         const styleOption = MEDIA_ART_STYLE_OPTIONS.find(opt => opt.value === newStyle);
@@ -156,6 +157,10 @@ const MediaArtGenerator: React.FC<MediaArtGeneratorProps> = ({
                 [param]: value
             }
         }));
+    };
+
+    const handleConfigChange = (newConfig: StoryboardConfig) => {
+        setState(s => ({ ...s, config: newConfig }));
     };
 
     const handleExportPdf = async () => {
@@ -310,6 +315,24 @@ const MediaArtGenerator: React.FC<MediaArtGeneratorProps> = ({
                 <h3 className="block text-sm font-semibold text-slate-300 mb-4">{t('mediaArt.paramsTitle')}</h3>
                 <StyleParameterControls style={style} params={styleParams} onChange={handleParamChange} />
             </div>
+
+            {/* --- Advanced Settings --- */}
+            <div className="flex justify-between items-center pt-2">
+                <button
+                    type="button"
+                    onClick={() => setShowSettings(!showSettings)}
+                    className="text-sm text-blue-400 hover:text-blue-300"
+                >
+                    {showSettings ? t('storyboardForm.hideSettings') : t('storyboardForm.showSettings')}
+                </button>
+            </div>
+
+            {showSettings && (
+                <div className="animate-fade-in">
+                    <StoryboardSettings config={state.config} setConfig={handleConfigChange} />
+                </div>
+            )}
+
 
             {/* --- Generate Button --- */}
             <div className="pt-2">
