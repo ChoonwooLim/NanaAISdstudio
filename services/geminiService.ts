@@ -170,22 +170,22 @@ export const generateImageForPanel = async (description: string, config: { image
 export const generateVideoForPanel = async (prompt: string, imageBase64: string, videoModel: string, isMediaArt: boolean = false): Promise<string> => {
     let finalPrompt = prompt;
     if (isMediaArt) {
-        finalPrompt = `**ULTIMATE DIRECTIVE: PERFECT FIDELITY & CINEMATIC QUALITY**
-        Your primary mission is to create a flawless, high-definition video that demonstrates a seamless morphing transformation. The two most critical requirements are **absolute fidelity** to the start/end frames and **maximum visual quality** that matches the provided artwork.
+        // Re-engineered the prompt to be more structured and robust, prioritizing the detailed
+        // end-frame description to ensure accuracy even with long, complex prompts.
+        finalPrompt = `Your primary task is to create a video that ends with a precise image.
+        
+**Target Image Description (The Final Frame):** 
+${prompt}
 
-        **Start Frame:** [Image provided via API]
-        **End Frame Description (This defines the final frame):** "${prompt}"
+**Starting Image (The First Frame):** 
+The provided input image.
 
-        **ANIMATION & MORPHING LOGIC:**
-        1.  **Fluid Transformation:** This is not a fade or cross-dissolve. It is a true morph. Every element in the start frame must fluidly transform, shift, or evolve into the corresponding elements described for the end frame.
-        2.  **Consistent Style Evolution:** The artistic style, texture, and lighting of the start frame must smoothly transition into the style of the end frame. There should be no jarring change in aesthetic.
-        3.  **Natural & Cinematic Motion:** All movement must be smooth, believable, and aesthetically pleasing. Avoid jerky or unnatural animations.
-
-        **STRICT QUALITY & FIDELITY CONSTRAINTS (NON-NEGOTIABLE):**
-        1.  **100% Start Frame Match:** The very first frame of your generated video MUST be a **pixel-for-pixel identical copy** of the provided Start Frame image. No exceptions.
-        2.  **100% End Frame Match:** The very last frame of your video MUST be a **pixel-perfect, high-fidelity rendering** of the End Frame Description. It must fully capture the details, colors, lighting, and composition described.
-        3.  **Match Source Quality:** The video's resolution, clarity, and overall quality must **match the quality of the original art images**. Do not introduce compression artifacts, blurriness, or lower detail. Produce a high-bitrate, cinematic-quality result.
-        4.  **No Extraneous Elements:** DO NOT add any text, watermarks, logos, or any other elements not present in the source images or implied by the descriptions.`;
+**Animation Instructions:**
+- The video's first frame MUST be 100% identical to the Starting Image.
+- The video's final frame MUST be a photorealistic, high-quality, and detailed rendering that is 100% identical to the Target Image Description above.
+- The animation between the start and end frames must be a smooth, cinematic morphing transition. Do not use a simple cross-fade.
+- Maintain the highest possible visual quality.
+- Do not add any text or watermarks to the video.`;
     }
 
     // Corrected: Use ai.models.generateVideos for video generation as per guidelines.
@@ -256,25 +256,27 @@ const getStylePrompt = (style: MediaArtStyle, params: MediaArtStyleParams): stri
 
 export const generateMediaArtKeyframePrompts = async (sourceImage: MediaArtSourceImage, style: MediaArtStyle, params: MediaArtStyleParams, config: StoryboardConfig): Promise<string[]> => {
     const styleInstruction = getStylePrompt(style, params);
+    // A user-selected "scene count" of N corresponds to N transitions, which requires N+1 keyframes.
+    const numberOfKeyframes = config.sceneCount + 1;
 
-    const prompt = `Analyze the provided source image (${sourceImage.title}). Your task is to generate a ${config.sceneCount}-step visual storyboard. This storyboard will define an animation that starts as a highly abstract artistic piece and smoothly resolves into the original image.
+    const prompt = `Analyze the provided source image (${sourceImage.title}). Your task is to generate prompts for exactly ${numberOfKeyframes} keyframes for a visual animation. This animation begins as a highly abstract artistic piece and smoothly resolves into the original, realistic image.
 
-    **Core Style:**
-    The artistic style for the abstract steps is: ${styleInstruction}
+**Core Artistic Style:**
+The abstract style is: ${styleInstruction}
 
-    **Overall Mood:**
-    The mood of the sequence should be ${config.mood}.
+**Overall Mood:**
+The mood of the animation sequence should be ${config.mood}.
 
-    **Instructions for ${config.sceneCount} Keyframes:**
-    1.  Generate exactly ${config.sceneCount} prompts for an AI image generator.
-    2.  The prompts must represent a smooth, linear interpolation from almost pure abstraction to almost perfect reality.
-    3.  **Keyframe 1 (Most Abstract):** This should be a radical artistic interpretation. Only 10-20% of the original subject should be hinted at. The Core Style must be the absolute focus.
-    4.  **Intermediate Keyframes:** For each step between the first and last, gradually increase the fidelity to the original image and decrease the intensity of the Core Style. The visual change between any two consecutive steps should be roughly equal.
-    5.  **Keyframe ${config.sceneCount} (Most Realistic):** This prompt must describe the original source image with 95-100% fidelity. The subject, composition, and colors should be faithfully reproduced. The Core Style should be minimal to non-existent.
-    6.  Each prompt must be a single, detailed, and visually rich paragraph.
-    7.  The descriptions must be in ${config.descriptionLanguage}.
+**Instructions for Generating ${numberOfKeyframes} Keyframe Prompts:**
+1.  **Generate exactly ${numberOfKeyframes} prompts** for an AI image generator. The output MUST be a JSON array containing ${numberOfKeyframes} strings.
+2.  The prompts must represent a smooth, linear interpolation from pure abstraction to perfect reality. The visual change between any two consecutive keyframes should be gradual and consistent.
+3.  **Keyframe 1 (Most Abstract):** This must be a radical artistic interpretation. Only 10-20% of the original image's subject should be recognizable. The Core Artistic Style must be the absolute focus.
+4.  **Intermediate Keyframes:** For each step between the first and last, you must gradually and evenly increase the realism and fidelity to the original image, while simultaneously decreasing the intensity of the Core Artistic Style.
+5.  **Keyframe ${numberOfKeyframes} (Most Realistic):** This prompt MUST describe the original source image with 100% fidelity. The subject, composition, and colors must be perfectly reproduced. The Core Artistic Style should be completely absent here.
+6.  Each prompt must be a single, detailed, and visually rich paragraph.
+7.  All descriptions must be in ${config.descriptionLanguage}.
 
-    Return the result as a JSON array of strings.`;
+Return the result as a JSON array of strings, containing exactly ${numberOfKeyframes} elements.`;
     
     const imagePart = await (async () => {
         if (sourceImage.url.startsWith('data:')) {

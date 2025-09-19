@@ -399,9 +399,14 @@ const MediaArtGenerator: React.FC<MediaArtGeneratorProps> = ({
                                          )}
                                      </div>
                                  </div>
-                                  <div className="p-4 flex-grow">
-                                     <p className="text-xs text-slate-400 mb-1">{t('mediaArt.transitionPrompt')}:</p>
-                                     <p className="text-sm text-slate-300 leading-relaxed line-clamp-3">{panel.description}</p>
+                                 <div className="p-4 flex-grow flex flex-col">
+                                     <label htmlFor={`transition-prompt-${index}`} className="text-xs text-slate-400 mb-1 flex-shrink-0">{t('mediaArt.transitionPrompt')}:</label>
+                                     <textarea
+                                        id={`transition-prompt-${index}`}
+                                        readOnly
+                                        value={panel.description}
+                                        className="w-full flex-grow bg-slate-700/50 border border-slate-600 rounded-md p-2 text-sm text-slate-300 leading-relaxed resize-none focus:ring-0 focus:border-slate-600"
+                                     />
                                  </div>
                                   <div className="p-3 border-t border-slate-700 bg-slate-900/30 flex items-center justify-between gap-2">
                                      <div className="flex-grow min-w-0">
