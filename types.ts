@@ -89,6 +89,7 @@ export interface StoryboardConfig {
 export interface StoryboardPanel {
     description: string;
     imageUrl?: string;
+    endImageUrl?: string;
     isLoadingImage?: boolean;
     videoUrl?: string;
     isLoadingVideo?: boolean;

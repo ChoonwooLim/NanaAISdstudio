@@ -128,7 +128,12 @@
     "generating": "생성 중...",
     "resultsTitle": "4. 애니메이션 및 다듬기",
     "exportPdf": "PDF로 내보내기",
-    "exportingPdf": "내보내는 중..."
+    "exportingPdf": "내보내는 중...",
+    "generateTransition": "전환 생성",
+    "startFrame": "시작 프레임",
+    "endFrame": "종료 프레임",
+    "transitionPrompt": "전환 프롬프트",
+    "transition": "전환"
   },
   "mediaArtStyles": {
     "dataComposition": "데이터 구성",

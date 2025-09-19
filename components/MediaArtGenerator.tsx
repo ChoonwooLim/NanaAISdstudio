@@ -4,8 +4,6 @@ import { MEDIA_ART_STYLE_OPTIONS } from '../constants';
 import { useTranslation } from '../i18n/LanguageContext';
 import LoadingSpinner from './LoadingSpinner';
 import UploadIcon from './icons/UploadIcon';
-import RefreshIcon from './icons/RefreshIcon';
-import DeleteIcon from './icons/DeleteIcon';
 import DownloadIcon from './icons/DownloadIcon';
 
 declare var jspdf: any;
@@ -16,9 +14,7 @@ interface MediaArtGeneratorProps {
     setState: React.Dispatch<React.SetStateAction<MediaArtState>>;
     onOpenImageSelector: () => void;
     onGenerateScenes: () => void;
-    onRegenerateImage: (index: number) => void;
     onRegenerateVideo: (index: number) => void;
-    onDeletePanel: (index: number) => void;
     isLoading: boolean;
     error: string | null;
 }
@@ -136,9 +132,7 @@ const MediaArtGenerator: React.FC<MediaArtGeneratorProps> = ({
     setState,
     onOpenImageSelector,
     onGenerateScenes,
-    onRegenerateImage,
     onRegenerateVideo,
-    onDeletePanel,
     isLoading,
     error,
 }) => {
@@ -164,7 +158,7 @@ const MediaArtGenerator: React.FC<MediaArtGeneratorProps> = ({
     };
 
     const handleExportPdf = async () => {
-        if (panels.length === 0 || panels.some(p => p.isLoadingImage)) return;
+        if (panels.length === 0) return;
         setIsExportingPdf(true);
 
         try {
@@ -181,7 +175,7 @@ const MediaArtGenerator: React.FC<MediaArtGeneratorProps> = ({
             pdf.rect(0, 0, pdfWidth, pdfHeight, 'F');
             pdf.setFontSize(28);
             pdf.setTextColor(255, 255, 255);
-            pdf.text('Media Art', pdfWidth / 2, 40, { align: 'center' });
+            pdf.text('Media Art Storyboard', pdfWidth / 2, 40, { align: 'center' });
             if (sourceImage) {
                 pdf.setFontSize(14);
                 pdf.setTextColor(148, 163, 184); // slate-400
@@ -197,7 +191,7 @@ const MediaArtGenerator: React.FC<MediaArtGeneratorProps> = ({
                 const imgProps = pdf.getImageProperties(imgData);
                 const imgHeight = (imgProps.height * contentWidth) / imgProps.width;
 
-                const requiredSpace = imgHeight + 10; // Image height + margin
+                const requiredSpace = imgHeight + 10;
                 if (yPos > margin && yPos + requiredSpace > pdfHeight - margin) {
                     pdf.addPage();
                     yPos = margin;
@@ -217,9 +211,8 @@ const MediaArtGenerator: React.FC<MediaArtGeneratorProps> = ({
         }
     };
 
-    const selectedStyleOption = MEDIA_ART_STYLE_OPTIONS.find(opt => opt.value === style);
     const isGenerateDisabled = isLoading || !sourceImage;
-    const canExportPdf = panels.length > 0 && !panels.some(p => p.isLoadingImage || !p.imageUrl || p.imageUrl === 'error');
+    const canExportPdf = panels.length > 0 && !panels.some(p => !p.imageUrl || p.imageUrl === 'error');
 
     return (
         <div className="space-y-8">
@@ -294,7 +287,7 @@ const MediaArtGenerator: React.FC<MediaArtGeneratorProps> = ({
             {error && <p className="text-red-400 mt-4 text-center">{error}</p>}
 
             {/* --- Results --- */}
-            {(isLoading || panels.length > 0) && (
+            {(panels.length > 0) && (
                  <div className="mt-8 animate-fade-in">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-xl font-bold text-slate-200">{t('mediaArt.resultsTitle')}</h2>
@@ -319,67 +312,64 @@ const MediaArtGenerator: React.FC<MediaArtGeneratorProps> = ({
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                          {panels.map((panel, index) => (
                              <div key={index} className="media-art-panel-pdf bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden flex flex-col">
-                                 <div className="relative aspect-video bg-slate-800 flex items-center justify-center">
-                                    <div className="absolute top-2 left-2 bg-black/50 text-white text-xs font-bold px-2 py-1 rounded">
-                                        {t('storyboardDisplay.scene', { index: index + 1 })}
-                                    </div>
-                                    {panel.isLoadingImage && (
-                                        <div className="flex flex-col items-center text-slate-400">
-                                            <LoadingSpinner />
-                                            <p className="text-xs mt-2">{t('storyboardDisplay.generatingImage')}</p>
-                                        </div>
-                                    )}
-                                    {panel.imageUrl && panel.imageUrl !== 'error' && (
-                                        <img src={panel.imageUrl} alt={`Panel ${index + 1}`} className="w-full h-full object-cover" />
-                                    )}
-                                     {panel.imageUrl === 'error' && (
-                                        <div className="text-red-400 text-center p-4">
-                                            <p className="font-semibold">Oops!</p>
-                                            <p className="text-xs">{t('storyboardDisplay.imageError')}</p>
-                                        </div>
-                                    )}
-                                    {panel.isLoadingVideo && (
-                                        <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center text-white">
-                                            <LoadingSpinner />
-                                            <p className="text-sm mt-2">{t('storyboardDisplay.generatingClip')}</p>
-                                            <p className="text-xs text-slate-400">{t('storyboardDisplay.generatingClipHint')}</p>
-                                        </div>
-                                    )}
-                                    {panel.videoUrl === 'error' && (
-                                        <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center text-red-400 p-4 text-center">
-                                            <p className="font-semibold">{t('storyboardDisplay.videoErrorTitle')}</p>
-                                            <p className="text-xs mt-1">{panel.videoError || t('storyboardDisplay.videoError')}</p>
-                                        </div>
-                                    )}
+                                 <div className="p-3">
+                                     <h4 className="text-sm font-semibold text-slate-300">{t('mediaArt.transition')} {index + 1}</h4>
                                  </div>
-                                 <div className="p-4 flex-grow">
-                                     <p className="text-sm text-slate-300 leading-relaxed">{panel.description}</p>
+                                 <div className="grid grid-cols-2 gap-px bg-slate-700">
+                                     <div className="relative aspect-video bg-slate-800 flex flex-col items-center justify-center">
+                                         <p className="absolute top-2 left-2 bg-black/50 text-white text-xs font-bold px-2 py-1 rounded">{t('mediaArt.startFrame')}</p>
+                                         {(panel.imageUrl && panel.imageUrl !== 'error') ? (
+                                            <img src={panel.imageUrl} alt={`${t('mediaArt.startFrame')} ${index + 1}`} className="w-full h-full object-cover" />
+                                         ) : (
+                                            <div className="w-full h-full flex items-center justify-center text-red-400 text-xs p-2 text-center">{t('storyboardDisplay.imageError')}</div>
+                                         )}
+                                     </div>
+                                      <div className="relative aspect-video bg-slate-800 flex flex-col items-center justify-center">
+                                         <p className="absolute top-2 left-2 bg-black/50 text-white text-xs font-bold px-2 py-1 rounded">{t('mediaArt.endFrame')}</p>
+                                         {(panel.endImageUrl && panel.endImageUrl !== 'error') ? (
+                                            <img src={panel.endImageUrl} alt={`${t('mediaArt.endFrame')} ${index + 1}`} className="w-full h-full object-cover" />
+                                         ) : (
+                                            <div className="w-full h-full flex items-center justify-center text-red-400 text-xs p-2 text-center">{t('storyboardDisplay.imageError')}</div>
+                                         )}
+                                     </div>
                                  </div>
-                                 {panel.videoUrl && panel.videoUrl !== 'error' && (
-                                    <div className="px-4 pb-2">
-                                        <video
-                                            key={panel.videoUrl}
-                                            src={panel.videoUrl}
-                                            controls
-                                            className="w-full rounded-md max-h-48"
-                                        />
-                                    </div>
-                                )}
-                                  <div className="p-3 border-t border-slate-700 bg-slate-900/30 flex items-center justify-end gap-2">
-                                     <button
-                                        onClick={() => onRegenerateVideo(index)}
-                                        title={t('tooltips.generateVideo')}
-                                        className="p-2 bg-slate-700 hover:bg-slate-600 rounded-md transition-colors disabled:opacity-50"
-                                        disabled={panel.isLoadingVideo || !panel.imageUrl || panel.imageUrl === 'error'}
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-300"><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/></svg>
-                                    </button>
-                                    <button onClick={() => onRegenerateImage(index)} title={t('tooltips.regenerateImage')} className="p-2 bg-slate-700 hover:bg-slate-600 rounded-md transition-colors disabled:opacity-50" disabled={panel.isLoadingImage}>
-                                        <RefreshIcon className="w-4 h-4 text-slate-300"/>
-                                    </button>
-                                    <button onClick={() => onDeletePanel(index)} title={t('tooltips.deletePanel')} className="p-2 bg-slate-700 hover:bg-slate-600 rounded-md transition-colors">
-                                        <DeleteIcon className="w-4 h-4 text-slate-300"/>
-                                    </button>
+                                  <div className="p-4 flex-grow">
+                                     <p className="text-xs text-slate-400 mb-1">{t('mediaArt.transitionPrompt')}:</p>
+                                     <p className="text-sm text-slate-300 leading-relaxed line-clamp-3">{panel.description}</p>
+                                 </div>
+                                  <div className="p-3 border-t border-slate-700 bg-slate-900/30 flex items-center justify-between gap-2">
+                                     <div className="flex-grow min-w-0">
+                                         {panel.isLoadingVideo && (
+                                            <div className="h-10 bg-slate-900/50 rounded-lg flex items-center justify-center text-white px-2">
+                                                <LoadingSpinner />
+                                                <p className="text-xs ml-2">{t('storyboardDisplay.generatingClip')}</p>
+                                            </div>
+                                        )}
+                                         {panel.videoUrl === 'error' && (
+                                            <div className="h-10 bg-red-900/50 rounded-lg flex items-center justify-center text-red-300 p-2 text-center">
+                                                <p className="text-xs font-semibold">{t('storyboardDisplay.videoErrorTitle')}</p>
+                                            </div>
+                                        )}
+                                          {panel.videoUrl && panel.videoUrl !== 'error' && !panel.isLoadingVideo && (
+                                            <video
+                                                key={panel.videoUrl}
+                                                src={panel.videoUrl}
+                                                controls
+                                                className="w-full rounded-md max-h-48"
+                                            />
+                                        )}
+                                     </div>
+                                     <div className="flex-shrink-0">
+                                         <button
+                                            onClick={() => onRegenerateVideo(index)}
+                                            title={t('mediaArt.generateTransition')}
+                                            className="p-2 bg-slate-700 hover:bg-slate-600 rounded-md transition-colors disabled:opacity-50 flex items-center gap-2 text-xs px-3"
+                                            disabled={panel.isLoadingVideo || !panel.imageUrl || panel.imageUrl === 'error'}
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-300"><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/></svg>
+                                            <span className="hidden sm:inline">{t('mediaArt.generateTransition')}</span>
+                                        </button>
+                                     </div>
                                 </div>
                              </div>
                          ))}

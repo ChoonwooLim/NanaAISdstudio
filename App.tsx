@@ -309,24 +309,35 @@ const App: React.FC = () => {
 
         try {
             const { sourceImage, style, styleParams } = mediaArtState;
-            const panels = await geminiService.generateMediaArtStoryboard(sourceImage, style, styleParams, language);
-            const initialPanels: StoryboardPanel[] = panels.map(p => ({ ...p, isLoadingImage: true, sceneDuration: 4 }));
-            setMediaArtState(s => ({ ...s, panels: initialPanels }));
-            
-            let currentPanels = [...initialPanels];
-            for (let i = 0; i < panels.length; i++) {
-                try {
-                    const imageBase64 = await geminiService.generateImageForPanel(panels[i].description, {
-                        imageModel: 'imagen-4.0-generate-001',
-                        aspectRatio: AspectRatio.LANDSCAPE,
-                        visualStyle: VisualStyle.CINEMATIC // Default for art
-                    });
-                    currentPanels[i] = { ...currentPanels[i], imageUrl: `data:image/jpeg;base64,${imageBase64}`, isLoadingImage: false };
-                } catch (imgErr) {
-                    currentPanels[i] = { ...currentPanels[i], imageUrl: 'error', isLoadingImage: false };
-                }
-                setMediaArtState(s => ({ ...s, panels: [...currentPanels] }));
+            // Step 1: Generate keyframe prompts
+            const keyframePrompts = await geminiService.generateMediaArtKeyframePrompts(sourceImage, style, styleParams, language);
+            if (keyframePrompts.length < 2) {
+                throw new Error("Not enough keyframe prompts were generated to create transitions.");
             }
+
+            // Step 2: Generate all keyframe images in parallel
+            const keyframeImages = await Promise.all(keyframePrompts.map(prompt =>
+                geminiService.generateImageForPanel(prompt, {
+                    imageModel: 'imagen-4.0-generate-001',
+                    aspectRatio: AspectRatio.LANDSCAPE,
+                }).then(imageBase64 => `data:image/jpeg;base64,${imageBase64}`).catch(() => 'error')
+            ));
+
+            // Step 3: Construct final transition panels
+            const transitionPanels: StoryboardPanel[] = [];
+            for (let i = 0; i < keyframeImages.length - 1; i++) {
+                if (keyframeImages[i] !== 'error' && keyframeImages[i + 1] !== 'error') {
+                    transitionPanels.push({
+                        description: keyframePrompts[i + 1], // Description is the target state
+                        imageUrl: keyframeImages[i], // imageUrl is the start frame
+                        endImageUrl: keyframeImages[i + 1], // endImageUrl is the end frame
+                        isLoadingImage: false,
+                        sceneDuration: 5,
+                    });
+                }
+            }
+            setMediaArtState(s => ({ ...s, panels: transitionPanels }));
+
         } catch (e: any) {
             setMediaArtError(e.message || t('errors.mediaArtGeneration'));
         } finally {
@@ -334,28 +345,6 @@ const App: React.FC = () => {
         }
     };
     
-    const handleRegenerateMediaArtImage = async (index: number) => {
-        const panels = [...mediaArtState.panels];
-        if (!panels[index]) return;
-    
-        const updatedPanels = [...panels];
-        updatedPanels[index] = { ...updatedPanels[index], imageUrl: undefined, isLoadingImage: true };
-        setMediaArtState(s => ({ ...s, panels: updatedPanels }));
-    
-        try {
-            const imageBase64 = await geminiService.generateImageForPanel(updatedPanels[index].description, {
-                imageModel: 'imagen-4.0-generate-001',
-                aspectRatio: AspectRatio.LANDSCAPE,
-                visualStyle: VisualStyle.CINEMATIC
-            });
-            updatedPanels[index] = { ...updatedPanels[index], imageUrl: `data:image/jpeg;base64,${imageBase64}`, isLoadingImage: false };
-        } catch (e) {
-            updatedPanels[index] = { ...updatedPanels[index], imageUrl: 'error', isLoadingImage: false };
-        } finally {
-            setMediaArtState(s => ({ ...s, panels: [...updatedPanels] }));
-        }
-    };
-
     const handleRegenerateMediaArtVideo = async (index: number) => {
         const panel = mediaArtState.panels[index];
         if (!panel.imageUrl || !panel.imageUrl.startsWith('data:image')) return;
@@ -366,6 +355,7 @@ const App: React.FC = () => {
 
         try {
             const imageBase64 = panel.imageUrl.split(',')[1];
+            // The panel description is now the prompt for the *end* frame, which is what the video model needs.
             const videoUrl = await geminiService.generateVideoForPanel(panel.description, imageBase64, 'veo-2.0-generate-001', true);
             panels[index].videoUrl = videoUrl;
         } catch (e: any) {
@@ -454,9 +444,7 @@ const App: React.FC = () => {
                                     setState={setMediaArtState}
                                     onOpenImageSelector={() => setIsImageSelectorOpen(true)}
                                     onGenerateScenes={handleGenerateMediaArtScenes}
-                                    onRegenerateImage={handleRegenerateMediaArtImage}
                                     onRegenerateVideo={handleRegenerateMediaArtVideo}
-                                    onDeletePanel={(index) => setMediaArtState(s => ({ ...s, panels: s.panels.filter((_, i) => i !== index)}))}
                                     isLoading={isGeneratingMediaArtScenes}
                                     error={mediaArtError}
                                 />

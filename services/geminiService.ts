@@ -145,9 +145,9 @@ export const generateDetailedStoryboard = async (originalScene: string, language
     return parsed.map(p => ({ description: p.description }));
 };
 
-export const generateImageForPanel = async (description: string, config: { imageModel: string, aspectRatio: AspectRatio, visualStyle: VisualStyle }): Promise<string> => {
-    const visualStylePrompt = config.visualStyle === VisualStyle.PHOTOREALISTIC ? 'photorealistic, cinematic' : config.visualStyle;
-    const prompt = `${description}, ${visualStylePrompt} style, high detail`;
+export const generateImageForPanel = async (description: string, config: { imageModel: string, aspectRatio: AspectRatio, visualStyle?: VisualStyle }): Promise<string> => {
+    const visualStylePrompt = config.visualStyle ? (config.visualStyle === VisualStyle.PHOTOREALISTIC ? 'photorealistic, cinematic' : config.visualStyle) : '';
+    const prompt = `${description}${visualStylePrompt ? `, ${visualStylePrompt} style` : ''}, high detail`;
 
     // Corrected: Use ai.models.generateImages for image generation as per guidelines.
     const response = await ai.models.generateImages({
@@ -170,18 +170,19 @@ export const generateImageForPanel = async (description: string, config: { image
 export const generateVideoForPanel = async (prompt: string, imageBase64: string, videoModel: string, isMediaArt: boolean = false): Promise<string> => {
     let finalPrompt = prompt;
     if (isMediaArt) {
-        finalPrompt = `Create a professional and captivating short media art video clip from this image.
+        finalPrompt = `Animate this starting image to smoothly transform into a new target scene.
         
-        **Core Animation Instructions:**
-        1.  **Animate Objects:** Bring the subjects and elements within the image to life with natural, subtle movements based on realistic physics. For example, leaves should rustle, water should ripple, fabric should sway, clouds should drift. The original static image should become a living, breathing scene.
-        2.  **Cinematic Camera Work:** Incorporate dynamic and professional camera movements. Use techniques like a slow zoom, a gentle pan, a tracking shot, or a subtle dolly movement to add depth and a cinematic quality to the video. The camera work should enhance the mood and focus of the scene.
-        3.  **Artistic Transformation:** The animation should feel like a living painting, transforming fantastically and creating a dreamlike, artistic atmosphere, while preserving the core composition and mood of the original image.
+        **Target Scene Description:**
+        "${prompt}"
+
+        **Animation Instructions:**
+        1.  **Seamless Transition:** The animation must be a seamless, cinematic transition, creating a single-cut or morphing effect.
+        2.  **Style Consistency:** Maintain the core artistic style of the starting image while morphing the composition, subjects, and lighting towards the new elements described in the target scene.
+        3.  **Natural Motion:** All movements should feel fluid and natural, enhancing the dreamlike, artistic atmosphere.
         
         **Strict Constraints:**
-        - DO NOT add any text, numbers, logos, or new characters that were not in the original image.
-        - The animation must be a high-quality, professional-level video.
-
-        The original prompt for the image was: "${prompt}"`;
+        - DO NOT add any text, numbers, logos, or new characters that were not in the original image unless they are part of the target scene description.
+        - The animation must be a high-quality, professional-level video.`;
     }
 
     // Corrected: Use ai.models.generateVideos for video generation as per guidelines.
@@ -250,29 +251,29 @@ const getStylePrompt = (style: MediaArtStyle, params: MediaArtStyleParams): stri
     }
 };
 
-export const generateMediaArtStoryboard = async (sourceImage: MediaArtSourceImage, style: MediaArtStyle, params: MediaArtStyleParams, language: string) => {
+export const generateMediaArtKeyframePrompts = async (sourceImage: MediaArtSourceImage, style: MediaArtStyle, params: MediaArtStyleParams, language: string): Promise<string[]> => {
     const styleInstruction = getStylePrompt(style, params);
 
-    const prompt = `Analyze the provided image (${sourceImage.title}). Your task is to generate a 4-scene storyboard for a short, artistic video that reinterprets this image and then gradually transforms back to the original. The scenes must show a clear, connected progression.
+    const prompt = `Analyze the provided image (${sourceImage.title}). Your task is to generate a 4-step visual storyboard that starts with a heavy artistic transformation and gradually reverts to the original image.
 
     **Style Instructions:**
     The core artistic style for the transformation is as follows:
     ${styleInstruction}
 
-    **Scene-by-Scene Transformation Instructions:**
-    You must create exactly 4 scene descriptions that follow a specific visual journey from highly artistic back to the original image.
+    **Keyframe Prompt Instructions:**
+    You must create exactly 4 detailed and visually rich prompts for an AI image generator. These prompts represent keyframes in a continuous animation. They must describe a full scene.
 
-    *   **Scene 1:** This is the most abstract and stylized scene. It should be heavily transformed by the artistic style. Preserve only **20-40%** of the original image's core subject and composition. The style should dominate the visual.
-    *   **Scene 2:** The scene begins to revert towards the original. It should be a blend of the artistic style and the source image. Preserve **30-60%** of the original image's features. The connection to the original should be more recognizable than in Scene 1.
-    *   **Scene 3:** The original image becomes more prominent. The artistic style should now feel like a sophisticated filter or overlay. Preserve **40-70%** of the original image's features.
-    *   **Scene 4 (Final Scene):** This scene should be a near-perfect representation of the original source image, marking the end of the transformation. Preserve **80-100%** of the original image's subject, composition, and color palette. Any remaining stylistic effects should be extremely subtle, like a faint echo of the previous scenes.
+    *   **Keyframe 1 (Most Abstract):** This is the most stylized scene. Preserve only **20-40%** of the original image's core subject and composition. The artistic style should dominate the visual.
+    *   **Keyframe 2 (Hybrid):** The scene begins to revert towards the original. Preserve **30-60%** of the original image's features. The connection to the original should be more recognizable.
+    *   **Keyframe 3 (Subtle Style):** The original image becomes prominent. The artistic style should now feel like a sophisticated filter or overlay. Preserve **40-70%** of the original image's features.
+    *   **Keyframe 4 (Final Image):** This prompt should describe a near-perfect representation of the original source image. Preserve **80-100%** of the original image's subject, composition, and color palette. Any remaining stylistic effects should be extremely subtle.
 
     **Output Instructions:**
-    1.  Ensure the descriptions for the 4 scenes create a smooth and logical visual transition as described above.
-    2.  Each description must be highly visual, evocative, and suitable for an AI image generator.
+    1.  Ensure the prompts create a smooth and logical visual transition.
+    2.  Each prompt must be a single, detailed paragraph.
     3.  The descriptions must be in ${language}.
     
-    Return the result as a JSON array of objects.`;
+    Return the result as a JSON array of strings.`;
     
     const imagePart = await (async () => {
         if (sourceImage.url.startsWith('data:')) {
@@ -313,16 +314,19 @@ export const generateMediaArtStoryboard = async (sourceImage: MediaArtSourceImag
             responseMimeType: "application/json",
             responseSchema: {
                 type: Type.ARRAY,
-                items: storyboardPanelSchema,
+                items: {
+                    type: Type.STRING,
+                    description: 'A detailed, visually descriptive paragraph for an image keyframe.'
+                },
             }
         }
     });
 
     const parsed = safeJsonParse(response.text);
-    if (!parsed || !Array.isArray(parsed)) {
-        throw new Error("Failed to generate a valid media art storyboard.");
+    if (!parsed || !Array.isArray(parsed) || parsed.some(p => typeof p !== 'string')) {
+        throw new Error("Failed to generate a valid media art keyframe prompt list.");
     }
-    return parsed.map((p: any) => ({ description: p.description }));
+    return parsed;
 };
 
 export const generateVisualArtVideo = async (text: string, effect: VisualArtEffect): Promise<string> => {

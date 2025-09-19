@@ -128,7 +128,12 @@
     "generating": "Generating...",
     "resultsTitle": "4. Animation & Refinement",
     "exportPdf": "Export PDF",
-    "exportingPdf": "Exporting..."
+    "exportingPdf": "Exporting...",
+    "generateTransition": "Generate Transition",
+    "startFrame": "Start Frame",
+    "endFrame": "End Frame",
+    "transitionPrompt": "Transition Prompt",
+    "transition": "Transition"
   },
   "mediaArtStyles": {
     "dataComposition": "Data Composition",
