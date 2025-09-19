@@ -170,19 +170,22 @@ export const generateImageForPanel = async (description: string, config: { image
 export const generateVideoForPanel = async (prompt: string, imageBase64: string, videoModel: string, isMediaArt: boolean = false): Promise<string> => {
     let finalPrompt = prompt;
     if (isMediaArt) {
-        finalPrompt = `Animate this starting image to smoothly transform into a new target scene.
-        
-        **Target Scene Description:**
-        "${prompt}"
+        finalPrompt = `**ULTIMATE DIRECTIVE: PERFECT FIDELITY & CINEMATIC QUALITY**
+        Your primary mission is to create a flawless, high-definition video that demonstrates a seamless morphing transformation. The two most critical requirements are **absolute fidelity** to the start/end frames and **maximum visual quality** that matches the provided artwork.
 
-        **Animation Instructions:**
-        1.  **Seamless Transition:** The animation must be a seamless, cinematic transition, creating a single-cut or morphing effect.
-        2.  **Style Consistency:** Maintain the core artistic style of the starting image while morphing the composition, subjects, and lighting towards the new elements described in the target scene.
-        3.  **Natural Motion:** All movements should feel fluid and natural, enhancing the dreamlike, artistic atmosphere.
-        
-        **Strict Constraints:**
-        - DO NOT add any text, numbers, logos, or new characters that were not in the original image unless they are part of the target scene description.
-        - The animation must be a high-quality, professional-level video.`;
+        **Start Frame:** [Image provided via API]
+        **End Frame Description (This defines the final frame):** "${prompt}"
+
+        **ANIMATION & MORPHING LOGIC:**
+        1.  **Fluid Transformation:** This is not a fade or cross-dissolve. It is a true morph. Every element in the start frame must fluidly transform, shift, or evolve into the corresponding elements described for the end frame.
+        2.  **Consistent Style Evolution:** The artistic style, texture, and lighting of the start frame must smoothly transition into the style of the end frame. There should be no jarring change in aesthetic.
+        3.  **Natural & Cinematic Motion:** All movement must be smooth, believable, and aesthetically pleasing. Avoid jerky or unnatural animations.
+
+        **STRICT QUALITY & FIDELITY CONSTRAINTS (NON-NEGOTIABLE):**
+        1.  **100% Start Frame Match:** The very first frame of your generated video MUST be a **pixel-for-pixel identical copy** of the provided Start Frame image. No exceptions.
+        2.  **100% End Frame Match:** The very last frame of your video MUST be a **pixel-perfect, high-fidelity rendering** of the End Frame Description. It must fully capture the details, colors, lighting, and composition described.
+        3.  **Match Source Quality:** The video's resolution, clarity, and overall quality must **match the quality of the original art images**. Do not introduce compression artifacts, blurriness, or lower detail. Produce a high-bitrate, cinematic-quality result.
+        4.  **No Extraneous Elements:** DO NOT add any text, watermarks, logos, or any other elements not present in the source images or implied by the descriptions.`;
     }
 
     // Corrected: Use ai.models.generateVideos for video generation as per guidelines.
@@ -254,22 +257,22 @@ const getStylePrompt = (style: MediaArtStyle, params: MediaArtStyleParams): stri
 export const generateMediaArtKeyframePrompts = async (sourceImage: MediaArtSourceImage, style: MediaArtStyle, params: MediaArtStyleParams, language: string): Promise<string[]> => {
     const styleInstruction = getStylePrompt(style, params);
 
-    const prompt = `Analyze the provided image (${sourceImage.title}). Your task is to generate a 4-step visual storyboard that starts with a heavy artistic transformation and gradually reverts to the original image.
+    const prompt = `Analyze the provided source image (${sourceImage.title}). Your task is to generate a 4-step visual storyboard that creates a natural, significant, and visually compelling transformation. The sequence starts with a highly abstract artistic interpretation and gradually, smoothly resolves back into the original image.
 
     **Style Instructions:**
     The core artistic style for the transformation is as follows:
     ${styleInstruction}
 
-    **Keyframe Prompt Instructions:**
-    You must create exactly 4 detailed and visually rich prompts for an AI image generator. These prompts represent keyframes in a continuous animation. They must describe a full scene.
+    **Keyframe Evolution Instructions:**
+    You must create exactly 4 detailed and visually rich prompts for an AI image generator. These prompts represent keyframes in a continuous animation that starts highly abstract and ends with a faithful representation of the source image. Each keyframe must describe a complete, distinct scene.
 
-    *   **Keyframe 1 (Most Abstract):** This is the most stylized scene. Preserve only **20-40%** of the original image's core subject and composition. The artistic style should dominate the visual.
-    *   **Keyframe 2 (Hybrid):** The scene begins to revert towards the original. Preserve **30-60%** of the original image's features. The connection to the original should be more recognizable.
-    *   **Keyframe 3 (Subtle Style):** The original image becomes prominent. The artistic style should now feel like a sophisticated filter or overlay. Preserve **40-70%** of the original image's features.
-    *   **Keyframe 4 (Final Image):** This prompt should describe a near-perfect representation of the original source image. Preserve **80-100%** of the original image's subject, composition, and color palette. Any remaining stylistic effects should be extremely subtle.
+    *   **Keyframe 1 (Maximum Abstraction):** This is a radical artistic interpretation. Deconstruct the source image almost completely. Only **10-20%** of the original subject/composition should be hinted at. The artistic style must be the absolute focus. The result should be visually stunning but barely recognizable as the source.
+    *   **Keyframe 2 (Emerging Forms):** The scene is still highly stylized, but recognizable forms and shapes from the source image begin to emerge from the abstraction. About **30-50%** of the original image's features should be identifiable, acting as a bridge between pure art and the source.
+    *   **Keyframe 3 (Artistic Overlay):** The source image is now clearly the primary subject. The artistic style acts as a beautiful, complex overlay or filter, rather than the core structure. About **60-80%** of the original image should be clear and distinct.
+    *   **Keyframe 4 (Faithful Rendition):** This prompt must describe the original source image with near-perfect accuracy (**95-100%** fidelity). The subject, composition, colors, and lighting should be faithfully reproduced. Any remaining stylistic influence must be minimal to non-existent, just a subtle artistic echo.
 
     **Output Instructions:**
-    1.  Ensure the prompts create a smooth and logical visual transition.
+    1.  Ensure the prompts create a smooth and logical visual transition with significant change between steps.
     2.  Each prompt must be a single, detailed paragraph.
     3.  The descriptions must be in ${language}.
     
