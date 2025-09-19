@@ -167,11 +167,16 @@ export const generateImageForPanel = async (description: string, config: { image
     return response.generatedImages[0].image.imageBytes;
 };
 
-export const generateVideoForPanel = async (prompt: string, imageBase64: string, videoModel: string): Promise<string> => {
+export const generateVideoForPanel = async (prompt: string, imageBase64: string, videoModel: string, isMediaArt: boolean = false): Promise<string> => {
+    let finalPrompt = prompt;
+    if (isMediaArt) {
+        finalPrompt = `Animate this image to create a short, mesmerizing media art video clip. The elements and objects within the image should transform subtly and fantastically, creating a dreamlike and artistic atmosphere. The animation should feel like a living painting. IMPORTANT: Do not add any text, numbers, or new characters. The animation must bring the static image to life while preserving its core composition and mood. The original prompt for the image was: "${prompt}"`;
+    }
+
     // Corrected: Use ai.models.generateVideos for video generation as per guidelines.
     let operation = await ai.models.generateVideos({
         model: videoModel,
-        prompt: prompt,
+        prompt: finalPrompt,
         image: {
             imageBytes: imageBase64,
             mimeType: 'image/jpeg',
@@ -237,14 +242,17 @@ const getStylePrompt = (style: MediaArtStyle, params: MediaArtStyleParams): stri
 export const generateMediaArtStoryboard = async (sourceImage: MediaArtSourceImage, style: MediaArtStyle, params: MediaArtStyleParams, language: string) => {
     const styleInstruction = getStylePrompt(style, params);
 
-    const prompt = `Analyze the provided image (${sourceImage.title}). Based on its content and composition, generate a 4-scene storyboard for a short, artistic video. Each scene description must be a creative interpretation of the original image, transformed through the lens of the chosen style.
+    const prompt = `Analyze the provided image (${sourceImage.title}). Your task is to generate a 4-scene storyboard for a short, artistic video that reinterprets this image.
+
+    **Core Requirement:** Each generated scene must strongly resemble the source image. You must preserve approximately 70-80% of the original image's core subject, composition, and overall color palette. The transformation should feel like an artistic filter or evolution applied to the source, not a completely new scene.
 
     **Style Instructions:**
+    Apply the following artistic style to the source image's foundation:
     ${styleInstruction}
 
-    **General Instructions:**
-    1.  Create exactly 4 scene descriptions that form a cohesive visual arc.
-    2.  Each description should be highly visual and evocative, suitable for an AI image generation model, and must incorporate the specific style parameters.
+    **Output Instructions:**
+    1.  Create exactly 4 scene descriptions. Together, they should form a subtle, cohesive visual arc (e.g., the effect slowly intensifying).
+    2.  Each description must be highly visual, evocative, and suitable for an AI image generator. It should describe how the source image is being transformed by the chosen style.
     3.  The descriptions must be in ${language}.
     
     Return the result as a JSON array of objects.`;

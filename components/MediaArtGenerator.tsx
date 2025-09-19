@@ -17,6 +17,7 @@ interface MediaArtGeneratorProps {
     onOpenImageSelector: () => void;
     onGenerateScenes: () => void;
     onRegenerateImage: (index: number) => void;
+    onRegenerateVideo: (index: number) => void;
     onDeletePanel: (index: number) => void;
     isLoading: boolean;
     error: string | null;
@@ -136,6 +137,7 @@ const MediaArtGenerator: React.FC<MediaArtGeneratorProps> = ({
     onOpenImageSelector,
     onGenerateScenes,
     onRegenerateImage,
+    onRegenerateVideo,
     onDeletePanel,
     isLoading,
     error,
@@ -336,11 +338,32 @@ const MediaArtGenerator: React.FC<MediaArtGeneratorProps> = ({
                                             <p className="text-xs">{t('storyboardDisplay.imageError')}</p>
                                         </div>
                                     )}
+                                    {panel.isLoadingVideo && (
+                                        <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center text-white">
+                                            <LoadingSpinner />
+                                            <p className="text-sm mt-2">{t('storyboardDisplay.generatingClip')}</p>
+                                            <p className="text-xs text-slate-400">{t('storyboardDisplay.generatingClipHint')}</p>
+                                        </div>
+                                    )}
+                                    {panel.videoUrl === 'error' && (
+                                        <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center text-red-400 p-4 text-center">
+                                            <p className="font-semibold">{t('storyboardDisplay.videoErrorTitle')}</p>
+                                            <p className="text-xs mt-1">{panel.videoError || t('storyboardDisplay.videoError')}</p>
+                                        </div>
+                                    )}
                                  </div>
                                  <div className="p-4 flex-grow">
                                      <p className="text-sm text-slate-300 leading-relaxed">{panel.description}</p>
                                  </div>
                                   <div className="p-3 border-t border-slate-700 bg-slate-900/30 flex items-center justify-end gap-2">
+                                     <button
+                                        onClick={() => onRegenerateVideo(index)}
+                                        title={t('tooltips.generateVideo')}
+                                        className="p-2 bg-slate-700 hover:bg-slate-600 rounded-md transition-colors disabled:opacity-50"
+                                        disabled={panel.isLoadingVideo || !panel.imageUrl || panel.imageUrl === 'error'}
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-300"><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/></svg>
+                                    </button>
                                     <button onClick={() => onRegenerateImage(index)} title={t('tooltips.regenerateImage')} className="p-2 bg-slate-700 hover:bg-slate-600 rounded-md transition-colors disabled:opacity-50" disabled={panel.isLoadingImage}>
                                         <RefreshIcon className="w-4 h-4 text-slate-300"/>
                                     </button>

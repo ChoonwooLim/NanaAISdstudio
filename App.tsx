@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -357,6 +356,27 @@ const App: React.FC = () => {
         }
     };
 
+    const handleRegenerateMediaArtVideo = async (index: number) => {
+        const panel = mediaArtState.panels[index];
+        if (!panel.imageUrl || !panel.imageUrl.startsWith('data:image')) return;
+
+        const panels = [...mediaArtState.panels];
+        panels[index] = { ...panels[index], videoUrl: undefined, isLoadingVideo: true, videoError: null };
+        setMediaArtState(s => ({ ...s, panels }));
+
+        try {
+            const imageBase64 = panel.imageUrl.split(',')[1];
+            const videoUrl = await geminiService.generateVideoForPanel(panel.description, imageBase64, 'veo-2.0-generate-001', true);
+            panels[index].videoUrl = videoUrl;
+        } catch (e: any) {
+            panels[index].videoUrl = 'error';
+            panels[index].videoError = e.message || t('errors.videoGeneration');
+        } finally {
+            panels[index].isLoadingVideo = false;
+            setMediaArtState(s => ({ ...s, panels: [...panels] }));
+        }
+    };
+
     // Visual Art Handlers
     const handleGenerateVisualArt = async () => {
         setVisualArtState(s => ({ ...s, isLoading: true, error: null, resultVideoUrl: null }));
@@ -429,17 +449,18 @@ const App: React.FC = () => {
                         )}
                         {mode === AppMode.MEDIA_ART && (
                             <div className="max-w-5xl mx-auto">
-                                {/* FIX: Removed unused props (`onGenerateClip`, `onGenerateAllClips`, `onSave`, `onExport`, `canSave`) to align with the component's defined interface and fix the type error. */}
                                 <MediaArtGenerator 
                                     state={mediaArtState}
                                     setState={setMediaArtState}
                                     onOpenImageSelector={() => setIsImageSelectorOpen(true)}
                                     onGenerateScenes={handleGenerateMediaArtScenes}
                                     onRegenerateImage={handleRegenerateMediaArtImage}
+                                    onRegenerateVideo={handleRegenerateMediaArtVideo}
                                     onDeletePanel={(index) => setMediaArtState(s => ({ ...s, panels: s.panels.filter((_, i) => i !== index)}))}
                                     isLoading={isGeneratingMediaArtScenes}
                                     error={mediaArtError}
                                 />
+                                <VideoDisplay panels={mediaArtState.panels} />
                             </div>
                         )}
                          {mode === AppMode.VISUAL_ART && (
