@@ -253,17 +253,23 @@ const getStylePrompt = (style: MediaArtStyle, params: MediaArtStyleParams): stri
 export const generateMediaArtStoryboard = async (sourceImage: MediaArtSourceImage, style: MediaArtStyle, params: MediaArtStyleParams, language: string) => {
     const styleInstruction = getStylePrompt(style, params);
 
-    const prompt = `Analyze the provided image (${sourceImage.title}). Your task is to generate a 4-scene storyboard for a short, artistic video that reinterprets this image.
-
-    **Core Requirement:** Each generated scene must strongly resemble the source image. You must preserve approximately 70-80% of the original image's core subject, composition, and overall color palette. The transformation should feel like an artistic filter or evolution applied to the source, not a completely new scene.
+    const prompt = `Analyze the provided image (${sourceImage.title}). Your task is to generate a 4-scene storyboard for a short, artistic video that reinterprets this image and then gradually transforms back to the original. The scenes must show a clear, connected progression.
 
     **Style Instructions:**
-    Apply the following artistic style to the source image's foundation:
+    The core artistic style for the transformation is as follows:
     ${styleInstruction}
 
+    **Scene-by-Scene Transformation Instructions:**
+    You must create exactly 4 scene descriptions that follow a specific visual journey from highly artistic back to the original image.
+
+    *   **Scene 1:** This is the most abstract and stylized scene. It should be heavily transformed by the artistic style. Preserve only **20-40%** of the original image's core subject and composition. The style should dominate the visual.
+    *   **Scene 2:** The scene begins to revert towards the original. It should be a blend of the artistic style and the source image. Preserve **30-60%** of the original image's features. The connection to the original should be more recognizable than in Scene 1.
+    *   **Scene 3:** The original image becomes more prominent. The artistic style should now feel like a sophisticated filter or overlay. Preserve **40-70%** of the original image's features.
+    *   **Scene 4 (Final Scene):** This scene should be a near-perfect representation of the original source image, marking the end of the transformation. Preserve **80-100%** of the original image's subject, composition, and color palette. Any remaining stylistic effects should be extremely subtle, like a faint echo of the previous scenes.
+
     **Output Instructions:**
-    1.  Create exactly 4 scene descriptions. Together, they should form a subtle, cohesive visual arc (e.g., the effect slowly intensifying).
-    2.  Each description must be highly visual, evocative, and suitable for an AI image generator. It should describe how the source image is being transformed by the chosen style.
+    1.  Ensure the descriptions for the 4 scenes create a smooth and logical visual transition as described above.
+    2.  Each description must be highly visual, evocative, and suitable for an AI image generator.
     3.  The descriptions must be in ${language}.
     
     Return the result as a JSON array of objects.`;
