@@ -89,7 +89,9 @@
   },
   "videoDisplay": {
     "title": "Generated Video Preview",
-    "playingScene": "Playing Scene {{current}} of {{total}}"
+    "playingScene": "Playing Scene {{current}} of {{total}}",
+    "selectClip": "Select a clip to play",
+    "sceneButton": "Scene {{index}}"
   },
   "apiKeyInstructions": {
     "title": "API Key Required",

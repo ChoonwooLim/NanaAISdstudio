@@ -170,7 +170,18 @@ export const generateImageForPanel = async (description: string, config: { image
 export const generateVideoForPanel = async (prompt: string, imageBase64: string, videoModel: string, isMediaArt: boolean = false): Promise<string> => {
     let finalPrompt = prompt;
     if (isMediaArt) {
-        finalPrompt = `Animate this image to create a short, mesmerizing media art video clip. The elements and objects within the image should transform subtly and fantastically, creating a dreamlike and artistic atmosphere. The animation should feel like a living painting. IMPORTANT: Do not add any text, numbers, or new characters. The animation must bring the static image to life while preserving its core composition and mood. The original prompt for the image was: "${prompt}"`;
+        finalPrompt = `Create a professional and captivating short media art video clip from this image.
+        
+        **Core Animation Instructions:**
+        1.  **Animate Objects:** Bring the subjects and elements within the image to life with natural, subtle movements based on realistic physics. For example, leaves should rustle, water should ripple, fabric should sway, clouds should drift. The original static image should become a living, breathing scene.
+        2.  **Cinematic Camera Work:** Incorporate dynamic and professional camera movements. Use techniques like a slow zoom, a gentle pan, a tracking shot, or a subtle dolly movement to add depth and a cinematic quality to the video. The camera work should enhance the mood and focus of the scene.
+        3.  **Artistic Transformation:** The animation should feel like a living painting, transforming fantastically and creating a dreamlike, artistic atmosphere, while preserving the core composition and mood of the original image.
+        
+        **Strict Constraints:**
+        - DO NOT add any text, numbers, logos, or new characters that were not in the original image.
+        - The animation must be a high-quality, professional-level video.
+
+        The original prompt for the image was: "${prompt}"`;
     }
 
     // Corrected: Use ai.models.generateVideos for video generation as per guidelines.

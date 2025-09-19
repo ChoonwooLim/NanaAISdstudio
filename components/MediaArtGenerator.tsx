@@ -355,6 +355,16 @@ const MediaArtGenerator: React.FC<MediaArtGeneratorProps> = ({
                                  <div className="p-4 flex-grow">
                                      <p className="text-sm text-slate-300 leading-relaxed">{panel.description}</p>
                                  </div>
+                                 {panel.videoUrl && panel.videoUrl !== 'error' && (
+                                    <div className="px-4 pb-2">
+                                        <video
+                                            key={panel.videoUrl}
+                                            src={panel.videoUrl}
+                                            controls
+                                            className="w-full rounded-md max-h-48"
+                                        />
+                                    </div>
+                                )}
                                   <div className="p-3 border-t border-slate-700 bg-slate-900/30 flex items-center justify-end gap-2">
                                      <button
                                         onClick={() => onRegenerateVideo(index)}
