@@ -246,7 +246,10 @@
   },
   "visualArt": {
     "title": "비주얼 아트 생성기",
-    "textInputLabel": "애니메이션에 사용할 텍스트 입력",
+    "instruction": "비디오를 생성하려면 텍스트, 이미지 또는 둘 다 제공하세요.",
+    "imageInputLabel": "이미지 (선택 사항)",
+    "removeImage": "이미지 제거",
+    "textInputLabel": "텍스트 (선택 사항)",
     "textInputPlaceholder": "여기에 텍스트를 입력하세요...",
     "styleTitle": "시각 효과 선택",
     "generateButton": "비디오 생성하기",
@@ -309,5 +312,8 @@
     "visualArtGeneration": "비주얼 아트 비디오 생성에 실패했습니다. 다시 시도해주세요.",
     "projectImport": "프로젝트를 가져오지 못했습니다. 파일이 유효하지 않거나 손상되었을 수 있습니다.",
     "projectExport": "프로젝트를 내보내지 못했습니다."
+  },
+  "confirmations": {
+    "videoGeneration": "비디오 생성은 비용이 많이 들고 몇 분이 소요될 수 있는 작업입니다. 시작한 후에는 잠재적인 중복 청구를 방지하기 위해 이 페이지를 닫거나 새로고침하지 마세요. 계속하시겠습니까?"
   }
 }

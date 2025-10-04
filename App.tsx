@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import Header from './components/Header';
@@ -123,6 +123,25 @@ const App: React.FC = () => {
     // Generic loading/error for now
     const [error, setError] = useState<string | null>(null);
     
+    // Safeguard for video generation
+    const generatingVideoCounter = useRef(0);
+
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (generatingVideoCounter.current > 0) {
+                e.preventDefault();
+                e.returnValue = ''; // Required for Chrome
+                return ''; // For older browsers
+            }
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, []); // Run only once on mount
+
     const getSampleProducts = useCallback(() => {
         const langCode = language === 'Korean' ? 'ko' : 'en';
         return Object.values(sampleProductsData).map(p => p[langCode]);
@@ -248,20 +267,34 @@ const App: React.FC = () => {
         const panel = storyboardPanels[index];
         if (!panel.imageUrl || !panel.imageUrl.startsWith('data:image')) return;
 
-        const panels = [...storyboardPanels];
-        panels[index] = { ...panels[index], videoUrl: undefined, isLoadingVideo: true, videoError: null };
-        setStoryboardPanels(panels);
+        if (!window.confirm(t('confirmations.videoGeneration'))) {
+            return;
+        }
+
+        generatingVideoCounter.current += 1;
+        
+        setStoryboardPanels(currentPanels => {
+            const newPanels = [...currentPanels];
+            newPanels[index] = { ...newPanels[index], videoUrl: undefined, isLoadingVideo: true, videoError: null };
+            return newPanels;
+        });
 
         try {
             const imageBase64 = panel.imageUrl.split(',')[1];
             const videoUrl = await geminiService.generateVideoForPanel(panel.description, imageBase64, storyboardConfig.videoModel);
-            panels[index].videoUrl = videoUrl;
+            setStoryboardPanels(currentPanels => {
+                const newPanels = [...currentPanels];
+                newPanels[index] = { ...newPanels[index], videoUrl, isLoadingVideo: false };
+                return newPanels;
+            });
         } catch (e: any) {
-            panels[index].videoUrl = 'error';
-            panels[index].videoError = e.message || t('errors.videoGeneration');
+            setStoryboardPanels(currentPanels => {
+                const newPanels = [...currentPanels];
+                newPanels[index] = { ...newPanels[index], videoUrl: 'error', videoError: e.message || t('errors.videoGeneration'), isLoadingVideo: false };
+                return newPanels;
+            });
         } finally {
-            panels[index].isLoadingVideo = false;
-            setStoryboardPanels([...panels]);
+            generatingVideoCounter.current -= 1;
         }
     };
 
@@ -564,26 +597,48 @@ const App: React.FC = () => {
         const panel = mediaArtState.panels[index];
         if (!panel.imageUrl || !panel.imageUrl.startsWith('data:image')) return;
 
-        const panels = [...mediaArtState.panels];
-        panels[index] = { ...panels[index], videoUrl: undefined, isLoadingVideo: true, videoError: null };
-        setMediaArtState(s => ({ ...s, panels }));
+        if (!window.confirm(t('confirmations.videoGeneration'))) {
+            return;
+        }
+
+        generatingVideoCounter.current += 1;
+        setMediaArtState(s => {
+            const panels = [...s.panels];
+            panels[index] = { ...panels[index], videoUrl: undefined, isLoadingVideo: true, videoError: null };
+            return { ...s, panels };
+        });
 
         try {
             const imageBase64 = panel.imageUrl.split(',')[1];
             // The panel description is now the prompt for the *end* frame, which is what the video model needs.
             const videoUrl = await geminiService.generateVideoForPanel(panel.description, imageBase64, mediaArtState.config.videoModel, true);
-            panels[index].videoUrl = videoUrl;
+            setMediaArtState(s => {
+                const newPanels = [...s.panels];
+                newPanels[index] = { ...newPanels[index], videoUrl: videoUrl, isLoadingVideo: false };
+                return { ...s, panels: newPanels };
+            });
         } catch (e: any) {
-            panels[index].videoUrl = 'error';
-            panels[index].videoError = e.message || t('errors.videoGeneration');
+            setMediaArtState(s => {
+                const newPanels = [...s.panels];
+                newPanels[index] = { 
+                    ...newPanels[index], 
+                    videoUrl: 'error', 
+                    videoError: e.message || t('errors.videoGeneration'),
+                    isLoadingVideo: false
+                };
+                return { ...s, panels: newPanels };
+            });
         } finally {
-            panels[index].isLoadingVideo = false;
-            setMediaArtState(s => ({ ...s, panels: [...panels] }));
+            generatingVideoCounter.current -= 1;
         }
     };
 
     // Visual Art Handlers
     const handleGenerateVisualArt = async () => {
+        if (!window.confirm(t('confirmations.videoGeneration'))) {
+            return;
+        }
+        generatingVideoCounter.current += 1;
         setVisualArtState(s => ({ ...s, isLoading: true, error: null, resultVideoUrl: null }));
         try {
             const { inputText, effect, sourceImage } = visualArtState;
@@ -592,6 +647,7 @@ const App: React.FC = () => {
         } catch (e: any) {
             setVisualArtState(s => ({ ...s, error: e.message || t('errors.visualArtGeneration') }));
         } finally {
+            generatingVideoCounter.current -= 1;
             setVisualArtState(s => ({ ...s, isLoading: false }));
         }
     };
