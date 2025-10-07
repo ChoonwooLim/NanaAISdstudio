@@ -1,9 +1,9 @@
 import React from 'react';
-import { ImageTransitionState, MediaArtSourceImage, ImageTransitionStyle, VideoModelID } from '../types';
+import { ImageTransitionState, TransitionMedia, ImageTransitionStyle, VideoModelID } from '../types';
 import { VIDEO_MODEL_OPTIONS } from '../constants';
 import LoadingSpinner from './LoadingSpinner';
 import { useTranslation } from '../i18n/LanguageContext';
-import ImageUploader from './ImageUploader';
+import UploadIcon from './icons/UploadIcon';
 
 interface ImageTransitionGeneratorProps {
     state: ImageTransitionState;
@@ -11,14 +11,18 @@ interface ImageTransitionGeneratorProps {
     onGenerate: (state: ImageTransitionState) => void;
 }
 
-const ImageDisplay: React.FC<{
-    image: MediaArtSourceImage;
+const MediaDisplay: React.FC<{
+    media: TransitionMedia;
     onRemove: () => void;
-}> = ({ image, onRemove }) => {
+}> = ({ media, onRemove }) => {
     const { t } = useTranslation();
     return (
-        <div className="relative group">
-            <img src={image.url} alt={image.title} className="w-full rounded-xl shadow-lg" />
+        <div className="relative group aspect-video">
+            {media.type === 'image' ? (
+                 <img src={media.url} alt={media.title} className="w-full h-full object-cover rounded-xl shadow-lg" />
+            ) : (
+                <video src={media.url} controls muted loop className="w-full h-full object-cover rounded-xl shadow-lg" />
+            )}
             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-xl">
                 <button onClick={onRemove} className="bg-red-500/80 backdrop-blur-sm text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-500 transition-colors">
                     {t('visualArt.removeImage')}
@@ -27,6 +31,38 @@ const ImageDisplay: React.FC<{
         </div>
     );
 };
+
+const MediaUploader: React.FC<{
+    onMediaSelect: (media: TransitionMedia) => void;
+    id: string;
+}> = ({ onMediaSelect, id }) => {
+    const { t } = useTranslation();
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                onMediaSelect({
+                    type: file.type.startsWith('image/') ? 'image' : 'video',
+                    url: reader.result as string,
+                    title: file.name
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+     return (
+        <div className="w-full max-w-lg mx-auto">
+            <label htmlFor={id} className="w-full aspect-video flex flex-col items-center justify-center gap-3 bg-slate-900/70 hover:bg-slate-800/80 border-2 border-dashed border-slate-700 hover:border-blue-500 rounded-2xl p-6 cursor-pointer transition-colors">
+                <UploadIcon className="w-10 h-10 text-slate-500" />
+                <span className="font-semibold text-slate-300 text-center">{t('imageUploader.cta')}</span>
+                <span className="text-sm text-slate-500 text-center">{t('imageUploader.hint')}</span>
+            </label>
+            <input id={id} type="file" accept="image/*,video/mp4,video/webm" className="hidden" onChange={handleFileChange} />
+        </div>
+    );
+};
+
 
 const TRANSITION_STYLE_OPTIONS: { value: ImageTransitionStyle, titleKey: string, descriptionKey: string }[] = [
     { value: ImageTransitionStyle.MORPH, titleKey: 'imageTransition.styleOptions.morph.title', descriptionKey: 'imageTransition.styleOptions.morph.description' },
@@ -38,21 +74,21 @@ const TRANSITION_STYLE_OPTIONS: { value: ImageTransitionStyle, titleKey: string,
 
 const ImageTransitionGenerator: React.FC<ImageTransitionGeneratorProps> = ({ state, setState, onGenerate }) => {
     const { t } = useTranslation();
-    const { startImage, endImage, prompt, style, resultVideoUrl, isLoading, error, videoModel } = state;
+    const { startMedia, endMedia, prompt, style, resultVideoUrl, isLoading, error, videoModel } = state;
 
-    const handleImageSelect = (image: MediaArtSourceImage, type: 'start' | 'end') => {
+    const handleMediaSelect = (media: TransitionMedia, type: 'start' | 'end') => {
         if (type === 'start') {
-            setState(s => ({ ...s, startImage: image, resultVideoUrl: null, error: null }));
+            setState(s => ({ ...s, startMedia: media, resultVideoUrl: null, error: null }));
         } else {
-            setState(s => ({ ...s, endImage: image, resultVideoUrl: null, error: null }));
+            setState(s => ({ ...s, endMedia: media, resultVideoUrl: null, error: null }));
         }
     };
 
-    const handleRemoveImage = (type: 'start' | 'end') => {
+    const handleRemoveMedia = (type: 'start' | 'end') => {
         if (type === 'start') {
-            setState(s => ({ ...s, startImage: null }));
+            setState(s => ({ ...s, startMedia: null }));
         } else {
-            setState(s => ({ ...s, endImage: null }));
+            setState(s => ({ ...s, endMedia: null }));
         }
     };
 
@@ -64,7 +100,7 @@ const ImageTransitionGenerator: React.FC<ImageTransitionGeneratorProps> = ({ sta
         setState(s => ({...s, videoModel: newModel}));
     };
 
-    const isGenerateDisabled = isLoading || !startImage || !endImage;
+    const isGenerateDisabled = isLoading || !startMedia || !endMedia;
     const selectedVideoModel = VIDEO_MODEL_OPTIONS.find(o => o.value === videoModel);
 
     return (
@@ -75,27 +111,27 @@ const ImageTransitionGenerator: React.FC<ImageTransitionGeneratorProps> = ({ sta
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-                {/* Start Image */}
+                {/* Start Media */}
                 <div className="space-y-2">
                     <label className="block text-sm font-semibold text-slate-300 mb-2 text-center">
                         {t('imageTransition.startImageLabel')}
                     </label>
-                    {startImage ? (
-                        <ImageDisplay image={startImage} onRemove={() => handleRemoveImage('start')} />
+                    {startMedia ? (
+                        <MediaDisplay media={startMedia} onRemove={() => handleRemoveMedia('start')} />
                     ) : (
-                        <ImageUploader onImageSelect={(img) => handleImageSelect(img, 'start')} />
+                        <MediaUploader onMediaSelect={(media) => handleMediaSelect(media, 'start')} id="start-media-uploader" />
                     )}
                 </div>
                 
-                {/* End Image */}
+                {/* End Media */}
                  <div className="space-y-2">
                     <label className="block text-sm font-semibold text-slate-300 mb-2 text-center">
                         {t('imageTransition.endImageLabel')}
                     </label>
-                    {endImage ? (
-                        <ImageDisplay image={endImage} onRemove={() => handleRemoveImage('end')} />
+                    {endMedia ? (
+                        <MediaDisplay media={endMedia} onRemove={() => handleRemoveMedia('end')} />
                     ) : (
-                        <ImageUploader onImageSelect={(img) => handleImageSelect(img, 'end')} />
+                        <MediaUploader onMediaSelect={(media) => handleMediaSelect(media, 'end')} id="end-media-uploader" />
                     )}
                 </div>
             </div>

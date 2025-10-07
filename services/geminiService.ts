@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type, GenerateContentResponse, Modality } from "@google/genai";
-import { AspectRatio, DescriptionConfig, StoryboardConfig, VisualStyle, MediaArtStyle, VisualArtEffect, MediaArtSourceImage, MediaArtStyleParams, DataCompositionParams, DigitalNatureParams, AiDataSculptureParams, LightAndSpaceParams, KineticMirrorsParams, GenerativeBotanyParams, QuantumPhantasmParams, ArchitecturalProjectionParams, ImageTransitionStyle, VideoModelID } from "../types";
+import { AspectRatio, DescriptionConfig, StoryboardConfig, VisualStyle, MediaArtStyle, VisualArtEffect, MediaArtSourceImage, MediaArtStyleParams, DataCompositionParams, DigitalNatureParams, AiDataSculptureParams, LightAndSpaceParams, KineticMirrorsParams, GenerativeBotanyParams, QuantumPhantasmParams, ArchitecturalProjectionParams, ImageTransitionStyle, VideoModelID, TransitionMedia } from "../types";
 
 // Corrected: Initialize GoogleGenAI with a named apiKey parameter as per the guidelines.
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -413,58 +413,130 @@ export const generateVisualArtVideo = async (text: string, effect: VisualArtEffe
     return URL.createObjectURL(blob);
 };
 
-const getTransitionStylePrompt = (style: ImageTransitionStyle, userPrompt: string): string => {
+const getTransitionStylePrompt = (style: ImageTransitionStyle, userPrompt: string, startDesc: string, endDesc: string): string => {
     let styleInstruction = '';
     switch (style) {
         case ImageTransitionStyle.PHYSICS_MORPH:
-            styleInstruction = `The transition must be a physics-based morph. Animate the objects and elements within the start image with realistic physics (gravity, momentum, collision). They should move, interact, and settle before seamlessly morphing into the final arrangement of the end image. The transition should feel dynamic and grounded in reality.`;
+            styleInstruction = `The transition must be a physics-based morph. Animate the objects and elements within the start scene with realistic physics (gravity, momentum, collision). They should move, interact, and settle before seamlessly morphing into the final arrangement of the end scene. The transition should feel dynamic and grounded in reality.`;
             break;
         case ImageTransitionStyle.PARTICLE_DISSOLVE:
-            styleInstruction = `The transition must be a particle dissolve. The start image should dissolve into a swirling vortex of glowing particles. These particles will then elegantly coalesce and reform to create the end image. The transition should feel magical and ethereal.`;
+            styleInstruction = `The transition must be a particle dissolve. The start scene should dissolve into a swirling vortex of glowing particles. These particles will then elegantly coalesce and reform to create the end scene. The transition should feel magical and ethereal.`;
             break;
         case ImageTransitionStyle.CINEMATIC_ZOOM:
-            styleInstruction = `The transition must be a slow, cinematic Ken Burns effect. Start with a close-up on a key detail in the start image, then slowly pan and zoom out to reveal the full scene. As the zoom completes, cross-dissolve smoothly into the end image, which may also have its own subtle pan or zoom. The movement must be smooth and professional.`;
+            styleInstruction = `The transition must be a slow, cinematic Ken Burns effect. Start with a close-up on a key detail in the start scene, then slowly pan and zoom out to reveal the full scene. As the zoom completes, cross-dissolve smoothly into the end scene, which may also have its own subtle pan or zoom. The movement must be smooth and professional.`;
             break;
         case ImageTransitionStyle.FLUID_PAINT:
-            styleInstruction = `The transition must look like a fluid paint effect. Treat the start image as a wet oil painting. Animate it with visible, fluid brushstrokes that swirl and blend the colors, transforming the scene dynamically. The paint should then settle and resolve into the sharp details of the end image.`;
+            styleInstruction = `The transition must look like a fluid paint effect. Treat the start scene as a wet oil painting. Animate it with visible, fluid brushstrokes that swirl and blend the colors, transforming the scene dynamically. The paint should then settle and resolve into the sharp details of the end scene.`;
             break;
         case ImageTransitionStyle.MORPH:
         default:
-            styleInstruction = `The transition must be a direct, smooth, and cinematic morphing effect between the start and end images.`;
+            styleInstruction = `The transition must be a direct, smooth, and cinematic morphing effect between the start and end scenes.`;
             break;
     }
 
     return `
-    **Primary Goal:** Create a short video that transitions from the provided start image to an end image.
+    **Primary Goal:** Create a short video that transitions from a starting scene to an ending scene.
     
+    **Starting Scene Description:** ${startDesc}
+    
+    **Ending Scene Description:** ${endDesc}
+
     **Transition Style:** ${styleInstruction}
 
     **User's Creative Direction:** ${userPrompt}
 
     **Strict Requirements:**
-    1.  The very first frame of the video MUST be identical to the start image.
-    2.  The very last frame of the video MUST be identical to the end image.
+    1.  The very first frame of the video MUST be identical to the provided start image.
+    2.  The very last frame of the video MUST be a perfect visual representation of the 'Ending Scene Description'.
     3.  The animation between them must follow the specified transition style and user direction.
     4.  The final video must be high-quality and visually seamless.
     `;
 }
 
-export const generateImageTransitionVideo = async (startImage: MediaArtSourceImage, endImage: MediaArtSourceImage, userPrompt: string, style: ImageTransitionStyle, videoModel: VideoModelID): Promise<string> => {
-    // Step 1: Generate a detailed prompt using the selected style and user prompt.
-    // This step is now more direct, as we construct the prompt logic here instead of asking another AI.
-    const detailedPrompt = getTransitionStylePrompt(style, userPrompt);
+const extractFrameFromMedia = async (media: TransitionMedia): Promise<{ data: string; mimeType: 'image/jpeg' }> => {
+    if (media.type === 'image') {
+        const response = await fetch(media.url);
+        const blob = await response.blob();
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+             const reader = new FileReader();
+             reader.onloadend = () => resolve(reader.result as string);
+             reader.onerror = reject;
+             reader.readAsDataURL(blob);
+        });
+        return { data: dataUrl.split(',')[1], mimeType: 'image/jpeg' };
+    } else { // video
+        return new Promise((resolve, reject) => {
+            const video = document.createElement('video');
+            video.preload = 'metadata';
+            video.muted = true;
+            video.playsInline = true;
+
+            video.onloadeddata = () => {
+                video.currentTime = 0;
+            };
+
+            video.onseeked = () => {
+                // Delay slightly to ensure the frame is painted
+                setTimeout(() => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    const ctx = canvas.getContext('2d');
+                    if (!ctx) {
+                        URL.revokeObjectURL(video.src);
+                        return reject(new Error('Canvas context not available'));
+                    }
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    const dataUrl = canvas.toDataURL('image/jpeg');
+                    URL.revokeObjectURL(video.src); 
+                    resolve({ data: dataUrl.split(',')[1], mimeType: 'image/jpeg' });
+                }, 100);
+            };
+
+            video.onerror = (e) => {
+                URL.revokeObjectURL(video.src);
+                reject(new Error('Failed to load video for frame extraction.'));
+            };
+            
+            video.src = media.url;
+            video.load();
+        });
+    }
+};
+
+
+export const generateImageTransitionVideo = async (startMedia: TransitionMedia, endMedia: TransitionMedia, userPrompt: string, style: ImageTransitionStyle, videoModel: VideoModelID): Promise<string> => {
+    // Step 1: Extract first frame from both start and end media.
+    const [startFrame, endFrame] = await Promise.all([
+        extractFrameFromMedia(startMedia),
+        extractFrameFromMedia(endMedia),
+    ]);
     
-    const startImageData = await getImageData(startImage);
+    // Step 2: Get AI descriptions of both frames.
+    const descriptionPrompt = "Concisely describe this image with vivid visual details. Focus on the main subject, setting, colors, and mood. This description will be used to guide a video animation AI.";
+
+    const startImagePart = { inlineData: { data: startFrame.data, mimeType: startFrame.mimeType } };
+    const endImagePart = { inlineData: { data: endFrame.data, mimeType: endFrame.mimeType } };
+
+    const [startDescResponse, endDescResponse] = await Promise.all([
+        ai.models.generateContent({ model: 'gemini-2.5-flash', contents: { parts: [{ text: descriptionPrompt }, startImagePart] } }),
+        ai.models.generateContent({ model: 'gemini-2.5-flash', contents: { parts: [{ text: descriptionPrompt }, endImagePart] } }),
+    ]);
+
+    const startDescription = startDescResponse.text;
+    const endDescription = endDescResponse.text;
+
+    // Step 3: Create the final detailed prompt for the video model.
+    const detailedPrompt = getTransitionStylePrompt(style, userPrompt, startDescription, endDescription);
     const modelPrefix = getVideoModelPromptPrefix(videoModel);
 
-    // Step 2: Generate the video using the start image and the new detailed prompt.
-    // The end image is not sent to the video model; its description is implied in the prompt logic.
+    // Step 4: Generate the video using the start frame and the new detailed prompt.
     let operation = await ai.models.generateVideos({
         model: 'veo-2.0-generate-001',
         prompt: modelPrefix + detailedPrompt,
         image: {
-            imageBytes: startImageData.data,
-            mimeType: startImageData.mimeType,
+            imageBytes: startFrame.data,
+            mimeType: startFrame.mimeType,
         },
         config: {
             numberOfVideos: 1,

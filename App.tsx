@@ -116,9 +116,9 @@ const App: React.FC = () => {
 
     // Image Transition Mode State
     const initialImageTransitionState: ImageTransitionState = {
-        startImage: null,
-        endImage: null,
-        prompt: 'Create a smooth, cinematic morphing transition between the two images.',
+        startMedia: null,
+        endMedia: null,
+        prompt: 'Create a smooth, cinematic morphing transition between the two scenes.',
         style: ImageTransitionStyle.MORPH,
         videoModel: VideoModelID.STANDARD,
         resultVideoUrl: null,
@@ -504,7 +504,7 @@ const App: React.FC = () => {
             );
 
             const projectData = {
-                version: '1.0.0',
+                version: '1.0.1', // Bump version for new state structure
                 mode,
                 descriptionConfig,
                 description,
@@ -573,7 +573,15 @@ const App: React.FC = () => {
                     if (!loadedVisualArtState.videoModel) loadedVisualArtState.videoModel = VideoModelID.STANDARD;
                     setVisualArtState(loadedVisualArtState);
 
-                    const loadedImageTransitionState = { ...initialImageTransitionState, ...(projectData.imageTransitionState || {}) };
+                    // Handle legacy and new ImageTransitionState structure
+                    const rawImageTransitionState = projectData.imageTransitionState || {};
+                    const loadedImageTransitionState = { ...initialImageTransitionState, ...rawImageTransitionState };
+                    if (rawImageTransitionState.startImage || rawImageTransitionState.endImage) {
+                         loadedImageTransitionState.startMedia = rawImageTransitionState.startImage ? { ...rawImageTransitionState.startImage, type: 'image' } : null;
+                         loadedImageTransitionState.endMedia = rawImageTransitionState.endImage ? { ...rawImageTransitionState.endImage, type: 'image' } : null;
+                         delete loadedImageTransitionState.startImage;
+                         delete loadedImageTransitionState.endImage;
+                    }
                     if (!loadedImageTransitionState.videoModel) loadedImageTransitionState.videoModel = VideoModelID.STANDARD;
                     setImageTransitionState(loadedImageTransitionState);
 
@@ -734,11 +742,11 @@ const App: React.FC = () => {
             generatingVideoCounter.current += 1;
             setImageTransitionState(s => ({ ...s, isLoading: true, error: null, resultVideoUrl: null }));
             try {
-                const { startImage, endImage, prompt, style, videoModel } = currentState;
-                if (!startImage || !endImage) {
+                const { startMedia, endMedia, prompt, style, videoModel } = currentState;
+                if (!startMedia || !endMedia) {
                     throw new Error(t('imageTransition.errorStartEndImage'));
                 }
-                const resultUrl = await geminiService.generateImageTransitionVideo(startImage, endImage, prompt, style, videoModel);
+                const resultUrl = await geminiService.generateImageTransitionVideo(startMedia, endMedia, prompt, style, videoModel);
                 setImageTransitionState(s => ({ ...s, resultVideoUrl: resultUrl }));
             } catch (e: any) {
                 setImageTransitionState(s => ({ ...s, error: e.message || t('errors.imageTransitionGeneration') }));

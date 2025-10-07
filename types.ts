@@ -234,9 +234,15 @@ export interface VisualArtState {
     error: string | null;
 }
 
+export interface TransitionMedia {
+    type: 'image' | 'video';
+    url: string; // dataURL
+    title: string;
+}
+
 export interface ImageTransitionState {
-    startImage: MediaArtSourceImage | null;
-    endImage: MediaArtSourceImage | null;
+    startMedia: TransitionMedia | null;
+    endMedia: TransitionMedia | null;
     prompt: string;
     style: ImageTransitionStyle;
     videoModel: VideoModelID;

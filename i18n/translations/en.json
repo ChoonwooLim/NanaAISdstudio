@@ -22,7 +22,7 @@
     "storyboard": "Storyboard Generator",
     "mediaArt": "Media Art Generator",
     "visualArt": "Visual Art Generator",
-    "imageTransition": "Image Transition"
+    "imageTransition": "Media Transition"
   },
   "inputForm": {
     "productName": "Product Name",
@@ -270,20 +270,20 @@
     "asciiStorm": "ASCII Storm"
   },
   "imageUploader": {
-    "cta": "Click to upload an image",
-    "hint": "PNG, JPG, or WEBP. Max 5MB."
+    "cta": "Click to upload an image or video",
+    "hint": "PNG, JPG, MP4, WEBM. Max 10MB."
   },
   "imageTransition": {
-    "title": "Image to Video Transition",
-    "instruction": "Provide a start image and an end image to generate a video transitioning between them.",
-    "startImageLabel": "Start Image",
-    "endImageLabel": "End Image",
+    "title": "Media to Video Transition",
+    "instruction": "Provide start and end media (image or video) to generate a video transitioning between them.",
+    "startImageLabel": "Start Media",
+    "endImageLabel": "End Media",
     "promptLabel": "Transition Prompt (Optional)",
     "promptPlaceholder": "Describe how the transition should look, e.g., 'a smooth morph', 'dissolve into particles', 'a cinematic fade'...",
     "generateButton": "Generate Transition Video",
     "generating": "Generating Video...",
     "resultTitle": "Generated Video",
-    "errorStartEndImage": "Both start and end images are required to generate a video.",
+    "errorStartEndImage": "Both start and end media are required to generate a video.",
     "styleTitle": "Transition Style",
     "videoModelLabel": "Video Generation Model",
     "styleOptions": {
