@@ -21,7 +21,8 @@
     "productDescription": "Product Description",
     "storyboard": "Storyboard Generator",
     "mediaArt": "Media Art Generator",
-    "visualArt": "Visual Art Generator"
+    "visualArt": "Visual Art Generator",
+    "imageTransition": "Image Transition"
   },
   "inputForm": {
     "productName": "Product Name",
@@ -47,7 +48,10 @@
     "showSettings": "Show Advanced Settings",
     "generating": "Generating Storyboard...",
     "generateButton": "Generate Storyboard",
-    "loadSample": "Load Sample Idea"
+    "loadSample": "Load Sample Idea",
+    "oneByOneLabel": "Generate images one-by-one",
+    "oneByOneDescription": "Recommended. Generate text first, then create images individually to save costs.",
+    "costWarning": "This will generate all {{count}} images at once. Estimated cost: ${{cost}}."
   },
   "storyboardSettings": {
     "title": "Advanced Settings",
@@ -71,6 +75,7 @@
     "estimatedLength": "Est. Length: {{duration}}s",
     "generatingScenes": "Generating scene descriptions...\nThis may take a moment.",
     "scene": "Scene #{{index}}",
+    "generateImage": "Generate Image",
     "generatingImage": "Generating image...",
     "imageError": "Image generation failed.",
     "quotaErrorTitle": "Quota Reached",
@@ -254,7 +259,8 @@
     "styleTitle": "Choose Visual Effect",
     "generateButton": "Generate Video",
     "generating": "Generating...",
-    "resultTitle": "Generated Video"
+    "resultTitle": "Generated Video",
+    "videoModelLabel": "Video Generation Model"
   },
   "visualArtEffects": {
     "glitch": "Glitch Art",
@@ -267,9 +273,67 @@
     "cta": "Click to upload an image",
     "hint": "PNG, JPG, or WEBP. Max 5MB."
   },
+  "imageTransition": {
+    "title": "Image to Video Transition",
+    "instruction": "Provide a start image and an end image to generate a video transitioning between them.",
+    "startImageLabel": "Start Image",
+    "endImageLabel": "End Image",
+    "promptLabel": "Transition Prompt (Optional)",
+    "promptPlaceholder": "Describe how the transition should look, e.g., 'a smooth morph', 'dissolve into particles', 'a cinematic fade'...",
+    "generateButton": "Generate Transition Video",
+    "generating": "Generating Video...",
+    "resultTitle": "Generated Video",
+    "errorStartEndImage": "Both start and end images are required to generate a video.",
+    "styleTitle": "Transition Style",
+    "videoModelLabel": "Video Generation Model",
+    "styleOptions": {
+      "morph": {
+        "title": "Simple Morph",
+        "description": "A direct, smooth crossfade and morph between the two images."
+      },
+      "physicsMorph": {
+        "title": "Physics Morph",
+        "description": "Objects in the scene animate with realistic physics while transitioning."
+      },
+      "particleDissolve": {
+        "title": "Particle Dissolve",
+        "description": "The first image dissolves into magical particles that reform into the second."
+      },
+      "cinematicZoom": {
+        "title": "Cinematic Zoom",
+        "description": "Uses slow pans and zooms to create a dramatic, film-like transition."
+      },
+      "fluidPaint": {
+        "title": "Fluid Paint",
+        "description": "Transforms the image as if it were a swirling, wet oil painting."
+      }
+    }
+  },
   "common": {
     "errorPrefix": "Error:",
     "exportAll": "Export All"
+  },
+  "videoModels": {
+    "standard": {
+      "label": "Veo 2.0 (Standard)",
+      "description": "The best all-around model for general purpose video generation."
+    },
+    "cinematic": {
+      "label": "Veo 2.1 (Cinematic)",
+      "description": "Optimized for photorealistic, high-fidelity, and film-like results."
+    },
+    "animator": {
+      "label": "Veo Animator",
+      "description": "Specialized for animation styles like anime, claymation, and cartoons."
+    },
+    "fx": {
+      "label": "Veo FX",
+      "description": "Excels at generating dynamic visual effects like particles, fire, and fluids."
+    },
+    "lite": {
+      "label": "Veo Lite",
+      "description": "A faster, lighter model ideal for quick previews and drafts."
+    }
   },
   "paintings": {
     "starryNight": { "title": "The Starry Night", "artist": "Vincent van Gogh" },
@@ -310,10 +374,15 @@
     "videoGeneration": "Failed to generate video clip.",
     "mediaArtGeneration": "Failed to generate media art scenes. Please try again.",
     "visualArtGeneration": "Failed to generate visual art video. Please try again.",
+    "imageTransitionGeneration": "Failed to generate transition video. Please try again.",
     "projectImport": "Failed to import project. The file may be invalid or corrupted.",
     "projectExport": "Failed to export project."
   },
   "confirmations": {
-    "videoGeneration": "Video generation is an expensive operation and can take several minutes. Once started, please do not close or refresh this page to avoid potential duplicate charges. Do you want to proceed?"
+    "videoGeneration": "Video generation is an expensive operation and can take several minutes. Once started, please do not close or refresh this page to avoid potential duplicate charges.",
+    "pageLeave": "A video is currently being generated. Leaving this page may result in incomplete generation and potential duplicate charges if you restart. Are you sure you want to leave?",
+    "videoGenTitle": "Confirm Video Generation",
+    "confirm": "Confirm",
+    "cancel": "Cancel"
   }
 }

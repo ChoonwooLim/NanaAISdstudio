@@ -15,7 +15,7 @@ interface MediaArtGeneratorProps {
     setState: React.Dispatch<React.SetStateAction<MediaArtState>>;
     onOpenImageSelector: () => void;
     onGenerateScenes: () => void;
-    onRegenerateVideo: (index: number) => void;
+    onRegenerateVideo: (index: number, description: string, imageUrl: string) => void;
     isLoading: boolean;
     error: string | null;
 }
@@ -452,7 +452,7 @@ const MediaArtGenerator: React.FC<MediaArtGeneratorProps> = ({
                                      </div>
                                      <div className="flex-shrink-0">
                                          <button
-                                            onClick={() => onRegenerateVideo(index)}
+                                            onClick={() => onRegenerateVideo(index, panel.description, panel.imageUrl!)}
                                             title={t('mediaArt.generateTransition')}
                                             className="p-2 bg-slate-700 hover:bg-slate-600 rounded-md transition-colors disabled:opacity-50 flex items-center gap-2 text-xs px-3"
                                             disabled={panel.isLoadingVideo || !panel.imageUrl || panel.imageUrl === 'error' || panel.imageUrl === 'quota_error'}

@@ -1,8 +1,11 @@
 import { GoogleGenAI, Type, GenerateContentResponse, Modality } from "@google/genai";
-import { AspectRatio, DescriptionConfig, StoryboardConfig, VisualStyle, MediaArtStyle, VisualArtEffect, MediaArtSourceImage, MediaArtStyleParams, DataCompositionParams, DigitalNatureParams, AiDataSculptureParams, LightAndSpaceParams, KineticMirrorsParams, GenerativeBotanyParams, QuantumPhantasmParams, ArchitecturalProjectionParams } from "../types";
+import { AspectRatio, DescriptionConfig, StoryboardConfig, VisualStyle, MediaArtStyle, VisualArtEffect, MediaArtSourceImage, MediaArtStyleParams, DataCompositionParams, DigitalNatureParams, AiDataSculptureParams, LightAndSpaceParams, KineticMirrorsParams, GenerativeBotanyParams, QuantumPhantasmParams, ArchitecturalProjectionParams, ImageTransitionStyle, VideoModelID } from "../types";
 
 // Corrected: Initialize GoogleGenAI with a named apiKey parameter as per the guidelines.
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+// Cost estimation constant
+export const COST_PER_IMAGEN_IMAGE = 0.02; // Example cost, adjust based on actual pricing
 
 const aspectRatiosMap: Record<AspectRatio, string> = {
     [AspectRatio.LANDSCAPE]: "16:9",
@@ -75,6 +78,23 @@ const getImageData = async (sourceImage: MediaArtSourceImage): Promise<{data: st
         data,
         mimeType: blob.type || 'image/jpeg'
     };
+};
+
+// Helper to add style prefixes for different video models
+const getVideoModelPromptPrefix = (model: VideoModelID): string => {
+    switch (model) {
+        case VideoModelID.CINEMATIC:
+            return "Style Emphasis: Create a hyper-realistic, cinematic video with film grain, dramatic lighting, and a high-end feel. ";
+        case VideoModelID.ANIMATOR:
+            return "Style Emphasis: Animate this scene with smooth motion and exaggerated expressions, perfectly matching the specified animation style (e.g., anime, claymation). ";
+        case VideoModelID.FX:
+            return "Style Emphasis: Focus on creating stunning visual effects. Generate dynamic particles, fire, smoke, or fluid simulations as described in the prompt. ";
+        case VideoModelID.LITE:
+            return "Instruction: Generate a fast preview. Prioritize speed over ultimate quality. ";
+        case VideoModelID.STANDARD:
+        default:
+            return "";
+    }
 };
 
 export const generateDescription = async (config: DescriptionConfig): Promise<string> => {
@@ -196,7 +216,7 @@ export const generateImageForPanel = async (description: string, config: { image
     return response.generatedImages[0].image.imageBytes;
 };
 
-export const generateVideoForPanel = async (prompt: string, imageBase64: string, videoModel: string, isMediaArt: boolean = false): Promise<string> => {
+export const generateVideoForPanel = async (prompt: string, imageBase64: string, videoModel: VideoModelID, isMediaArt: boolean = false): Promise<string> => {
     let finalPrompt = prompt;
     if (isMediaArt) {
         // Re-engineered the prompt to be more structured and robust, prioritizing the detailed
@@ -217,10 +237,12 @@ The provided input image.
 - Do not add any text or watermarks to the video.`;
     }
 
+    const modelPrefix = getVideoModelPromptPrefix(videoModel);
+
     // Corrected: Use ai.models.generateVideos for video generation as per guidelines.
     let operation = await ai.models.generateVideos({
-        model: videoModel,
-        prompt: finalPrompt,
+        model: 'veo-2.0-generate-001',
+        prompt: modelPrefix + finalPrompt,
         image: {
             imageBytes: imageBase64,
             mimeType: 'image/jpeg',
@@ -335,7 +357,7 @@ export const generateMediaArtKeyframePrompts = async (sourceImage: MediaArtSourc
     return parsed;
 };
 
-export const generateVisualArtVideo = async (text: string, effect: VisualArtEffect, image?: MediaArtSourceImage | null): Promise<string> => {
+export const generateVisualArtVideo = async (text: string, effect: VisualArtEffect, videoModel: VideoModelID, image?: MediaArtSourceImage | null): Promise<string> => {
     let prompt = `Create a dynamic, visually striking motion graphics video based on the following parameters. The style should be abstract, high-energy, and suitable for a short social media clip.
 
 - Visual Effect: ${effect}
@@ -362,10 +384,88 @@ export const generateVisualArtVideo = async (text: string, effect: VisualArtEffe
         };
     }
 
+    const modelPrefix = getVideoModelPromptPrefix(videoModel);
+
     let operation = await ai.models.generateVideos({
         model: 'veo-2.0-generate-001',
-        prompt: prompt,
+        prompt: modelPrefix + prompt,
         ...(imagePart && { image: imagePart }),
+        config: {
+            numberOfVideos: 1,
+        }
+    });
+
+    while (!operation.done) {
+        await new Promise(resolve => setTimeout(resolve, 10000));
+        operation = await ai.operations.getVideosOperation({ operation: operation });
+    }
+
+    const downloadLink = operation.response?.generatedVideos?.[0]?.video?.uri;
+    if (!downloadLink) {
+        throw new Error("Video generation completed, but no download link was found.");
+    }
+
+    const videoResponse = await fetch(`${downloadLink}&key=${process.env.API_KEY}`);
+    if (!videoResponse.ok) {
+        throw new Error(`Failed to download video: ${videoResponse.statusText}`);
+    }
+    const blob = await videoResponse.blob();
+    return URL.createObjectURL(blob);
+};
+
+const getTransitionStylePrompt = (style: ImageTransitionStyle, userPrompt: string): string => {
+    let styleInstruction = '';
+    switch (style) {
+        case ImageTransitionStyle.PHYSICS_MORPH:
+            styleInstruction = `The transition must be a physics-based morph. Animate the objects and elements within the start image with realistic physics (gravity, momentum, collision). They should move, interact, and settle before seamlessly morphing into the final arrangement of the end image. The transition should feel dynamic and grounded in reality.`;
+            break;
+        case ImageTransitionStyle.PARTICLE_DISSOLVE:
+            styleInstruction = `The transition must be a particle dissolve. The start image should dissolve into a swirling vortex of glowing particles. These particles will then elegantly coalesce and reform to create the end image. The transition should feel magical and ethereal.`;
+            break;
+        case ImageTransitionStyle.CINEMATIC_ZOOM:
+            styleInstruction = `The transition must be a slow, cinematic Ken Burns effect. Start with a close-up on a key detail in the start image, then slowly pan and zoom out to reveal the full scene. As the zoom completes, cross-dissolve smoothly into the end image, which may also have its own subtle pan or zoom. The movement must be smooth and professional.`;
+            break;
+        case ImageTransitionStyle.FLUID_PAINT:
+            styleInstruction = `The transition must look like a fluid paint effect. Treat the start image as a wet oil painting. Animate it with visible, fluid brushstrokes that swirl and blend the colors, transforming the scene dynamically. The paint should then settle and resolve into the sharp details of the end image.`;
+            break;
+        case ImageTransitionStyle.MORPH:
+        default:
+            styleInstruction = `The transition must be a direct, smooth, and cinematic morphing effect between the start and end images.`;
+            break;
+    }
+
+    return `
+    **Primary Goal:** Create a short video that transitions from the provided start image to an end image.
+    
+    **Transition Style:** ${styleInstruction}
+
+    **User's Creative Direction:** ${userPrompt}
+
+    **Strict Requirements:**
+    1.  The very first frame of the video MUST be identical to the start image.
+    2.  The very last frame of the video MUST be identical to the end image.
+    3.  The animation between them must follow the specified transition style and user direction.
+    4.  The final video must be high-quality and visually seamless.
+    `;
+}
+
+export const generateImageTransitionVideo = async (startImage: MediaArtSourceImage, endImage: MediaArtSourceImage, userPrompt: string, style: ImageTransitionStyle, videoModel: VideoModelID): Promise<string> => {
+    // Step 1: Generate a detailed prompt using the selected style and user prompt.
+    // This step is now more direct, as we construct the prompt logic here instead of asking another AI.
+    const detailedPrompt = getTransitionStylePrompt(style, userPrompt);
+    
+    const startImageData = await getImageData(startImage);
+    const modelPrefix = getVideoModelPromptPrefix(videoModel);
+
+    // Step 2: Generate the video using the start image and the new detailed prompt.
+    // The end image is not sent to the video model; its description is implied in the prompt logic.
+    let operation = await ai.models.generateVideos({
+        model: 'veo-2.0-generate-001',
+        prompt: modelPrefix + detailedPrompt,
+        image: {
+            imageBytes: startImageData.data,
+            mimeType: startImageData.mimeType,
+        },
         config: {
             numberOfVideos: 1,
         }

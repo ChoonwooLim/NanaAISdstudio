@@ -5,14 +5,16 @@ import { useTranslation } from '../i18n/LanguageContext';
 import RefreshIcon from './icons/RefreshIcon';
 import DeleteIcon from './icons/DeleteIcon';
 import DownloadIcon from './icons/DownloadIcon';
+import ImageIcon from './icons/ImageIcon';
 
 interface StoryboardDisplayProps {
     panels: StoryboardPanel[];
     storyIdea: string;
     onExpandScene: (sceneDescription: string, index: number) => void;
     onSceneDurationChange: (index: number, duration: number) => void;
-    onRegenerateVideo: (index: number) => void;
-    onRegenerateImage: (index: number) => void;
+    onRegenerateVideo: (index: number, description: string, imageUrl: string) => void;
+    onGenerateSingleImage: (index: number, description: string) => void;
+    onRegenerateImage: (index: number, description: string) => void;
     onDeletePanel: (index: number) => void;
     isGeneratingImages: boolean;
     onExportPdf: () => void;
@@ -25,6 +27,7 @@ const StoryboardDisplay: React.FC<StoryboardDisplayProps> = ({
     onExpandScene,
     onSceneDurationChange,
     onRegenerateVideo,
+    onGenerateSingleImage,
     onRegenerateImage,
     onDeletePanel,
     isGeneratingImages,
@@ -86,6 +89,13 @@ const StoryboardDisplay: React.FC<StoryboardDisplayProps> = ({
                             <div className="absolute top-2 left-2 bg-black/50 text-white text-xs font-bold px-2 py-1 rounded">
                                 {t('storyboardDisplay.scene', { index: index + 1 })}
                             </div>
+                            
+                            {!panel.imageUrl && !panel.isLoadingImage && (
+                                <button onClick={() => onGenerateSingleImage(index, panel.description)} className="flex flex-col items-center text-slate-400 hover:text-white transition-colors">
+                                    <ImageIcon className="w-8 h-8"/>
+                                    <span className="text-sm font-semibold mt-2">{t('storyboardDisplay.generateImage')}</span>
+                                </button>
+                            )}
                              {panel.isLoadingImage && (
                                 <div className="flex flex-col items-center text-slate-400">
                                     <LoadingSpinner />
@@ -134,10 +144,10 @@ const StoryboardDisplay: React.FC<StoryboardDisplayProps> = ({
                         </div>
                         <div className="p-3 border-t border-slate-700 bg-slate-900/30 flex items-center justify-between flex-wrap gap-2">
                             <div className="flex items-center gap-2">
-                                <button onClick={() => onRegenerateImage(index)} title={t('tooltips.regenerateImage')} className="p-2 bg-slate-700 hover:bg-slate-600 rounded-md transition-colors disabled:opacity-50" disabled={panel.isLoadingImage}>
+                                <button onClick={() => onRegenerateImage(index, panel.description)} title={t('tooltips.regenerateImage')} className="p-2 bg-slate-700 hover:bg-slate-600 rounded-md transition-colors disabled:opacity-50" disabled={panel.isLoadingImage || !panel.imageUrl}>
                                     <RefreshIcon className="w-4 h-4 text-slate-300"/>
                                 </button>
-                                <button onClick={() => onRegenerateVideo(index)} title={t('tooltips.generateVideo')} className="p-2 bg-slate-700 hover:bg-slate-600 rounded-md transition-colors disabled:opacity-50" disabled={panel.isLoadingVideo || !panel.imageUrl || panel.imageUrl === 'error' || panel.imageUrl === 'quota_error'}>
+                                <button onClick={() => onRegenerateVideo(index, panel.description, panel.imageUrl!)} title={t('tooltips.generateVideo')} className="p-2 bg-slate-700 hover:bg-slate-600 rounded-md transition-colors disabled:opacity-50" disabled={panel.isLoadingVideo || !panel.imageUrl || panel.imageUrl === 'error' || panel.imageUrl === 'quota_error'}>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-300"><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/></svg>
                                 </button>
                                 <button onClick={() => onExpandScene(panel.description, index)} title={t('tooltips.expandScene')} className="p-2 bg-slate-700 hover:bg-slate-600 rounded-md transition-colors disabled:opacity-50" disabled={panel.isLoadingImage}>

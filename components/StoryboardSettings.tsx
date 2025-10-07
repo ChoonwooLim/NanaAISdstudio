@@ -1,5 +1,5 @@
 import React from 'react';
-import { StoryboardConfig, AspectRatio, VisualStyle, VideoLength, Mood } from '../types';
+import { StoryboardConfig, AspectRatio, VisualStyle, VideoLength, Mood, VideoModelID } from '../types';
 import { 
     ASPECT_RATIO_OPTIONS, 
     VISUAL_STYLE_OPTIONS, 
@@ -168,7 +168,7 @@ const StoryboardSettings: React.FC<StoryboardSettingsProps> = ({ config, setConf
             {/* Video Settings */}
              <div className="p-4 border border-slate-700 rounded-lg bg-slate-900/30">
                 <h3 className="block text-xs font-semibold text-slate-300 mb-4">{t('storyboardSettings.videoSection')}</h3>
-                 <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label htmlFor="videoModel" className="block text-xs font-medium text-slate-400 mb-1">
                             {t('storyboardSettings.videoModel')}
@@ -176,12 +176,12 @@ const StoryboardSettings: React.FC<StoryboardSettingsProps> = ({ config, setConf
                         <select
                             id="videoModel"
                             value={config.videoModel}
-                            onChange={(e) => handleConfigChange('videoModel', e.target.value)}
+                            onChange={(e) => handleConfigChange('videoModel', e.target.value as VideoModelID)}
                             className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         >
-                            {VIDEO_MODEL_OPTIONS.map(o => <option key={o.value} value={o.value} className="bg-slate-800">{o.label}</option>)}
+                            {VIDEO_MODEL_OPTIONS.map(o => <option key={o.value} value={o.value} className="bg-slate-800">{t(o.labelKey)}</option>)}
                         </select>
-                        {selectedVideoModel && <p className="text-xs text-slate-500 mt-1">{selectedVideoModel.description}</p>}
+                        {selectedVideoModel && <p className="text-xs text-slate-500 mt-1">{t(selectedVideoModel.descriptionKey)}</p>}
                     </div>
                  </div>
                  <p className="text-xs text-slate-500 mt-4">{t('storyboardSettings.videoNote')}</p>

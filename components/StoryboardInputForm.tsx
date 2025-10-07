@@ -3,9 +3,10 @@ import StoryboardSettings from './StoryboardSettings';
 import { StoryboardConfig } from '../types';
 import LoadingSpinner from './LoadingSpinner';
 import { useTranslation } from '../i18n/LanguageContext';
+import { COST_PER_IMAGEN_IMAGE } from '../services/geminiService';
 
 interface StoryboardInputFormProps {
-    onGenerate: (idea: string, config: StoryboardConfig) => void;
+    onGenerate: (idea: string, config: StoryboardConfig, oneByOne: boolean) => void;
     isLoading: boolean;
     config: StoryboardConfig;
     setConfig: (config: StoryboardConfig) => void;
@@ -16,13 +17,16 @@ const StoryboardInputForm: React.FC<StoryboardInputFormProps> = ({ onGenerate, i
     const { t } = useTranslation();
     const [idea, setIdea] = useState('');
     const [showSettings, setShowSettings] = useState(false);
+    const [generateOneByOne, setGenerateOneByOne] = useState(true);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (idea.trim()) {
-            onGenerate(idea, config);
+            onGenerate(idea, config, generateOneByOne);
         }
     };
+
+    const estimatedCost = (config.sceneCount * COST_PER_IMAGEN_IMAGE).toFixed(2);
     
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -40,7 +44,7 @@ const StoryboardInputForm: React.FC<StoryboardInputFormProps> = ({ onGenerate, i
                 />
             </div>
             
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center flex-wrap gap-4">
                 <button
                     type="button"
                     onClick={() => setShowSettings(!showSettings)}
@@ -48,6 +52,27 @@ const StoryboardInputForm: React.FC<StoryboardInputFormProps> = ({ onGenerate, i
                 >
                     {showSettings ? t('storyboardForm.hideSettings') : t('storyboardForm.showSettings')}
                 </button>
+                 <div className="relative flex items-start">
+                    <div className="flex h-6 items-center">
+                        <input
+                        id="one-by-one-checkbox"
+                        aria-describedby="one-by-one-description"
+                        name="one-by-one"
+                        type="checkbox"
+                        checked={generateOneByOne}
+                        onChange={(e) => setGenerateOneByOne(e.target.checked)}
+                        className="h-4 w-4 rounded border-slate-500 bg-slate-700 text-blue-600 focus:ring-blue-600"
+                        />
+                    </div>
+                    <div className="ml-3 text-sm">
+                        <label htmlFor="one-by-one-checkbox" className="font-medium text-slate-300">
+                             {t('storyboardForm.oneByOneLabel')}
+                        </label>
+                        <p id="one-by-one-description" className="text-slate-500">
+                            {t('storyboardForm.oneByOneDescription')}
+                        </p>
+                    </div>
+                </div>
             </div>
 
             {showSettings && (
@@ -56,6 +81,12 @@ const StoryboardInputForm: React.FC<StoryboardInputFormProps> = ({ onGenerate, i
                 </div>
             )}
             
+            {!generateOneByOne && (
+                 <div className="p-3 bg-yellow-900/30 border border-yellow-700/50 rounded-lg text-center text-xs text-yellow-300">
+                    {t('storyboardForm.costWarning', { cost: estimatedCost })}
+                </div>
+            )}
+
             <div className="pt-2 flex flex-col sm:flex-row gap-4">
                 <button
                     type="submit"

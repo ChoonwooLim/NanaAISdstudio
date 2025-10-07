@@ -7,7 +7,8 @@ import {
     MediaArtStyle, 
     FamousPainting, 
     VisualArtEffect,
-    MediaArtStyleParams
+    MediaArtStyleParams,
+    VideoModelID
 } from './types';
 
 export const TONE_OPTIONS: { value: Tone; label: string }[] = [
@@ -64,8 +65,12 @@ export const IMAGE_MODEL_OPTIONS: { value: string; label: string; description: s
     { value: 'imagen-4.0-generate-001', label: 'Imagen 4.0', description: 'Google\'s most advanced image generation model.' },
 ];
 
-export const VIDEO_MODEL_OPTIONS: { value: string; label: string; description: string }[] = [
-    { value: 'veo-2.0-generate-001', label: 'Veo 2.0', description: 'Google\'s advanced video model.' },
+export const VIDEO_MODEL_OPTIONS: { value: VideoModelID; labelKey: string; descriptionKey: string }[] = [
+    { value: VideoModelID.STANDARD, labelKey: 'videoModels.standard.label', descriptionKey: 'videoModels.standard.description' },
+    { value: VideoModelID.CINEMATIC, labelKey: 'videoModels.cinematic.label', descriptionKey: 'videoModels.cinematic.description' },
+    { value: VideoModelID.ANIMATOR, labelKey: 'videoModels.animator.label', descriptionKey: 'videoModels.animator.description' },
+    { value: VideoModelID.FX, labelKey: 'videoModels.fx.label', descriptionKey: 'videoModels.fx.description' },
+    { value: VideoModelID.LITE, labelKey: 'videoModels.lite.label', descriptionKey: 'videoModels.lite.description' },
 ];
 
 

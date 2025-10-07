@@ -6,6 +6,7 @@ export enum AppMode {
     STORYBOARD = 'STORYBOARD',
     MEDIA_ART = 'MEDIA_ART',
     VISUAL_ART = 'VISUAL_ART',
+    IMAGE_TRANSITION = 'IMAGE_TRANSITION',
 }
 
 export enum Tone {
@@ -65,6 +66,22 @@ export enum VisualArtEffect {
     ASCII_STORM = 'ascii storm',
 }
 
+export enum ImageTransitionStyle {
+    MORPH = 'morph',
+    PHYSICS_MORPH = 'physics_morph',
+    PARTICLE_DISSOLVE = 'particle_dissolve',
+    CINEMATIC_ZOOM = 'cinematic_zoom',
+    FLUID_PAINT = 'fluid_paint',
+}
+
+export enum VideoModelID {
+    STANDARD = 'veo-2.0-generate-001',
+    CINEMATIC = 'veo-2.1-cinematic',
+    ANIMATOR = 'veo-animator',
+    FX = 'veo-fx',
+    LITE = 'veo-lite',
+}
+
 
 export interface DescriptionConfig {
     productName: string;
@@ -83,7 +100,7 @@ export interface StoryboardConfig {
     descriptionLanguage: string;
     textModel: string;
     imageModel: string;
-    videoModel: string;
+    videoModel: VideoModelID;
 }
 
 export interface StoryboardPanel {
@@ -211,6 +228,18 @@ export interface VisualArtState {
     inputText: string;
     sourceImage: MediaArtSourceImage | null;
     effect: VisualArtEffect;
+    videoModel: VideoModelID;
+    resultVideoUrl: string | null;
+    isLoading: boolean;
+    error: string | null;
+}
+
+export interface ImageTransitionState {
+    startImage: MediaArtSourceImage | null;
+    endImage: MediaArtSourceImage | null;
+    prompt: string;
+    style: ImageTransitionStyle;
+    videoModel: VideoModelID;
     resultVideoUrl: string | null;
     isLoading: boolean;
     error: string | null;

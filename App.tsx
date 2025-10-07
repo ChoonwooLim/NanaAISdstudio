@@ -15,6 +15,8 @@ import GalleryModal from './components/GalleryModal';
 import MediaArtGenerator from './components/MediaArtGenerator';
 import ImageSelectionModal from './components/ImageSelectionModal';
 import VisualArtGenerator from './components/VisualArtGenerator';
+import ConfirmationModal from './components/ConfirmationModal';
+import ImageTransitionGenerator from './components/ImageTransitionGenerator';
 
 import { 
     AppMode, 
@@ -35,6 +37,9 @@ import {
     MediaArtSourceImage,
     VisualArtState,
     VisualArtEffect,
+    ImageTransitionState,
+    ImageTransitionStyle,
+    VideoModelID,
 } from './types';
 import * as geminiService from './services/geminiService';
 import * as db from './services/db';
@@ -76,7 +81,7 @@ const App: React.FC = () => {
         descriptionLanguage: 'English',
         textModel: 'gemini-2.5-flash',
         imageModel: 'imagen-4.0-generate-001',
-        videoModel: 'veo-2.0-generate-001',
+        videoModel: VideoModelID.STANDARD,
     };
     const [storyboardConfig, setStoryboardConfig] = useState<StoryboardConfig>(initialStoryboardConfig);
     const [storyIdea, setStoryIdea] = useState('');
@@ -102,11 +107,26 @@ const App: React.FC = () => {
         inputText: '',
         sourceImage: null,
         effect: VisualArtEffect.GLITCH,
+        videoModel: VideoModelID.STANDARD,
         resultVideoUrl: null,
         isLoading: false,
         error: null,
     };
     const [visualArtState, setVisualArtState] = useState<VisualArtState>(initialVisualArtState);
+
+    // Image Transition Mode State
+    const initialImageTransitionState: ImageTransitionState = {
+        startImage: null,
+        endImage: null,
+        prompt: 'Create a smooth, cinematic morphing transition between the two images.',
+        style: ImageTransitionStyle.MORPH,
+        videoModel: VideoModelID.STANDARD,
+        resultVideoUrl: null,
+        isLoading: false,
+        error: null,
+    };
+    const [imageTransitionState, setImageTransitionState] = useState<ImageTransitionState>(initialImageTransitionState);
+
 
     // Modal State
     const [isDetailedModalOpen, setIsDetailedModalOpen] = useState(false);
@@ -119,6 +139,12 @@ const App: React.FC = () => {
     const [isGalleryOpen, setIsGalleryOpen] = useState(false);
     const [projects, setProjects] = useState<Project[]>([]);
     const [isImageSelectorOpen, setIsImageSelectorOpen] = useState(false);
+    const [confirmationModal, setConfirmationModal] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        onConfirm: (() => void) | null;
+    }>({ isOpen: false, title: '', message: '', onConfirm: null });
     
     // Generic loading/error for now
     const [error, setError] = useState<string | null>(null);
@@ -129,9 +155,10 @@ const App: React.FC = () => {
     useEffect(() => {
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
             if (generatingVideoCounter.current > 0) {
+                const message = t('confirmations.pageLeave');
                 e.preventDefault();
-                e.returnValue = ''; // Required for Chrome
-                return ''; // For older browsers
+                e.returnValue = message; 
+                return message; 
             }
         };
 
@@ -140,7 +167,7 @@ const App: React.FC = () => {
         return () => {
             window.removeEventListener('beforeunload', handleBeforeUnload);
         };
-    }, []); // Run only once on mount
+    }, [t]); 
 
     const getSampleProducts = useCallback(() => {
         const langCode = language === 'Korean' ? 'ko' : 'en';
@@ -168,38 +195,60 @@ const App: React.FC = () => {
     };
 
     // Handlers for Storyboard Mode
-    const handleGenerateStoryboard = async (idea: string, config: StoryboardConfig) => {
+    const handleGenerateStoryboard = async (idea: string, config: StoryboardConfig, oneByOne: boolean) => {
         setStoryIdea(idea);
         setStoryboardConfig(config);
         setIsGeneratingStoryboard(true);
-        setIsGeneratingImages(true);
+        setIsGeneratingImages(!oneByOne); // Only set this true if generating all at once
         setError(null);
         setStoryboardPanels([]);
 
         try {
             const panels = await geminiService.generateStoryboard(idea, config);
-            const initialPanels: StoryboardPanel[] = panels.map(p => ({ ...p, isLoadingImage: true }));
+            const initialPanels: StoryboardPanel[] = panels.map(p => ({ ...p, isLoadingImage: false }));
             setStoryboardPanels(initialPanels);
             setIsGeneratingStoryboard(false);
 
-            // Generate images sequentially
-            let currentPanels = [...initialPanels];
-            for (let i = 0; i < panels.length; i++) {
-                try {
-                    const imageBase64 = await geminiService.generateImageForPanel(panels[i].description, config);
-                    currentPanels[i] = { ...currentPanels[i], imageUrl: `data:image/jpeg;base64,${imageBase64}`, isLoadingImage: false };
-                } catch (imgErr: any) {
-                    console.error(`Image generation failed for panel ${i}:`, imgErr);
-                    const isQuotaError = imgErr.message?.includes('429');
-                    currentPanels[i] = { ...currentPanels[i], imageUrl: isQuotaError ? 'quota_error' : 'error', isLoadingImage: false };
+            if (!oneByOne) {
+                // Generate all images sequentially if not in one-by-one mode
+                setStoryboardPanels(currentPanels => currentPanels.map(p => ({...p, isLoadingImage: true})));
+
+                for (let i = 0; i < panels.length; i++) {
+                    try {
+                        const imageBase64 = await geminiService.generateImageForPanel(panels[i].description, config);
+                        setStoryboardPanels(current => current.map((p, idx) => idx === i ? { ...p, imageUrl: `data:image/jpeg;base64,${imageBase64}`, isLoadingImage: false } : p));
+                    } catch (imgErr: any) {
+                        console.error(`Image generation failed for panel ${i}:`, imgErr);
+                        const isQuotaError = imgErr.message?.includes('429');
+                        setStoryboardPanels(current => current.map((p, idx) => idx === i ? { ...p, imageUrl: isQuotaError ? 'quota_error' : 'error', isLoadingImage: false } : p));
+                    }
                 }
-                setStoryboardPanels([...currentPanels]);
             }
         } catch (e: any) {
             setError(e.message || t('errors.storyboardGeneration'));
             setIsGeneratingStoryboard(false);
         } finally {
-            setIsGeneratingImages(false);
+            if (!oneByOne) {
+                 setIsGeneratingImages(false);
+            }
+        }
+    };
+
+    const handleGenerateSingleImage = async (index: number, description: string) => {
+        setStoryboardPanels(currentPanels => 
+            currentPanels.map((p, i) => i === index ? { ...p, imageUrl: undefined, isLoadingImage: true } : p)
+        );
+
+        try {
+            const imageBase64 = await geminiService.generateImageForPanel(description, storyboardConfig);
+            setStoryboardPanels(currentPanels => 
+                currentPanels.map((p, i) => i === index ? { ...p, imageUrl: `data:image/jpeg;base64,${imageBase64}`, isLoadingImage: false } : p)
+            );
+        } catch (e) {
+            console.error(`Image generation failed for panel ${index}:`, e);
+            setStoryboardPanels(currentPanels => 
+                currentPanels.map((p, i) => i === index ? { ...p, imageUrl: 'error', isLoadingImage: false } : p)
+            );
         }
     };
     
@@ -215,15 +264,13 @@ const App: React.FC = () => {
             setDetailedModalPanels(newPanels);
             setIsDetailedModalLoading(false);
 
-            let currentDetailedPanels = [...newPanels];
             for (let i = 0; i < newPanels.length; i++) {
                 try {
                     const imageBase64 = await geminiService.generateImageForPanel(newPanels[i].description, storyboardConfig);
-                    currentDetailedPanels[i] = { ...currentDetailedPanels[i], imageUrl: `data:image/jpeg;base64,${imageBase64}`, isLoadingImage: false };
+                     setDetailedModalPanels(current => current.map((p, idx) => idx === i ? { ...p, imageUrl: `data:image/jpeg;base64,${imageBase64}`, isLoadingImage: false } : p));
                 } catch (imgErr) {
-                    currentDetailedPanels[i] = { ...currentDetailedPanels[i], imageUrl: 'error', isLoadingImage: false };
+                    setDetailedModalPanels(current => current.map((p, idx) => idx === i ? { ...p, imageUrl: 'error', isLoadingImage: false } : p));
                 }
-                setDetailedModalPanels([...currentDetailedPanels]);
             }
         } catch (e: any) {
             setDetailedModalError(e.message || t('errors.sceneExpansion'));
@@ -247,55 +294,61 @@ const App: React.FC = () => {
         setIsDetailedModalOpen(false);
     };
 
-    const handleRegenerateImage = async (index: number) => {
-        const panels = [...storyboardPanels];
-        panels[index] = { ...panels[index], imageUrl: undefined, isLoadingImage: true };
-        setStoryboardPanels(panels);
+    const handleRegenerateImage = async (index: number, description: string) => {
+        setStoryboardPanels(currentPanels => 
+            currentPanels.map((p, i) => i === index ? { ...p, imageUrl: undefined, isLoadingImage: true } : p)
+        );
 
         try {
-            const imageBase64 = await geminiService.generateImageForPanel(panels[index].description, storyboardConfig);
-            panels[index].imageUrl = `data:image/jpeg;base64,${imageBase64}`;
+            const imageBase64 = await geminiService.generateImageForPanel(description, storyboardConfig);
+            setStoryboardPanels(currentPanels => 
+                currentPanels.map((p, i) => i === index ? { ...p, imageUrl: `data:image/jpeg;base64,${imageBase64}`, isLoadingImage: false } : p)
+            );
         } catch (e) {
-            panels[index].imageUrl = 'error';
-        } finally {
-            panels[index].isLoadingImage = false;
-            setStoryboardPanels([...panels]);
+            console.error(`Image regeneration failed for panel ${index}:`, e);
+            setStoryboardPanels(currentPanels => 
+                currentPanels.map((p, i) => i === index ? { ...p, imageUrl: 'error', isLoadingImage: false } : p)
+            );
         }
     };
     
-    const handleRegenerateVideo = async (index: number) => {
-        const panel = storyboardPanels[index];
-        if (!panel.imageUrl || !panel.imageUrl.startsWith('data:image')) return;
+    const handleRegenerateVideo = (index: number, description: string, imageUrl: string) => {
+        if (!imageUrl || !imageUrl.startsWith('data:image')) return;
 
-        if (!window.confirm(t('confirmations.videoGeneration'))) {
-            return;
-        }
+        const executeGeneration = async () => {
+            generatingVideoCounter.current += 1;
+            
+            setStoryboardPanels(currentPanels => {
+                const newPanels = [...currentPanels];
+                newPanels[index] = { ...newPanels[index], videoUrl: undefined, isLoadingVideo: true, videoError: null };
+                return newPanels;
+            });
 
-        generatingVideoCounter.current += 1;
-        
-        setStoryboardPanels(currentPanels => {
-            const newPanels = [...currentPanels];
-            newPanels[index] = { ...newPanels[index], videoUrl: undefined, isLoadingVideo: true, videoError: null };
-            return newPanels;
+            try {
+                const imageBase64 = imageUrl.split(',')[1];
+                const videoUrl = await geminiService.generateVideoForPanel(description, imageBase64, storyboardConfig.videoModel);
+                setStoryboardPanels(currentPanels => {
+                    const newPanels = [...currentPanels];
+                    newPanels[index] = { ...newPanels[index], videoUrl, isLoadingVideo: false };
+                    return newPanels;
+                });
+            } catch (e: any) {
+                setStoryboardPanels(currentPanels => {
+                    const newPanels = [...currentPanels];
+                    newPanels[index] = { ...newPanels[index], videoUrl: 'error', videoError: e.message || t('errors.videoGeneration'), isLoadingVideo: false };
+                    return newPanels;
+                });
+            } finally {
+                generatingVideoCounter.current -= 1;
+            }
+        };
+
+        setConfirmationModal({
+            isOpen: true,
+            title: t('confirmations.videoGenTitle'),
+            message: t('confirmations.videoGeneration'),
+            onConfirm: executeGeneration,
         });
-
-        try {
-            const imageBase64 = panel.imageUrl.split(',')[1];
-            const videoUrl = await geminiService.generateVideoForPanel(panel.description, imageBase64, storyboardConfig.videoModel);
-            setStoryboardPanels(currentPanels => {
-                const newPanels = [...currentPanels];
-                newPanels[index] = { ...newPanels[index], videoUrl, isLoadingVideo: false };
-                return newPanels;
-            });
-        } catch (e: any) {
-            setStoryboardPanels(currentPanels => {
-                const newPanels = [...currentPanels];
-                newPanels[index] = { ...newPanels[index], videoUrl: 'error', videoError: e.message || t('errors.videoGeneration'), isLoadingVideo: false };
-                return newPanels;
-            });
-        } finally {
-            generatingVideoCounter.current -= 1;
-        }
     };
 
     // Sample Gallery Handlers
@@ -313,7 +366,7 @@ const App: React.FC = () => {
         setStoryIdea(story.idea);
         setStoryboardConfig(story.config);
         setIsSampleGalleryOpen(false);
-        handleGenerateStoryboard(story.idea, story.config);
+        handleGenerateStoryboard(story.idea, story.config, false); // Samples are generated all at once
     };
 
     // Project Management (DB)
@@ -336,6 +389,7 @@ const App: React.FC = () => {
         setStoryboardPanels([]);
         setMediaArtState(initialMediaArtState);
         setVisualArtState(initialVisualArtState);
+        setImageTransitionState(initialImageTransitionState);
         setError(null);
     };
 
@@ -459,6 +513,7 @@ const App: React.FC = () => {
                 storyboardPanels: serializablePanels,
                 mediaArtState,
                 visualArtState,
+                imageTransitionState,
             };
             
             const jsonString = JSON.stringify(projectData);
@@ -498,18 +553,29 @@ const App: React.FC = () => {
                     setMode(projectData.mode);
                     setDescriptionConfig(projectData.descriptionConfig || initialDescriptionConfig);
                     setDescription(projectData.description || '');
-                    setStoryboardConfig(projectData.storyboardConfig || initialStoryboardConfig);
+                    
+                    const loadedStoryboardConfig = { ...initialStoryboardConfig, ...(projectData.storyboardConfig || {}) };
+                    if (!loadedStoryboardConfig.videoModel) loadedStoryboardConfig.videoModel = VideoModelID.STANDARD;
+                    setStoryboardConfig(loadedStoryboardConfig);
+                    
                     setStoryIdea(projectData.storyIdea || '');
                     
-                    const loadedMediaArtState = projectData.mediaArtState ? 
-                        { ...initialMediaArtState, ...projectData.mediaArtState } : 
-                        initialMediaArtState;
+                    const loadedMediaArtState = { ...initialMediaArtState, ...(projectData.mediaArtState || {}) };
                     if (!loadedMediaArtState.config) {
                         loadedMediaArtState.config = initialStoryboardConfig;
                     }
+                    if (!loadedMediaArtState.config.videoModel) {
+                        loadedMediaArtState.config.videoModel = VideoModelID.STANDARD;
+                    }
                     setMediaArtState(loadedMediaArtState);
+                    
+                    const loadedVisualArtState = { ...initialVisualArtState, ...(projectData.visualArtState || {}) };
+                    if (!loadedVisualArtState.videoModel) loadedVisualArtState.videoModel = VideoModelID.STANDARD;
+                    setVisualArtState(loadedVisualArtState);
 
-                    setVisualArtState(projectData.visualArtState || initialVisualArtState);
+                    const loadedImageTransitionState = { ...initialImageTransitionState, ...(projectData.imageTransitionState || {}) };
+                    if (!loadedImageTransitionState.videoModel) loadedImageTransitionState.videoModel = VideoModelID.STANDARD;
+                    setImageTransitionState(loadedImageTransitionState);
 
                     const panelsToLoad = projectData.storyboardPanels || [];
                     const panelsWithBlobUrls = await Promise.all(
@@ -593,64 +659,103 @@ const App: React.FC = () => {
         }
     };
     
-    const handleRegenerateMediaArtVideo = async (index: number) => {
-        const panel = mediaArtState.panels[index];
-        if (!panel.imageUrl || !panel.imageUrl.startsWith('data:image')) return;
+    const handleRegenerateMediaArtVideo = (index: number, description: string, imageUrl: string) => {
+        if (!imageUrl || !imageUrl.startsWith('data:image')) return;
 
-        if (!window.confirm(t('confirmations.videoGeneration'))) {
-            return;
-        }
+        const executeGeneration = async () => {
+            generatingVideoCounter.current += 1;
+            setMediaArtState(s => {
+                const panels = [...s.panels];
+                panels[index] = { ...panels[index], videoUrl: undefined, isLoadingVideo: true, videoError: null };
+                return { ...s, panels };
+            });
 
-        generatingVideoCounter.current += 1;
-        setMediaArtState(s => {
-            const panels = [...s.panels];
-            panels[index] = { ...panels[index], videoUrl: undefined, isLoadingVideo: true, videoError: null };
-            return { ...s, panels };
+            try {
+                const imageBase64 = imageUrl.split(',')[1];
+                // The panel description is now the prompt for the *end* frame, which is what the video model needs.
+                const videoUrl = await geminiService.generateVideoForPanel(description, imageBase64, mediaArtState.config.videoModel, true);
+                setMediaArtState(s => {
+                    const newPanels = [...s.panels];
+                    newPanels[index] = { ...newPanels[index], videoUrl: videoUrl, isLoadingVideo: false };
+                    return { ...s, panels: newPanels };
+                });
+            } catch (e: any) {
+                setMediaArtState(s => {
+                    const newPanels = [...s.panels];
+                    newPanels[index] = { 
+                        ...newPanels[index], 
+                        videoUrl: 'error', 
+                        videoError: e.message || t('errors.videoGeneration'),
+                        isLoadingVideo: false
+                    };
+                    return { ...s, panels: newPanels };
+                });
+            } finally {
+                generatingVideoCounter.current -= 1;
+            }
+        };
+        
+        setConfirmationModal({
+            isOpen: true,
+            title: t('confirmations.videoGenTitle'),
+            message: t('confirmations.videoGeneration'),
+            onConfirm: executeGeneration,
         });
-
-        try {
-            const imageBase64 = panel.imageUrl.split(',')[1];
-            // The panel description is now the prompt for the *end* frame, which is what the video model needs.
-            const videoUrl = await geminiService.generateVideoForPanel(panel.description, imageBase64, mediaArtState.config.videoModel, true);
-            setMediaArtState(s => {
-                const newPanels = [...s.panels];
-                newPanels[index] = { ...newPanels[index], videoUrl: videoUrl, isLoadingVideo: false };
-                return { ...s, panels: newPanels };
-            });
-        } catch (e: any) {
-            setMediaArtState(s => {
-                const newPanels = [...s.panels];
-                newPanels[index] = { 
-                    ...newPanels[index], 
-                    videoUrl: 'error', 
-                    videoError: e.message || t('errors.videoGeneration'),
-                    isLoadingVideo: false
-                };
-                return { ...s, panels: newPanels };
-            });
-        } finally {
-            generatingVideoCounter.current -= 1;
-        }
     };
 
     // Visual Art Handlers
-    const handleGenerateVisualArt = async () => {
-        if (!window.confirm(t('confirmations.videoGeneration'))) {
-            return;
-        }
-        generatingVideoCounter.current += 1;
-        setVisualArtState(s => ({ ...s, isLoading: true, error: null, resultVideoUrl: null }));
-        try {
-            const { inputText, effect, sourceImage } = visualArtState;
-            const resultUrl = await geminiService.generateVisualArtVideo(inputText, effect, sourceImage);
-            setVisualArtState(s => ({ ...s, resultVideoUrl: resultUrl }));
-        } catch (e: any) {
-            setVisualArtState(s => ({ ...s, error: e.message || t('errors.visualArtGeneration') }));
-        } finally {
-            generatingVideoCounter.current -= 1;
-            setVisualArtState(s => ({ ...s, isLoading: false }));
-        }
+    const handleGenerateVisualArt = (currentState: VisualArtState) => {
+        const executeGeneration = async () => {
+            generatingVideoCounter.current += 1;
+            setVisualArtState(s => ({ ...s, isLoading: true, error: null, resultVideoUrl: null }));
+            try {
+                const { inputText, effect, sourceImage, videoModel } = currentState;
+                const resultUrl = await geminiService.generateVisualArtVideo(inputText, effect, videoModel, sourceImage);
+                setVisualArtState(s => ({ ...s, resultVideoUrl: resultUrl }));
+            } catch (e: any) {
+                setVisualArtState(s => ({ ...s, error: e.message || t('errors.visualArtGeneration') }));
+            } finally {
+                generatingVideoCounter.current -= 1;
+                setVisualArtState(s => ({ ...s, isLoading: false }));
+            }
+        };
+
+        setConfirmationModal({
+            isOpen: true,
+            title: t('confirmations.videoGenTitle'),
+            message: t('confirmations.videoGeneration'),
+            onConfirm: executeGeneration,
+        });
     };
+
+    // Image Transition Handlers
+    const handleGenerateImageTransitionVideo = (currentState: ImageTransitionState) => {
+        const executeGeneration = async () => {
+            generatingVideoCounter.current += 1;
+            setImageTransitionState(s => ({ ...s, isLoading: true, error: null, resultVideoUrl: null }));
+            try {
+                const { startImage, endImage, prompt, style, videoModel } = currentState;
+                if (!startImage || !endImage) {
+                    throw new Error(t('imageTransition.errorStartEndImage'));
+                }
+                const resultUrl = await geminiService.generateImageTransitionVideo(startImage, endImage, prompt, style, videoModel);
+                setImageTransitionState(s => ({ ...s, resultVideoUrl: resultUrl }));
+            } catch (e: any) {
+                setImageTransitionState(s => ({ ...s, error: e.message || t('errors.imageTransitionGeneration') }));
+            } finally {
+                generatingVideoCounter.current -= 1;
+                setImageTransitionState(s => ({ ...s, isLoading: false }));
+            }
+        };
+
+        setConfirmationModal({
+            isOpen: true,
+            title: t('confirmations.videoGenTitle'),
+            message: t('confirmations.videoGeneration'),
+            onConfirm: executeGeneration,
+        });
+    };
+
 
     if (!API_KEY) {
         return <ApiKeyInstructions />;
@@ -706,6 +811,7 @@ const App: React.FC = () => {
                                             setStoryboardPanels(newPanels);
                                         }}
                                         onRegenerateVideo={handleRegenerateVideo}
+                                        onGenerateSingleImage={handleGenerateSingleImage}
                                         onRegenerateImage={handleRegenerateImage}
                                         onDeletePanel={(index) => setStoryboardPanels(storyboardPanels.filter((_, i) => i !== index))}
                                         isGeneratingImages={isGeneratingImages}
@@ -736,6 +842,15 @@ const App: React.FC = () => {
                                     state={visualArtState}
                                     setState={setVisualArtState}
                                     onGenerate={handleGenerateVisualArt}
+                                />
+                            </div>
+                         )}
+                         {mode === AppMode.IMAGE_TRANSITION && (
+                            <div className="max-w-5xl mx-auto">
+                                <ImageTransitionGenerator
+                                    state={imageTransitionState}
+                                    setState={setImageTransitionState}
+                                    onGenerate={handleGenerateImageTransitionVideo}
                                 />
                             </div>
                          )}
@@ -775,6 +890,18 @@ const App: React.FC = () => {
                 onSelect={(source: MediaArtSourceImage) => {
                     setMediaArtState(s => ({...s, sourceImage: source, panels: []}));
                     setIsImageSelectorOpen(false);
+                }}
+            />
+            <ConfirmationModal
+                isOpen={confirmationModal.isOpen}
+                title={confirmationModal.title}
+                message={confirmationModal.message}
+                onClose={() => setConfirmationModal({ isOpen: false, title: '', message: '', onConfirm: null })}
+                onConfirm={() => {
+                    if (confirmationModal.onConfirm) {
+                        confirmationModal.onConfirm();
+                    }
+                    setConfirmationModal({ isOpen: false, title: '', message: '', onConfirm: null });
                 }}
             />
         </>

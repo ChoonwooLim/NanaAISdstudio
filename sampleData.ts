@@ -1,4 +1,4 @@
-import { Tone, StoryboardConfig, AspectRatio, VisualStyle, VideoLength, Mood, SampleProduct, SampleStory } from './types';
+import { Tone, StoryboardConfig, AspectRatio, VisualStyle, VideoLength, Mood, SampleProduct, SampleStory, VideoModelID } from './types';
 
 // Type helper for localized data
 type Localized<T> = {
@@ -444,7 +444,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'English',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         },
         ko: {
@@ -459,7 +459,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'Korean',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         }
     },
@@ -476,7 +476,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'English',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         },
         ko: {
@@ -491,7 +491,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'Korean',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         }
     },
@@ -508,7 +508,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'English',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         },
         ko: {
@@ -523,7 +523,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'Korean',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         }
     },
@@ -540,7 +540,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'English',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         },
         ko: {
@@ -555,7 +555,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'Korean',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         }
     },
@@ -572,7 +572,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'English',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         },
         ko: {
@@ -587,7 +587,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'Korean',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         }
     },
@@ -604,7 +604,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'English',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         },
         ko: {
@@ -619,7 +619,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'Korean',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         }
     },
@@ -636,7 +636,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'English',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         },
         ko: {
@@ -651,7 +651,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'Korean',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         }
     },
@@ -668,7 +668,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'English',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         },
         ko: {
@@ -683,7 +683,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'Korean',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         }
     },
@@ -700,7 +700,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'English',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         },
         ko: {
@@ -715,7 +715,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'Korean',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         }
     },
@@ -732,7 +732,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'English',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         },
         ko: {
@@ -747,7 +747,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'Korean',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         }
     },
@@ -764,7 +764,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'English',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         },
         ko: {
@@ -779,7 +779,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'Korean',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         }
     },
@@ -796,7 +796,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'English',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         },
         ko: {
@@ -811,7 +811,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'Korean',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         }
     },
@@ -828,7 +828,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'English',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         },
         ko: {
@@ -843,7 +843,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'Korean',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         }
     },
@@ -860,7 +860,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'English',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         },
         ko: {
@@ -875,7 +875,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'Korean',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         }
     },
@@ -892,7 +892,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'English',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         },
         ko: {
@@ -907,7 +907,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'Korean',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         }
     },
@@ -924,7 +924,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'Japanese',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         },
         ko: {
@@ -939,7 +939,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'Korean',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         }
     },
@@ -956,7 +956,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'English',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         },
         ko: {
@@ -971,7 +971,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'Korean',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         }
     },
@@ -988,7 +988,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'French',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         },
         ko: {
@@ -1003,7 +1003,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'Korean',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         }
     },
@@ -1020,7 +1020,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'English',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         },
         ko: {
@@ -1035,7 +1035,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'Korean',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         }
     },
@@ -1052,7 +1052,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'English',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         },
         ko: {
@@ -1067,7 +1067,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'Korean',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         }
     },
@@ -1084,7 +1084,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'English',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         },
         ko: {
@@ -1099,7 +1099,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'Korean',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         }
     },
@@ -1116,7 +1116,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'English',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         },
         ko: {
@@ -1131,7 +1131,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'Korean',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         }
     },
@@ -1148,7 +1148,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'English',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         },
         ko: {
@@ -1163,7 +1163,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'Korean',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         }
     },
@@ -1180,7 +1180,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'English',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         },
         ko: {
@@ -1195,7 +1195,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'Korean',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         }
     },
@@ -1212,7 +1212,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'English',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         },
         ko: {
@@ -1227,7 +1227,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'Korean',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         }
     },
@@ -1244,7 +1244,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'English',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         },
         ko: {
@@ -1259,7 +1259,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'Korean',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         }
     },
@@ -1276,7 +1276,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'English',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         },
         ko: {
@@ -1291,7 +1291,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'Korean',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         }
     },
@@ -1308,7 +1308,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'English',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         },
         ko: {
@@ -1323,7 +1323,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'Korean',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         }
     },
@@ -1340,7 +1340,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'English',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         },
         ko: {
@@ -1355,7 +1355,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'Korean',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         }
     },
@@ -1372,7 +1372,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'English',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         },
         ko: {
@@ -1387,7 +1387,7 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 descriptionLanguage: 'Korean',
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
-                videoModel: 'veo-2.0-generate-001',
+                videoModel: VideoModelID.STANDARD,
             }
         }
     }

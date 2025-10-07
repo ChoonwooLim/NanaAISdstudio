@@ -21,7 +21,8 @@
     "productDescription": "제품 설명",
     "storyboard": "스토리보드 생성기",
     "mediaArt": "미디어 아트 생성기",
-    "visualArt": "비주얼 아트 생성기"
+    "visualArt": "비주얼 아트 생성기",
+    "imageTransition": "이미지 전환"
   },
   "inputForm": {
     "productName": "제품명",
@@ -47,7 +48,10 @@
     "showSettings": "고급 설정 보기",
     "generating": "스토리보드 생성 중...",
     "generateButton": "스토리보드 생성하기",
-    "loadSample": "샘플 아이디어 불러오기"
+    "loadSample": "샘플 아이디어 불러오기",
+    "oneByOneLabel": "이미지 하나씩 생성하기",
+    "oneByOneDescription": "권장. 텍스트를 먼저 생성 후, 비용 절감을 위해 이미지를 개별적으로 만드세요.",
+    "costWarning": "모든 {{count}}개의 이미지를 한 번에 생성합니다. 예상 비용: ${{cost}}."
   },
   "storyboardSettings": {
     "title": "고급 설정",
@@ -71,6 +75,7 @@
     "estimatedLength": "예상 길이: {{duration}}초",
     "generatingScenes": "장면 설명을 생성 중입니다...\n잠시만 기다려주세요.",
     "scene": "장면 #{{index}}",
+    "generateImage": "이미지 생성",
     "generatingImage": "이미지 생성 중...",
     "imageError": "이미지 생성에 실패했습니다.",
     "quotaErrorTitle": "할당량 도달",
@@ -254,7 +259,8 @@
     "styleTitle": "시각 효과 선택",
     "generateButton": "비디오 생성하기",
     "generating": "생성 중...",
-    "resultTitle": "생성된 비디오"
+    "resultTitle": "생성된 비디오",
+    "videoModelLabel": "비디오 생성 모델"
   },
   "visualArtEffects": {
     "glitch": "글리치 아트",
@@ -267,9 +273,67 @@
     "cta": "클릭하여 이미지 업로드",
     "hint": "PNG, JPG, 또는 WEBP. 최대 5MB."
   },
+  "imageTransition": {
+    "title": "이미지-비디오 전환",
+    "instruction": "시작 이미지와 종료 이미지를 제공하여 두 이미지 사이를 전환하는 비디오를 생성합니다.",
+    "startImageLabel": "시작 이미지",
+    "endImageLabel": "종료 이미지",
+    "promptLabel": "전환 프롬프트 (선택 사항)",
+    "promptPlaceholder": "전환이 어떻게 보여야 하는지 설명하세요. 예: '부드러운 모핑', '입자로 용해', '영화 같은 페이드'...",
+    "generateButton": "전환 비디오 생성",
+    "generating": "비디오 생성 중...",
+    "resultTitle": "생성된 비디오",
+    "errorStartEndImage": "비디오를 생성하려면 시작 이미지와 종료 이미지가 모두 필요합니다.",
+    "styleTitle": "전환 스타일",
+    "videoModelLabel": "비디오 생성 모델",
+    "styleOptions": {
+      "morph": {
+        "title": "단순 모핑",
+        "description": "두 이미지 사이의 직접적이고 부드러운 크로스페이드 및 모핑."
+      },
+      "physicsMorph": {
+        "title": "물리 기반 모핑",
+        "description": "장면 속 객체들이 전환되는 동안 사실적인 물리 법칙에 따라 움직입니다."
+      },
+      "particleDissolve": {
+        "title": "입자 분해",
+        "description": "첫 번째 이미지가 마법 같은 입자로 분해된 후 두 번째 이미지로 재구성됩니다."
+      },
+      "cinematicZoom": {
+        "title": "시네마틱 줌",
+        "description": "느린 팬과 줌을 사용하여 극적이고 영화 같은 전환을 만듭니다."
+      },
+      "fluidPaint": {
+        "title": "유화 물감 효과",
+        "description": "이미지가 마치 소용돌이치는 젖은 유화 물감처럼 변형됩니다."
+      }
+    }
+  },
   "common": {
     "errorPrefix": "오류:",
     "exportAll": "모두 내보내기"
+  },
+  "videoModels": {
+    "standard": {
+      "label": "Veo 2.0 (표준)",
+      "description": "범용 비디오 생성에 가장 적합한 만능 모델입니다."
+    },
+    "cinematic": {
+      "label": "Veo 2.1 (시네마틱)",
+      "description": "실사 같고 충실도 높은 영화 같은 결과물에 최적화되었습니다."
+    },
+    "animator": {
+      "label": "Veo Animator",
+      "description": "애니메이션, 클레이메이션, 카툰과 같은 애니메이션 스타일에 특화되었습니다."
+    },
+    "fx": {
+      "label": "Veo FX",
+      "description": "입자, 불, 유체와 같은 역동적인 시각 효과 생성에 뛰어납니다."
+    },
+    "lite": {
+      "label": "Veo Lite",
+      "description": "빠른 미리보기 및 초안에 이상적인 더 빠르고 가벼운 모델입니다."
+    }
   },
   "paintings": {
     "starryNight": { "title": "별이 빛나는 밤", "artist": "빈센트 반 고흐" },
@@ -310,10 +374,15 @@
     "videoGeneration": "비디오 클립 생성에 실패했습니다.",
     "mediaArtGeneration": "미디어 아트 장면 생성에 실패했습니다. 다시 시도해주세요.",
     "visualArtGeneration": "비주얼 아트 비디오 생성에 실패했습니다. 다시 시도해주세요.",
+    "imageTransitionGeneration": "전환 비디오 생성에 실패했습니다. 다시 시도해주세요.",
     "projectImport": "프로젝트를 가져오지 못했습니다. 파일이 유효하지 않거나 손상되었을 수 있습니다.",
     "projectExport": "프로젝트를 내보내지 못했습니다."
   },
   "confirmations": {
-    "videoGeneration": "비디오 생성은 비용이 많이 들고 몇 분이 소요될 수 있는 작업입니다. 시작한 후에는 잠재적인 중복 청구를 방지하기 위해 이 페이지를 닫거나 새로고침하지 마세요. 계속하시겠습니까?"
+    "videoGeneration": "비디오 생성은 비용이 많이 들고 몇 분이 소요될 수 있는 작업입니다. 시작한 후에는 잠재적인 중복 청구를 방지하기 위해 이 페이지를 닫거나 새로고침하지 마세요.",
+    "pageLeave": "현재 비디오를 생성하고 있습니다. 이 페이지를 나가면 생성이 중단되고, 다시 시작할 경우 중복 요금이 발생할 수 있습니다. 정말로 나가시겠습니까?",
+    "videoGenTitle": "비디오 생성 확인",
+    "confirm": "확인",
+    "cancel": "취소"
   }
 }
