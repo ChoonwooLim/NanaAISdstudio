@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type, GenerateContentResponse, Modality } from "@google/genai";
-import { AspectRatio, DescriptionConfig, StoryboardConfig, VisualStyle, MediaArtStyle, VisualArtEffect, MediaArtSourceImage, MediaArtStyleParams, DataCompositionParams, DigitalNatureParams, AiDataSculptureParams, LightAndSpaceParams, KineticMirrorsParams, GenerativeBotanyParams, QuantumPhantasmParams, ArchitecturalProjectionParams, ImageTransitionStyle, VideoModelID, TransitionMedia } from "../types";
+import { AspectRatio, DescriptionConfig, StoryboardConfig, VisualStyle, MediaArtStyle, VisualArtEffect, MediaArtSourceImage, MediaArtStyleParams, DataCompositionParams, DigitalNatureParams, AiDataSculptureParams, LightAndSpaceParams, KineticMirrorsParams, GenerativeBotanyParams, QuantumPhantasmParams, ArchitecturalProjectionParams, ImageTransitionStyle, VideoModelID, TransitionMedia, CameraType, ColorTone, LensType, LightingStyle } from "../types";
 
 // Corrected: Initialize GoogleGenAI with a named apiKey parameter as per the guidelines.
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -11,6 +11,9 @@ const aspectRatiosMap: Record<AspectRatio, string> = {
     [AspectRatio.LANDSCAPE]: "16:9",
     [AspectRatio.PORTRAIT]: "9:16",
     [AspectRatio.SQUARE]: "1:1",
+    [AspectRatio.ANAMORPHIC]: "2.39:1",
+    [AspectRatio.WIDESCREEN_CINEMA]: "1.85:1",
+    [AspectRatio.ACADEMY]: "1.37:1",
     [AspectRatio.VERTICAL]: "3:4",
     [AspectRatio.CLASSIC]: "4:3",
 };
@@ -120,28 +123,47 @@ const storyboardPanelSchema = {
     type: Type.OBJECT,
     properties: {
         scene: { type: Type.NUMBER },
-        description: { type: Type.STRING, description: 'A detailed, visually descriptive paragraph for this scene. Describe the camera shot, setting, action, and mood. This will be used as a prompt for an image generation model.' },
+        actionDescription: { type: Type.STRING, description: 'A short, one-sentence description of the main action or camera movement in the scene.' },
+        startFramePrompt: { type: Type.STRING, description: 'A detailed, visually descriptive prompt for the scene\'s starting image.' },
+        endFramePrompt: { type: Type.STRING, description: 'A detailed, visually descriptive prompt for the scene\'s ending image.' },
     }
 };
 
-export const generateStoryboard = async (idea: string, config: StoryboardConfig): Promise<{ description: string }[]> => {
-    const prompt = `Create a storyboard for a short video based on this idea: "${idea}".
+export const generateStoryboard = async (idea: string, config: StoryboardConfig): Promise<{ actionDescription: string, startFramePrompt: string, endFramePrompt: string }[]> => {
+    const systemInstruction = `You are a professional storyboard creator and virtual cinematographer AI. Your task is to generate a structured storyboard based on a user's idea and a strict set of constraints. You must follow all constraints precisely. The output must be a valid JSON array of objects conforming to the provided schema.`;
 
-    **Instructions:**
-    1.  Generate exactly ${config.sceneCount} scenes.
-    2.  The overall mood should be ${config.mood}.
-    3.  The visual style should be ${config.visualStyle}.
-    4.  The total video length is approximately ${config.videoLength}, so pace the scenes accordingly.
-    5.  The output language for the descriptions must be ${config.descriptionLanguage}.
-    6.  For each scene, provide a detailed, visually rich description suitable for an AI image generation model. Describe the camera angle, subject, setting, action, and atmosphere.
-    
-    Return the result as a JSON array of objects.`;
+    const prompt = `Generate a storyboard based on the following idea and constraints.
+
+**Idea:**
+"${idea}"
+
+**Constraint Checklist:**
+- **Number of Scenes:** Exactly ${config.sceneCount}. This is a strict requirement.
+- **Visual Style:** ${config.visualStyle}.
+- **Overall Mood:** ${config.mood}.
+- **Video Pacing:** Suitable for a ${config.videoLength} video.
+- **Language for Prompts:** ${config.descriptionLanguage}.
+- **Camera Simulation:** ${config.cameraType === CameraType.DEFAULT ? 'Standard digital camera' : `Simulate the look of a ${config.cameraType} camera.`}
+- **Lens & Framing:** ${config.lensType === LensType.DEFAULT ? 'Use appropriate framing for the shot' : `Shot with a ${config.lensType} lens.`}
+- **Lighting Style:** ${config.lightingStyle === LightingStyle.DEFAULT ? 'Use appropriate lighting for the mood' : `Lit with ${config.lightingStyle}.`}
+- **Color Grade:** ${config.colorTone === ColorTone.NATURAL ? 'Natural, balanced colors' : `Apply a ${config.colorTone} color grade.`}
+- **Film Grain:** ${config.filmGrain ? 'Add subtle, realistic film grain.' : 'No film grain.'}
+
+
+**Output Format:**
+For each of the ${config.sceneCount} scenes, provide:
+1. "actionDescription": A short, one-sentence summary of the camera movement or character action.
+2. "startFramePrompt": A detailed, visually rich description for the FIRST frame of the action. **This prompt must incorporate every constraint from the checklist above.**
+3. "endFramePrompt": A detailed, visually rich description for the LAST frame of the action. **This prompt must also incorporate every constraint from the checklist.**
+
+The final output must be a JSON array with exactly ${config.sceneCount} objects.`;
 
     // Corrected: Use ai.models.generateContent with responseSchema for JSON output
     const response = await ai.models.generateContent({
         model: config.textModel,
         contents: prompt,
         config: {
+            systemInstruction: systemInstruction,
             responseMimeType: "application/json",
             responseSchema: {
                 type: Type.ARRAY,
@@ -154,7 +176,11 @@ export const generateStoryboard = async (idea: string, config: StoryboardConfig)
     if (!parsed || !Array.isArray(parsed)) {
         throw new Error("Failed to generate a valid storyboard structure.");
     }
-    return parsed.map(p => ({ description: p.description }));
+    return parsed.map(p => ({
+        actionDescription: p.actionDescription,
+        startFramePrompt: p.startFramePrompt,
+        endFramePrompt: p.endFramePrompt,
+    }));
 };
 
 export const generateDetailedStoryboard = async (originalScene: string, language: string): Promise<{ description: string }[]> => {
@@ -194,9 +220,13 @@ export const generateDetailedStoryboard = async (originalScene: string, language
     return parsed.map(p => ({ description: p.description }));
 };
 
-export const generateImageForPanel = async (description: string, config: { imageModel: string, aspectRatio: AspectRatio, visualStyle?: VisualStyle }): Promise<string> => {
-    const visualStylePrompt = config.visualStyle ? (config.visualStyle === VisualStyle.PHOTOREALISTIC ? 'photorealistic, cinematic' : config.visualStyle) : '';
-    let prompt = `${description}${visualStylePrompt ? `, ${visualStylePrompt} style` : ''}, high detail`;
+export const generateImageForPanel = async (description: string, config: StoryboardConfig): Promise<string> => {
+    // This is a simplified combination for the final image prompt. 
+    // The main heavy lifting of combining prompts is done in generateStoryboard.
+    // This ensures that even when regenerating a single image, some context is maintained.
+    const visualStylePrompt = config.visualStyle === VisualStyle.PHOTOREALISTIC ? 'photorealistic, cinematic' : config.visualStyle;
+    const negativePrompt = ', no text, no subtitles, no words, no letters, no characters, no watermark';
+    let prompt = `${description}, ${visualStylePrompt} style, high detail${negativePrompt}`;
 
     if (config.imageModel === 'gemini-2.5-flash-image') {
         // Add aspect ratio to prompt as this model doesn't have a config for it in generateContent

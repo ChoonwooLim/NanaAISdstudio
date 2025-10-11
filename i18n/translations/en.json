@@ -12,7 +12,8 @@
     "importProjectFile": "Import a project file",
     "exportProjectFile": "Export current project to a file",
     "openGallery": "Open project gallery",
-    "regenerateImage": "Regenerate Image",
+    "regenerateStartImage": "Regenerate Start Frame",
+    "regenerateEndImage": "Regenerate End Frame",
     "generateVideo": "Generate Video Clip",
     "expandScene": "Expand Scene into more shots",
     "deletePanel": "Delete Panel"
@@ -61,13 +62,59 @@
     "pacing": "Pacing",
     "descriptionLanguage": "Description Language",
     "textModel": "Text Model",
-    "imageSection": "Image Generation",
+    "imageSection": "Cinematography",
     "aspectRatio": "Aspect Ratio",
     "visualStyle": "Visual Style",
     "imageModel": "Image Model",
     "videoSection": "Video Generation",
     "videoModel": "Video Model",
-    "videoNote": "Video generation is an experimental feature and may take several minutes per clip."
+    "videoNote": "Video generation is an experimental feature and may take several minutes per clip.",
+    "camera": "Camera",
+    "colorTone": "Color Tone",
+    "lens": "Lens",
+    "lighting": "Lighting",
+    "filmGrain": "Film Grain"
+  },
+  "aspectRatioOptions": {
+    "landscape": "16:9 Landscape",
+    "portrait": "9:16 Portrait",
+    "square": "1:1 Square",
+    "anamorphic": "2.39:1 Anamorphic",
+    "widescreen": "1.85:1 Widescreen",
+    "academy": "1.37:1 Academy",
+    "vertical": "3:4 Vertical",
+    "classic": "4:3 Classic"
+  },
+  "cameraOptions": {
+    "default": "Default",
+    "arri": "ARRI ALEXA 65",
+    "red": "RED Monstro 8K",
+    "panavision": "Panavision DXL2",
+    "imax": "IMAX 70mm"
+  },
+  "colorToneOptions": {
+    "natural": "Natural",
+    "technicolor": "Technicolor",
+    "bleachBypass": "Bleach Bypass",
+    "sepia": "Sepia",
+    "tealOrange": "Teal & Orange",
+    "vibrant": "Vibrant Saturation",
+    "muted": "Muted Cool"
+  },
+  "lensOptions": {
+    "default": "Default",
+    "wide": "Wide Angle (24mm)",
+    "standard": "Standard (50mm)",
+    "telephoto": "Telephoto (85mm)",
+    "macro": "Macro"
+  },
+  "lightingOptions": {
+    "default": "Default",
+    "goldenHour": "Golden Hour",
+    "noir": "High Contrast Noir",
+    "soft": "Soft Diffused",
+    "neon": "Neon Noir",
+    "daylight": "Natural Daylight"
   },
   "storyboardDisplay": {
     "title": "Generated Storyboard",
@@ -75,7 +122,8 @@
     "estimatedLength": "Est. Length: {{duration}}s",
     "generatingScenes": "Generating scene descriptions...\nThis may take a moment.",
     "scene": "Scene #{{index}}",
-    "generateImage": "Generate Image",
+    "generateStart": "Generate Start",
+    "generateEnd": "Generate End",
     "generatingImage": "Generating image...",
     "imageError": "Image generation failed.",
     "quotaErrorTitle": "Quota Reached",
@@ -87,7 +135,12 @@
     "duration": "Duration",
     "googleAIStudio": "Google AI Studio",
     "exportPdf": "Export PDF",
-    "exportingPdf": "Exporting..."
+    "exportingPdf": "Exporting...",
+    "startFrame": "Start Frame",
+    "endFrame": "End Frame",
+    "actionDescription": "Action Description",
+    "startFramePrompt": "Start Frame Prompt",
+    "endFramePrompt": "End Frame Prompt"
   },
   "detailedModal": {
     "title": "Expand Scene",

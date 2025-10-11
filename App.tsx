@@ -40,6 +40,10 @@ import {
     ImageTransitionState,
     ImageTransitionStyle,
     VideoModelID,
+    CameraType,
+    ColorTone,
+    LensType,
+    LightingStyle,
 } from './types';
 import * as geminiService from './services/geminiService';
 import * as db from './services/db';
@@ -82,6 +86,12 @@ const App: React.FC = () => {
         textModel: 'gemini-2.5-flash',
         imageModel: 'imagen-4.0-generate-001',
         videoModel: VideoModelID.STANDARD,
+        // New cinematic defaults
+        cameraType: CameraType.DEFAULT,
+        colorTone: ColorTone.NATURAL,
+        lensType: LensType.DEFAULT,
+        lightingStyle: LightingStyle.DEFAULT,
+        filmGrain: false,
     };
     const [storyboardConfig, setStoryboardConfig] = useState<StoryboardConfig>(initialStoryboardConfig);
     const [storyIdea, setStoryIdea] = useState('');
@@ -204,23 +214,39 @@ const App: React.FC = () => {
         setStoryboardPanels([]);
 
         try {
-            const panels = await geminiService.generateStoryboard(idea, config);
-            const initialPanels: StoryboardPanel[] = panels.map(p => ({ ...p, isLoadingImage: false }));
+            const panelsData = await geminiService.generateStoryboard(idea, config);
+            const initialPanels: StoryboardPanel[] = panelsData.map(p => ({ 
+                description: p.actionDescription,
+                startFramePrompt: p.startFramePrompt,
+                endFramePrompt: p.endFramePrompt,
+                isLoadingImage: false,
+                isLoadingEndImage: false,
+            }));
             setStoryboardPanels(initialPanels);
             setIsGeneratingStoryboard(false);
 
             if (!oneByOne) {
                 // Generate all images sequentially if not in one-by-one mode
-                setStoryboardPanels(currentPanels => currentPanels.map(p => ({...p, isLoadingImage: true})));
+                setStoryboardPanels(currentPanels => currentPanels.map(p => ({...p, isLoadingImage: true, isLoadingEndImage: true })));
 
-                for (let i = 0; i < panels.length; i++) {
+                for (let i = 0; i < panelsData.length; i++) {
+                    // Generate start image
                     try {
-                        const imageBase64 = await geminiService.generateImageForPanel(panels[i].description, config);
+                        const imageBase64 = await geminiService.generateImageForPanel(panelsData[i].startFramePrompt, config);
                         setStoryboardPanels(current => current.map((p, idx) => idx === i ? { ...p, imageUrl: `data:image/jpeg;base64,${imageBase64}`, isLoadingImage: false } : p));
                     } catch (imgErr: any) {
-                        console.error(`Image generation failed for panel ${i}:`, imgErr);
+                        console.error(`Start image generation failed for panel ${i}:`, imgErr);
                         const isQuotaError = imgErr.message?.includes('429');
                         setStoryboardPanels(current => current.map((p, idx) => idx === i ? { ...p, imageUrl: isQuotaError ? 'quota_error' : 'error', isLoadingImage: false } : p));
+                    }
+                    // Generate end image
+                    try {
+                        const imageBase64 = await geminiService.generateImageForPanel(panelsData[i].endFramePrompt, config);
+                        setStoryboardPanels(current => current.map((p, idx) => idx === i ? { ...p, endImageUrl: `data:image/jpeg;base64,${imageBase64}`, isLoadingEndImage: false } : p));
+                    } catch (imgErr: any) {
+                        console.error(`End image generation failed for panel ${i}:`, imgErr);
+                        const isQuotaError = imgErr.message?.includes('429');
+                        setStoryboardPanels(current => current.map((p, idx) => idx === i ? { ...p, endImageUrl: isQuotaError ? 'quota_error' : 'error', isLoadingEndImage: false } : p));
                     }
                 }
             }
@@ -234,24 +260,44 @@ const App: React.FC = () => {
         }
     };
 
-    const handleGenerateSingleImage = async (index: number, description: string) => {
-        setStoryboardPanels(currentPanels => 
-            currentPanels.map((p, i) => i === index ? { ...p, imageUrl: undefined, isLoadingImage: true } : p)
-        );
+    const handleGenerateFrameImage = async (index: number, frameType: 'start' | 'end') => {
+        const panel = storyboardPanels[index];
+        const prompt = frameType === 'start' ? panel.startFramePrompt : panel.endFramePrompt;
+
+        if (frameType === 'start') {
+            setStoryboardPanels(current => current.map((p, i) => i === index ? { ...p, imageUrl: undefined, isLoadingImage: true } : p));
+        } else {
+            setStoryboardPanels(current => current.map((p, i) => i === index ? { ...p, endImageUrl: undefined, isLoadingEndImage: true } : p));
+        }
 
         try {
-            const imageBase64 = await geminiService.generateImageForPanel(description, storyboardConfig);
-            setStoryboardPanels(currentPanels => 
-                currentPanels.map((p, i) => i === index ? { ...p, imageUrl: `data:image/jpeg;base64,${imageBase64}`, isLoadingImage: false } : p)
-            );
+            const imageBase64 = await geminiService.generateImageForPanel(prompt, storyboardConfig);
+            const imageUrl = `data:image/jpeg;base64,${imageBase64}`;
+            if (frameType === 'start') {
+                setStoryboardPanels(current => current.map((p, i) => i === index ? { ...p, imageUrl, isLoadingImage: false } : p));
+            } else {
+                setStoryboardPanels(current => current.map((p, i) => i === index ? { ...p, endImageUrl: imageUrl, isLoadingEndImage: false } : p));
+            }
         } catch (e) {
-            console.error(`Image generation failed for panel ${index}:`, e);
-            setStoryboardPanels(currentPanels => 
-                currentPanels.map((p, i) => i === index ? { ...p, imageUrl: 'error', isLoadingImage: false } : p)
-            );
+            console.error(`Image generation failed for panel ${index} (${frameType}):`, e);
+            if (frameType === 'start') {
+                setStoryboardPanels(current => current.map((p, i) => i === index ? { ...p, imageUrl: 'error', isLoadingImage: false } : p));
+            } else {
+                setStoryboardPanels(current => current.map((p, i) => i === index ? { ...p, endImageUrl: 'error', isLoadingEndImage: false } : p));
+            }
         }
     };
     
+    const handlePanelDescriptionChange = (index: number, field: 'description' | 'startFramePrompt' | 'endFramePrompt', value: string) => {
+        setStoryboardPanels(currentPanels => 
+            currentPanels.map((panel, i) => 
+                i === index 
+                ? { ...panel, [field]: value }
+                : panel
+            )
+        );
+    };
+
     const handleExpandScene = async (sceneDescription: string, index: number) => {
         setOriginalSceneContext({ description: sceneDescription, index });
         setIsDetailedModalOpen(true);
@@ -282,38 +328,26 @@ const App: React.FC = () => {
         if (originalSceneContext) {
             const { index } = originalSceneContext;
             const newStoryboardPanels = [...storyboardPanels];
-            const panelsToInsert = editedPanels.map(p => ({
+            const panelsToInsert: StoryboardPanel[] = editedPanels.map(p => ({
                 description: p.description,
+                startFramePrompt: p.description, // For static shots, prompts are the same
+                endFramePrompt: p.description,
                 imageUrl: p.imageUrl,
+                endImageUrl: p.imageUrl, // For static shots, images are the same
                 isLoadingImage: false,
+                isLoadingEndImage: false,
                 sceneDuration: 4,
             }));
-            newStoryboardPanels.splice(index, 1, ...panelsToInsert);
+            // Insert new panels after the original one, without removing it
+            newStoryboardPanels.splice(index + 1, 0, ...panelsToInsert);
             setStoryboardPanels(newStoryboardPanels);
         }
         setIsDetailedModalOpen(false);
     };
-
-    const handleRegenerateImage = async (index: number, description: string) => {
-        setStoryboardPanels(currentPanels => 
-            currentPanels.map((p, i) => i === index ? { ...p, imageUrl: undefined, isLoadingImage: true } : p)
-        );
-
-        try {
-            const imageBase64 = await geminiService.generateImageForPanel(description, storyboardConfig);
-            setStoryboardPanels(currentPanels => 
-                currentPanels.map((p, i) => i === index ? { ...p, imageUrl: `data:image/jpeg;base64,${imageBase64}`, isLoadingImage: false } : p)
-            );
-        } catch (e) {
-            console.error(`Image regeneration failed for panel ${index}:`, e);
-            setStoryboardPanels(currentPanels => 
-                currentPanels.map((p, i) => i === index ? { ...p, imageUrl: 'error', isLoadingImage: false } : p)
-            );
-        }
-    };
     
-    const handleRegenerateVideo = (index: number, description: string, imageUrl: string) => {
-        if (!imageUrl || !imageUrl.startsWith('data:image')) return;
+    const handleRegenerateVideo = (index: number) => {
+        const panel = storyboardPanels[index];
+        if (!panel.imageUrl || !panel.imageUrl.startsWith('data:image')) return;
 
         const executeGeneration = async () => {
             generatingVideoCounter.current += 1;
@@ -325,8 +359,9 @@ const App: React.FC = () => {
             });
 
             try {
-                const imageBase64 = imageUrl.split(',')[1];
-                const videoUrl = await geminiService.generateVideoForPanel(description, imageBase64, storyboardConfig.videoModel);
+                const imageBase64 = panel.imageUrl.split(',')[1];
+                // Use the end frame prompt as the goal for video generation
+                const videoUrl = await geminiService.generateVideoForPanel(panel.endFramePrompt, imageBase64, storyboardConfig.videoModel);
                 setStoryboardPanels(currentPanels => {
                     const newPanels = [...currentPanels];
                     newPanels[index] = { ...newPanels[index], videoUrl, isLoadingVideo: false };
@@ -441,17 +476,26 @@ const App: React.FC = () => {
 
             for (let i = 0; i < storyboardPanels.length; i++) {
                 const panel = storyboardPanels[i];
-                if (!panel.imageUrl || panel.imageUrl.startsWith('error')) continue;
+                if (!panel.imageUrl || panel.imageUrl.startsWith('error') || !panel.endImageUrl || panel.endImageUrl.startsWith('error')) continue;
 
                 const panelEl = document.createElement('div');
                 panelEl.innerHTML = `
-                    <div style="border: 1px solid #334155; border-radius: 8px; overflow: hidden; margin-bottom: 20px;">
-                        <div style="padding: 8px 12px; background-color: #1e293b;">
+                    <div style="border: 1px solid #334155; border-radius: 8px; overflow: hidden; margin-bottom: 20px; page-break-inside: avoid;">
+                        <div style="padding: 12px; background-color: #1e293b;">
                             <h3 style="font-size: 16px; font-weight: bold;">Scene #${i + 1}</h3>
                         </div>
-                        <img src="${panel.imageUrl}" style="width: 100%; height: auto; display: block; aspect-ratio: 16/9; object-fit: cover;" />
-                        <div style="padding: 16px; background-color: #1e293b;">
-                            <p style="font-size: 14px; line-height: 1.6; color: #cbd5e1; white-space: pre-wrap; word-wrap: break-word;">${panel.description}</p>
+                        <div style="padding: 16px; background-color: #1e293b; border-top: 1px solid #334155;">
+                            <p style="font-size: 12px; line-height: 1.5; color: #94a3b8; white-space: pre-wrap; word-wrap: break-word;"><b>Action:</b> ${panel.description}</p>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background-color: #334155;">
+                            <div style="position: relative; background-color: #0f172a;">
+                                <div style="position: absolute; top: 8px; left: 8px; background-color: rgba(0,0,0,0.5); color: white; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px;">Start Frame</div>
+                                <img src="${panel.imageUrl}" style="width: 100%; height: auto; display: block; aspect-ratio: 16/9; object-fit: cover;" />
+                            </div>
+                            <div style="position: relative; background-color: #0f172a;">
+                                 <div style="position: absolute; top: 8px; left: 8px; background-color: rgba(0,0,0,0.5); color: white; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px;">End Frame</div>
+                                <img src="${panel.endImageUrl}" style="width: 100%; height: auto; display: block; aspect-ratio: 16/9; object-fit: cover;" />
+                            </div>
                         </div>
                     </div>`;
                 
@@ -654,6 +698,8 @@ const App: React.FC = () => {
                     endImageUrl: currentImage,
                     isLoadingImage: false,
                     sceneDuration: 5,
+                    startFramePrompt: keyframePrompts[i-1],
+                    endFramePrompt: keyframePrompts[i],
                 };
 
                 setMediaArtState(s => ({ ...s, panels: [...s.panels, newPanel] }));
@@ -819,12 +865,12 @@ const App: React.FC = () => {
                                             setStoryboardPanels(newPanels);
                                         }}
                                         onRegenerateVideo={handleRegenerateVideo}
-                                        onGenerateSingleImage={handleGenerateSingleImage}
-                                        onRegenerateImage={handleRegenerateImage}
+                                        onGenerateFrameImage={handleGenerateFrameImage}
                                         onDeletePanel={(index) => setStoryboardPanels(storyboardPanels.filter((_, i) => i !== index))}
                                         isGeneratingImages={isGeneratingImages}
                                         onExportPdf={handleExportPdf}
                                         isExportingPdf={isExportingPdf}
+                                        onPanelDescriptionChange={handlePanelDescriptionChange}
                                     />
                                 )}
                                 <VideoDisplay panels={storyboardPanels} />

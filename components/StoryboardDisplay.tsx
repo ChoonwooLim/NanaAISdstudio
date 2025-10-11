@@ -12,14 +12,65 @@ interface StoryboardDisplayProps {
     storyIdea: string;
     onExpandScene: (sceneDescription: string, index: number) => void;
     onSceneDurationChange: (index: number, duration: number) => void;
-    onRegenerateVideo: (index: number, description: string, imageUrl: string) => void;
-    onGenerateSingleImage: (index: number, description: string) => void;
-    onRegenerateImage: (index: number, description: string) => void;
+    onRegenerateVideo: (index: number) => void;
+    onGenerateFrameImage: (index: number, frameType: 'start' | 'end') => void;
     onDeletePanel: (index: number) => void;
     isGeneratingImages: boolean;
     onExportPdf: () => void;
     isExportingPdf: boolean;
+    onPanelDescriptionChange: (index: number, field: 'description' | 'startFramePrompt' | 'endFramePrompt', value: string) => void;
 }
+
+const FrameDisplay: React.FC<{
+    panel: StoryboardPanel;
+    index: number;
+    frameType: 'start' | 'end';
+    onGenerate: () => void;
+}> = ({ panel, index, frameType, onGenerate }) => {
+    const { t } = useTranslation();
+    const isStart = frameType === 'start';
+    const imageUrl = isStart ? panel.imageUrl : panel.endImageUrl;
+    const isLoading = isStart ? panel.isLoadingImage : panel.isLoadingEndImage;
+    const label = isStart ? t('storyboardDisplay.startFrame') : t('storyboardDisplay.endFrame');
+    const generateLabel = isStart ? t('storyboardDisplay.generateStart') : t('storyboardDisplay.generateEnd');
+
+    return (
+        <div className="relative aspect-video bg-slate-800 flex items-center justify-center rounded-lg overflow-hidden">
+            <div className="absolute top-2 left-2 bg-black/50 text-white text-xs font-bold px-2 py-1 rounded z-10">
+                {label}
+            </div>
+            
+            {!imageUrl && !isLoading && (
+                <button onClick={onGenerate} className="flex flex-col items-center text-slate-400 hover:text-white transition-colors">
+                    <ImageIcon className="w-8 h-8"/>
+                    <span className="text-sm font-semibold mt-2">{generateLabel}</span>
+                </button>
+            )}
+             {isLoading && (
+                <div className="flex flex-col items-center text-slate-400">
+                    <LoadingSpinner />
+                    <p className="text-xs mt-2">{t('storyboardDisplay.generatingImage')}</p>
+                </div>
+            )}
+            {imageUrl && imageUrl !== 'error' && imageUrl !== 'quota_error' && (
+                <img src={imageUrl} alt={`Panel ${index + 1} ${frameType}`} className="w-full h-full object-cover" />
+            )}
+            {imageUrl === 'error' && (
+                <div className="text-red-400 text-center p-4">
+                    <p className="font-semibold">Oops!</p>
+                    <p className="text-xs">{t('storyboardDisplay.imageError')}</p>
+                </div>
+            )}
+             {imageUrl === 'quota_error' && (
+                <div className="text-yellow-400 text-center p-4">
+                    <p className="font-semibold">{t('storyboardDisplay.quotaErrorTitle')}</p>
+                    <p className="text-xs mt-1">{t('storyboardDisplay.imageError')}</p>
+                    <p className="text-xs mt-1 text-slate-400">{t('storyboardDisplay.checkPlan')}</p>
+                </div>
+            )}
+        </div>
+    );
+};
 
 const StoryboardDisplay: React.FC<StoryboardDisplayProps> = ({
     panels,
@@ -27,12 +78,12 @@ const StoryboardDisplay: React.FC<StoryboardDisplayProps> = ({
     onExpandScene,
     onSceneDurationChange,
     onRegenerateVideo,
-    onGenerateSingleImage,
-    onRegenerateImage,
+    onGenerateFrameImage,
     onDeletePanel,
     isGeneratingImages,
     onExportPdf,
-    isExportingPdf
+    isExportingPdf,
+    onPanelDescriptionChange,
 }) => {
     const { t } = useTranslation();
 
@@ -41,7 +92,7 @@ const StoryboardDisplay: React.FC<StoryboardDisplayProps> = ({
     }
 
     const totalDuration = panels.reduce((acc, panel) => acc + (panel.sceneDuration || 4), 0);
-    const canExportPdf = panels.length > 0 && !panels.some(p => !p.imageUrl || p.imageUrl === 'error');
+    const canExportPdf = panels.length > 0 && !panels.some(p => !p.imageUrl || p.imageUrl === 'error' || !p.endImageUrl || p.endImageUrl === 'error');
 
     return (
         <div className="mt-8 animate-fade-in">
@@ -75,79 +126,91 @@ const StoryboardDisplay: React.FC<StoryboardDisplayProps> = ({
                 </div>
             </div>
 
-            {isGeneratingImages && panels.every(p => p.isLoadingImage) && (
+            {(isGeneratingImages || isGeneratingImages) && panels.every(p => p.isLoadingImage && p.isLoadingEndImage) && (
                  <div className="flex flex-col items-center justify-center text-slate-400 py-12">
                     <LoadingSpinner />
                     <p className="mt-3 text-sm text-center whitespace-pre-wrap">{t('storyboardDisplay.generatingScenes')}</p>
                 </div>
             )}
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-6">
                 {panels.map((panel, index) => (
-                    <div key={index} className="bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden flex flex-col">
-                        <div className="relative aspect-video bg-slate-800 flex items-center justify-center">
-                            <div className="absolute top-2 left-2 bg-black/50 text-white text-xs font-bold px-2 py-1 rounded">
+                    <div key={index} className="relative bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden flex flex-col">
+                        <div className="p-3 bg-slate-900/50 flex justify-between items-center">
+                             <h3 className="font-bold text-slate-300">
                                 {t('storyboardDisplay.scene', { index: index + 1 })}
-                            </div>
-                            
-                            {!panel.imageUrl && !panel.isLoadingImage && (
-                                <button onClick={() => onGenerateSingleImage(index, panel.description)} className="flex flex-col items-center text-slate-400 hover:text-white transition-colors">
-                                    <ImageIcon className="w-8 h-8"/>
-                                    <span className="text-sm font-semibold mt-2">{t('storyboardDisplay.generateImage')}</span>
-                                </button>
-                            )}
-                             {panel.isLoadingImage && (
-                                <div className="flex flex-col items-center text-slate-400">
-                                    <LoadingSpinner />
-                                    <p className="text-xs mt-2">{t('storyboardDisplay.generatingImage')}</p>
-                                </div>
-                            )}
-                            {panel.imageUrl && panel.imageUrl !== 'error' && panel.imageUrl !== 'quota_error' && (
-                                <img src={panel.imageUrl} alt={`Panel ${index + 1}: ${panel.description}`} className="w-full h-full object-cover" />
-                            )}
-                            {panel.imageUrl === 'error' && (
-                                <div className="text-red-400 text-center p-4">
-                                    <p className="font-semibold">Oops!</p>
-                                    <p className="text-xs">{t('storyboardDisplay.imageError')}</p>
-                                </div>
-                            )}
-                             {panel.imageUrl === 'quota_error' && (
-                                <div className="text-yellow-400 text-center p-4">
-                                    <p className="font-semibold">{t('storyboardDisplay.quotaErrorTitle')}</p>
-                                    <p className="text-xs mt-1">{t('storyboardDisplay.imageError')}</p>
-                                    <p className="text-xs mt-1 text-slate-400">{t('storyboardDisplay.checkPlan')}</p>
-                                </div>
-                            )}
-
-                            {panel.isLoadingVideo && (
-                                <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center text-white">
-                                    <LoadingSpinner />
-                                    <p className="text-sm mt-2">{t('storyboardDisplay.generatingClip')}</p>
-                                    <p className="text-xs text-slate-400">{t('storyboardDisplay.generatingClipHint')}</p>
-                                </div>
-                            )}
-                             {panel.videoUrl === 'error' && (
-                                <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center text-red-400 p-4 text-center">
-                                    <p className="font-semibold">{t('storyboardDisplay.videoErrorTitle')}</p>
-                                    <p className="text-xs mt-1">{panel.videoError || t('storyboardDisplay.videoError')}</p>
-                                </div>
-                            )}
-
+                            </h3>
                         </div>
-                        <div className="p-4 flex-grow flex flex-col">
+
+                        {/* Action Description */}
+                        <div className="p-4 border-b border-slate-700">
+                            <label htmlFor={`action-desc-${index}`} className="block text-xs text-slate-400 mb-1 font-semibold">{t('storyboardDisplay.actionDescription')}</label>
                             <textarea
-                                defaultValue={panel.description}
-                                readOnly // For now, will implement editing later if needed
-                                rows={3}
-                                className="w-full bg-slate-700/50 border border-slate-600 rounded-md p-2 text-xs text-slate-300 leading-relaxed focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
+                                id={`action-desc-${index}`}
+                                value={panel.description}
+                                onChange={(e) => onPanelDescriptionChange(index, 'description', e.target.value)}
+                                rows={2}
+                                className="w-full bg-slate-700/50 border border-slate-600 rounded-md p-2 text-sm text-slate-300 leading-relaxed focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-y"
                             />
                         </div>
+
+                        {/* Frames and Prompts Grid */}
+                        <div className="p-4 flex-grow">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {/* Start Frame Column */}
+                                <div className="flex flex-col gap-2">
+                                    <FrameDisplay panel={panel} index={index} frameType="start" onGenerate={() => onGenerateFrameImage(index, 'start')} />
+                                    <div>
+                                        <label htmlFor={`start-prompt-${index}`} className="block text-xs text-slate-400 mb-1 font-semibold">{t('storyboardDisplay.startFramePrompt')}</label>
+                                        <textarea
+                                            id={`start-prompt-${index}`}
+                                            value={panel.startFramePrompt}
+                                            onChange={(e) => onPanelDescriptionChange(index, 'startFramePrompt', e.target.value)}
+                                            rows={5}
+                                            className="w-full bg-slate-700/50 border border-slate-600 rounded-md p-2 text-xs text-slate-300 leading-relaxed focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-y"
+                                        />
+                                    </div>
+                                </div>
+                                {/* End Frame Column */}
+                                <div className="flex flex-col gap-2">
+                                    <FrameDisplay panel={panel} index={index} frameType="end" onGenerate={() => onGenerateFrameImage(index, 'end')} />
+                                    <div>
+                                        <label htmlFor={`end-prompt-${index}`} className="block text-xs text-slate-400 mb-1 font-semibold">{t('storyboardDisplay.endFramePrompt')}</label>
+                                        <textarea
+                                            id={`end-prompt-${index}`}
+                                            value={panel.endFramePrompt}
+                                            onChange={(e) => onPanelDescriptionChange(index, 'endFramePrompt', e.target.value)}
+                                            rows={5}
+                                            className="w-full bg-slate-700/50 border border-slate-600 rounded-md p-2 text-xs text-slate-300 leading-relaxed focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-y"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {panel.isLoadingVideo && (
+                            <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center text-white z-20">
+                                <LoadingSpinner />
+                                <p className="text-sm mt-2">{t('storyboardDisplay.generatingClip')}</p>
+                                <p className="text-xs text-slate-400">{t('storyboardDisplay.generatingClipHint')}</p>
+                            </div>
+                        )}
+                         {panel.videoUrl === 'error' && (
+                            <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center text-red-400 p-4 text-center z-20">
+                                <p className="font-semibold">{t('storyboardDisplay.videoErrorTitle')}</p>
+                                <p className="text-xs mt-1">{panel.videoError || t('storyboardDisplay.videoError')}</p>
+                            </div>
+                        )}
+
                         <div className="p-3 border-t border-slate-700 bg-slate-900/30 flex items-center justify-between flex-wrap gap-2">
                             <div className="flex items-center gap-2">
-                                <button onClick={() => onRegenerateImage(index, panel.description)} title={t('tooltips.regenerateImage')} className="p-2 bg-slate-700 hover:bg-slate-600 rounded-md transition-colors disabled:opacity-50" disabled={panel.isLoadingImage || !panel.imageUrl}>
+                                <button onClick={() => onGenerateFrameImage(index, 'start')} title={t('tooltips.regenerateStartImage')} className="p-2 bg-slate-700 hover:bg-slate-600 rounded-md transition-colors disabled:opacity-50" disabled={panel.isLoadingImage}>
                                     <RefreshIcon className="w-4 h-4 text-slate-300"/>
                                 </button>
-                                <button onClick={() => onRegenerateVideo(index, panel.description, panel.imageUrl!)} title={t('tooltips.generateVideo')} className="p-2 bg-slate-700 hover:bg-slate-600 rounded-md transition-colors disabled:opacity-50" disabled={panel.isLoadingVideo || !panel.imageUrl || panel.imageUrl === 'error' || panel.imageUrl === 'quota_error'}>
+                                <button onClick={() => onGenerateFrameImage(index, 'end')} title={t('tooltips.regenerateEndImage')} className="p-2 bg-slate-700 hover:bg-slate-600 rounded-md transition-colors disabled:opacity-50" disabled={panel.isLoadingEndImage}>
+                                    <RefreshIcon className="w-4 h-4 text-slate-300"/>
+                                </button>
+                                <button onClick={() => onRegenerateVideo(index)} title={t('tooltips.generateVideo')} className="p-2 bg-slate-700 hover:bg-slate-600 rounded-md transition-colors disabled:opacity-50" disabled={panel.isLoadingVideo || !panel.imageUrl || panel.imageUrl === 'error' || panel.imageUrl === 'quota_error'}>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-300"><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/></svg>
                                 </button>
                                 <button onClick={() => onExpandScene(panel.description, index)} title={t('tooltips.expandScene')} className="p-2 bg-slate-700 hover:bg-slate-600 rounded-md transition-colors disabled:opacity-50" disabled={panel.isLoadingImage}>

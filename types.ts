@@ -20,6 +20,9 @@ export enum AspectRatio {
     LANDSCAPE = '16:9',
     PORTRAIT = '9:16',
     SQUARE = '1:1',
+    ANAMORPHIC = '2.39:1',
+    WIDESCREEN_CINEMA = '1.85:1',
+    ACADEMY = '1.37:1',
     VERTICAL = '3:4',
     CLASSIC = '4:3',
 }
@@ -45,6 +48,41 @@ export enum Mood {
     MYSTERIOUS = 'mysterious and suspenseful',
     COMEDIC = 'comedic and lighthearted',
     EPIC = 'epic and grandiose',
+}
+
+export enum CameraType {
+    DEFAULT = 'default',
+    ARRI_ALEXA_65 = 'ARRI Alexa 65',
+    RED_MONSTRO_8K = 'RED Monstro 8K',
+    PANAVISION_DXL2 = 'Panavision DXL2',
+    IMAX = 'IMAX 70mm',
+}
+
+export enum ColorTone {
+    NATURAL = 'natural',
+    TECHNICOLOR = 'vibrant Technicolor',
+    BLEACH_BYPASS = 'gritty bleach bypass',
+    SEPIA = 'warm sepia tone',
+    TEAL_AND_ORANGE = 'modern teal and orange',
+    VIBRANT_SATURATION = 'vibrant, high-saturation',
+    MUTED_COOL = 'muted, cool blue tones',
+}
+
+export enum LensType {
+    DEFAULT = 'default',
+    WIDE_ANGLE_24MM = 'wide-angle 24mm',
+    STANDARD_50MM = 'standard 50mm',
+    TELEPHOTO_85MM = 'telephoto 85mm',
+    MACRO = 'macro close-up',
+}
+
+export enum LightingStyle {
+    DEFAULT = 'default',
+    GOLDEN_HOUR = 'warm, golden hour lighting',
+    HIGH_CONTRAST_NOIR = 'high-contrast noir (chiaroscuro)',
+    SOFT_DIFFUSED = 'soft, diffused studio lighting',
+    NEON_NOIR = 'saturated neon noir',
+    NATURAL_DAYLIGHT = 'natural, bright daylight',
 }
 
 export enum MediaArtStyle {
@@ -101,18 +139,31 @@ export interface StoryboardConfig {
     textModel: string;
     imageModel: string;
     videoModel: VideoModelID;
+    // New Cinematic Options
+    cameraType: CameraType;
+    colorTone: ColorTone;
+    lensType: LensType;
+    lightingStyle: LightingStyle;
+    filmGrain: boolean;
 }
 
 export interface StoryboardPanel {
-    description: string;
-    imageUrl?: string;
+    description: string; // The action description
+
+    startFramePrompt: string;
+    imageUrl?: string; // This is the startImageUrl
+    isLoadingImage?: boolean; // This is the isLoadingStartImage
+
+    endFramePrompt: string;
     endImageUrl?: string;
-    isLoadingImage?: boolean;
+    isLoadingEndImage?: boolean;
+
     videoUrl?: string;
     isLoadingVideo?: boolean;
     videoError?: string | null;
     sceneDuration?: number;
 }
+
 
 export interface DetailedStoryboardPanel {
     description: string;

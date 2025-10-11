@@ -8,7 +8,11 @@ import {
     FamousPainting, 
     VisualArtEffect,
     MediaArtStyleParams,
-    VideoModelID
+    VideoModelID,
+    CameraType,
+    ColorTone,
+    LensType,
+    LightingStyle
 } from './types';
 
 export const TONE_OPTIONS: { value: Tone; label: string }[] = [
@@ -18,12 +22,15 @@ export const TONE_OPTIONS: { value: Tone; label: string }[] = [
     { value: Tone.LUXURIOUS, label: 'Luxurious & Elegant' },
 ];
 
-export const ASPECT_RATIO_OPTIONS: { value: AspectRatio; label: string }[] = [
-    { value: AspectRatio.LANDSCAPE, label: '16:9 Landscape' },
-    { value: AspectRatio.PORTRAIT, label: '9:16 Portrait' },
-    { value: AspectRatio.SQUARE, label: '1:1 Square' },
-    { value: AspectRatio.VERTICAL, label: '3:4 Vertical' },
-    { value: AspectRatio.CLASSIC, label: '4:3 Classic' },
+export const ASPECT_RATIO_OPTIONS: { value: AspectRatio; labelKey: string }[] = [
+    { value: AspectRatio.LANDSCAPE, labelKey: 'aspectRatioOptions.landscape' },
+    { value: AspectRatio.PORTRAIT, labelKey: 'aspectRatioOptions.portrait' },
+    { value: AspectRatio.SQUARE, labelKey: 'aspectRatioOptions.square' },
+    { value: AspectRatio.ANAMORPHIC, labelKey: 'aspectRatioOptions.anamorphic' },
+    { value: AspectRatio.WIDESCREEN_CINEMA, labelKey: 'aspectRatioOptions.widescreen' },
+    { value: AspectRatio.ACADEMY, labelKey: 'aspectRatioOptions.academy' },
+    { value: AspectRatio.VERTICAL, labelKey: 'aspectRatioOptions.vertical' },
+    { value: AspectRatio.CLASSIC, labelKey: 'aspectRatioOptions.classic' },
 ];
 
 export const VISUAL_STYLE_OPTIONS: { value: VisualStyle; label: string }[] = [
@@ -47,6 +54,41 @@ export const MOOD_OPTIONS: { value: Mood; label: string }[] = [
     { value: Mood.MYSTERIOUS, label: 'Mysterious & Suspenseful' },
     { value: Mood.COMEDIC, label: 'Comedic & Lighthearted' },
     { value: Mood.EPIC, label: 'Epic & Grandiose' },
+];
+
+export const CAMERA_TYPE_OPTIONS: { value: CameraType; labelKey: string }[] = [
+    { value: CameraType.DEFAULT, labelKey: 'cameraOptions.default' },
+    { value: CameraType.ARRI_ALEXA_65, labelKey: 'cameraOptions.arri' },
+    { value: CameraType.RED_MONSTRO_8K, labelKey: 'cameraOptions.red' },
+    { value: CameraType.PANAVISION_DXL2, labelKey: 'cameraOptions.panavision' },
+    { value: CameraType.IMAX, labelKey: 'cameraOptions.imax' },
+];
+
+export const COLOR_TONE_OPTIONS: { value: ColorTone; labelKey: string }[] = [
+    { value: ColorTone.NATURAL, labelKey: 'colorToneOptions.natural' },
+    { value: ColorTone.TECHNICOLOR, labelKey: 'colorToneOptions.technicolor' },
+    { value: ColorTone.BLEACH_BYPASS, labelKey: 'colorToneOptions.bleachBypass' },
+    { value: ColorTone.SEPIA, labelKey: 'colorToneOptions.sepia' },
+    { value: ColorTone.TEAL_AND_ORANGE, labelKey: 'colorToneOptions.tealOrange' },
+    { value: ColorTone.VIBRANT_SATURATION, labelKey: 'colorToneOptions.vibrant' },
+    { value: ColorTone.MUTED_COOL, labelKey: 'colorToneOptions.muted' },
+];
+
+export const LENS_TYPE_OPTIONS: { value: LensType; labelKey: string }[] = [
+    { value: LensType.DEFAULT, labelKey: 'lensOptions.default' },
+    { value: LensType.WIDE_ANGLE_24MM, labelKey: 'lensOptions.wide' },
+    { value: LensType.STANDARD_50MM, labelKey: 'lensOptions.standard' },
+    { value: LensType.TELEPHOTO_85MM, labelKey: 'lensOptions.telephoto' },
+    { value: LensType.MACRO, labelKey: 'lensOptions.macro' },
+];
+
+export const LIGHTING_STYLE_OPTIONS: { value: LightingStyle; labelKey: string }[] = [
+    { value: LightingStyle.DEFAULT, labelKey: 'lightingOptions.default' },
+    { value: LightingStyle.GOLDEN_HOUR, labelKey: 'lightingOptions.goldenHour' },
+    { value: LightingStyle.HIGH_CONTRAST_NOIR, labelKey: 'lightingOptions.noir' },
+    { value: LightingStyle.SOFT_DIFFUSED, labelKey: 'lightingOptions.soft' },
+    { value: LightingStyle.NEON_NOIR, labelKey: 'lightingOptions.neon' },
+    { value: LightingStyle.NATURAL_DAYLIGHT, labelKey: 'lightingOptions.daylight' },
 ];
 
 export const DESCRIPTION_LANGUAGE_OPTIONS: { value: string; label: string }[] = [

@@ -12,7 +12,8 @@
     "importProjectFile": "프로젝트 파일 가져오기",
     "exportProjectFile": "현재 프로젝트를 파일로 내보내기",
     "openGallery": "프로젝트 갤러리 열기",
-    "regenerateImage": "이미지 재생성",
+    "regenerateStartImage": "시작 프레임 재생성",
+    "regenerateEndImage": "종료 프레임 재생성",
     "generateVideo": "비디오 클립 생성",
     "expandScene": "장면을 더 많은 샷으로 확장",
     "deletePanel": "패널 삭제"
@@ -61,13 +62,59 @@
     "pacing": "속도",
     "descriptionLanguage": "설명 언어",
     "textModel": "텍스트 모델",
-    "imageSection": "이미지 생성",
+    "imageSection": "시네마토그래피",
     "aspectRatio": "화면 비율",
     "visualStyle": "비주얼 스타일",
     "imageModel": "이미지 모델",
     "videoSection": "비디오 생성",
     "videoModel": "비디오 모델",
-    "videoNote": "비디오 생성은 실험적인 기능이며 클립당 몇 분이 소요될 수 있습니다."
+    "videoNote": "비디오 생성은 실험적인 기능이며 클립당 몇 분이 소요될 수 있습니다.",
+    "camera": "카메라",
+    "colorTone": "컬러 톤",
+    "lens": "렌즈",
+    "lighting": "조명",
+    "filmGrain": "필름 그레인"
+  },
+  "aspectRatioOptions": {
+    "landscape": "16:9 가로",
+    "portrait": "9:16 세로",
+    "square": "1:1 정사각형",
+    "anamorphic": "2.39:1 아나모픽",
+    "widescreen": "1.85:1 와이드스크린",
+    "academy": "1.37:1 아카데미",
+    "vertical": "3:4 수직",
+    "classic": "4:3 클래식"
+  },
+  "cameraOptions": {
+    "default": "기본",
+    "arri": "ARRI ALEXA 65",
+    "red": "RED Monstro 8K",
+    "panavision": "Panavision DXL2",
+    "imax": "IMAX 70mm"
+  },
+  "colorToneOptions": {
+    "natural": "내추럴",
+    "technicolor": "테크니컬러",
+    "bleachBypass": "블리치 바이패스",
+    "sepia": "세피아",
+    "tealOrange": "틸 앤 오렌지",
+    "vibrant": "고채도",
+    "muted": "저채도 쿨톤"
+  },
+  "lensOptions": {
+    "default": "기본",
+    "wide": "광각 (24mm)",
+    "standard": "표준 (50mm)",
+    "telephoto": "망원 (85mm)",
+    "macro": "매크로"
+  },
+  "lightingOptions": {
+    "default": "기본",
+    "goldenHour": "골든 아워",
+    "noir": "하이 콘트라스트 누아르",
+    "soft": "부드러운 확산광",
+    "neon": "네온 누아르",
+    "daylight": "자연광"
   },
   "storyboardDisplay": {
     "title": "생성된 스토리보드",
@@ -75,7 +122,8 @@
     "estimatedLength": "예상 길이: {{duration}}초",
     "generatingScenes": "장면 설명을 생성 중입니다...\n잠시만 기다려주세요.",
     "scene": "장면 #{{index}}",
-    "generateImage": "이미지 생성",
+    "generateStart": "시작 프레임 생성",
+    "generateEnd": "종료 프레임 생성",
     "generatingImage": "이미지 생성 중...",
     "imageError": "이미지 생성에 실패했습니다.",
     "quotaErrorTitle": "할당량 도달",
@@ -87,7 +135,12 @@
     "duration": "길이",
     "googleAIStudio": "Google AI Studio",
     "exportPdf": "PDF로 내보내기",
-    "exportingPdf": "내보내는 중..."
+    "exportingPdf": "내보내는 중...",
+    "startFrame": "시작 프레임",
+    "endFrame": "종료 프레임",
+    "actionDescription": "액션 설명",
+    "startFramePrompt": "시작 프레임 프롬프트",
+    "endFramePrompt": "종료 프레임 프롬프트"
   },
   "detailedModal": {
     "title": "장면 확장",

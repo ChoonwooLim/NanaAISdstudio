@@ -1,5 +1,5 @@
 import React from 'react';
-import { StoryboardConfig, AspectRatio, VisualStyle, VideoLength, Mood, VideoModelID } from '../types';
+import { StoryboardConfig, AspectRatio, VisualStyle, VideoLength, Mood, VideoModelID, CameraType, ColorTone, LensType, LightingStyle } from '../types';
 import { 
     ASPECT_RATIO_OPTIONS, 
     VISUAL_STYLE_OPTIONS, 
@@ -8,7 +8,11 @@ import {
     DESCRIPTION_LANGUAGE_OPTIONS,
     TEXT_MODEL_OPTIONS,
     IMAGE_MODEL_OPTIONS,
-    VIDEO_MODEL_OPTIONS
+    VIDEO_MODEL_OPTIONS,
+    CAMERA_TYPE_OPTIONS,
+    COLOR_TONE_OPTIONS,
+    LENS_TYPE_OPTIONS,
+    LIGHTING_STYLE_OPTIONS,
 } from '../constants';
 import { useTranslation } from '../i18n/LanguageContext';
 
@@ -22,17 +26,19 @@ const StoryboardSettings: React.FC<StoryboardSettingsProps> = ({ config, setConf
     
     const handleConfigChange = (field: keyof StoryboardConfig, value: any) => {
         const newConfig = { ...config, [field]: value };
-        // Ensure scene count is within bounds
+        
         if (field === 'sceneCount') {
             const numValue = parseInt(value, 10);
-            if (numValue < 2) {
-                newConfig.sceneCount = 2;
-            } else if (numValue > 10) {
-                newConfig.sceneCount = 10;
-            } else {
-                newConfig.sceneCount = numValue;
+            if (!isNaN(numValue)) {
+                 if (numValue < 2) newConfig.sceneCount = 2;
+                 else if (numValue > 10) newConfig.sceneCount = 10;
+                 else newConfig.sceneCount = numValue;
             }
         }
+        if (field === 'filmGrain') {
+            newConfig.filmGrain = value as boolean;
+        }
+
         setConfig(newConfig);
     };
 
@@ -121,20 +127,7 @@ const StoryboardSettings: React.FC<StoryboardSettingsProps> = ({ config, setConf
             {/* Image Settings */}
             <div className="p-4 border border-slate-700 rounded-lg bg-slate-900/30">
                 <h3 className="block text-xs font-semibold text-slate-300 mb-4">{t('storyboardSettings.imageSection')}</h3>
-                 <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                     <div>
-                        <label htmlFor="aspectRatio" className="block text-xs font-medium text-slate-400 mb-1">
-                           {t('storyboardSettings.aspectRatio')}
-                        </label>
-                        <select
-                            id="aspectRatio"
-                            value={config.aspectRatio}
-                            onChange={(e) => handleConfigChange('aspectRatio', e.target.value as AspectRatio)}
-                            className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        >
-                            {ASPECT_RATIO_OPTIONS.map(o => <option key={o.value} value={o.value} className="bg-slate-800">{o.label}</option>)}
-                        </select>
-                    </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-4">
                      <div>
                         <label htmlFor="visualStyle" className="block text-xs font-medium text-slate-400 mb-1">
                            {t('storyboardSettings.visualStyle')}
@@ -148,7 +141,91 @@ const StoryboardSettings: React.FC<StoryboardSettingsProps> = ({ config, setConf
                             {VISUAL_STYLE_OPTIONS.map(o => <option key={o.value} value={o.value} className="bg-slate-800">{o.label}</option>)}
                         </select>
                     </div>
+                     <div>
+                        <label htmlFor="aspectRatio" className="block text-xs font-medium text-slate-400 mb-1">
+                           {t('storyboardSettings.aspectRatio')}
+                        </label>
+                        <select
+                            id="aspectRatio"
+                            value={config.aspectRatio}
+                            onChange={(e) => handleConfigChange('aspectRatio', e.target.value as AspectRatio)}
+                            className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                            {ASPECT_RATIO_OPTIONS.map(o => <option key={o.value} value={o.value} className="bg-slate-800">{t(o.labelKey)}</option>)}
+                        </select>
+                    </div>
                     <div>
+                        <label htmlFor="cameraType" className="block text-xs font-medium text-slate-400 mb-1">
+                           {t('storyboardSettings.camera')}
+                        </label>
+                        <select
+                            id="cameraType"
+                            value={config.cameraType}
+                            onChange={(e) => handleConfigChange('cameraType', e.target.value as CameraType)}
+                            className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                            {CAMERA_TYPE_OPTIONS.map(o => <option key={o.value} value={o.value} className="bg-slate-800">{t(o.labelKey)}</option>)}
+                        </select>
+                    </div>
+                     <div>
+                        <label htmlFor="lensType" className="block text-xs font-medium text-slate-400 mb-1">
+                           {t('storyboardSettings.lens')}
+                        </label>
+                        <select
+                            id="lensType"
+                            value={config.lensType}
+                            onChange={(e) => handleConfigChange('lensType', e.target.value as LensType)}
+                            className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                            {LENS_TYPE_OPTIONS.map(o => <option key={o.value} value={o.value} className="bg-slate-800">{t(o.labelKey)}</option>)}
+                        </select>
+                    </div>
+                     <div>
+                        <label htmlFor="lightingStyle" className="block text-xs font-medium text-slate-400 mb-1">
+                           {t('storyboardSettings.lighting')}
+                        </label>
+                        <select
+                            id="lightingStyle"
+                            value={config.lightingStyle}
+                            onChange={(e) => handleConfigChange('lightingStyle', e.target.value as LightingStyle)}
+                            className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                            {LIGHTING_STYLE_OPTIONS.map(o => <option key={o.value} value={o.value} className="bg-slate-800">{t(o.labelKey)}</option>)}
+                        </select>
+                    </div>
+                     <div>
+                        <label htmlFor="colorTone" className="block text-xs font-medium text-slate-400 mb-1">
+                           {t('storyboardSettings.colorTone')}
+                        </label>
+                        <select
+                            id="colorTone"
+                            value={config.colorTone}
+                            onChange={(e) => handleConfigChange('colorTone', e.target.value as ColorTone)}
+                            className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                            {COLOR_TONE_OPTIONS.map(o => <option key={o.value} value={o.value} className="bg-slate-800">{t(o.labelKey)}</option>)}
+                        </select>
+                    </div>
+                     <div className="md:col-span-1 flex items-end">
+                        <div className="relative flex items-start">
+                            <div className="flex h-6 items-center">
+                                <input
+                                id="filmGrain"
+                                name="filmGrain"
+                                type="checkbox"
+                                checked={config.filmGrain}
+                                onChange={(e) => handleConfigChange('filmGrain', e.target.checked)}
+                                className="h-4 w-4 rounded border-slate-500 bg-slate-700 text-blue-600 focus:ring-blue-600"
+                                />
+                            </div>
+                            <div className="ml-3 text-sm">
+                                <label htmlFor="filmGrain" className="font-medium text-slate-300">
+                                    {t('storyboardSettings.filmGrain')}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="md:col-span-2">
                         <label htmlFor="imageModel" className="block text-xs font-medium text-slate-400 mb-1">
                             {t('storyboardSettings.imageModel')}
                         </label>

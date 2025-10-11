@@ -1,4 +1,4 @@
-import { Tone, StoryboardConfig, AspectRatio, VisualStyle, VideoLength, Mood, SampleProduct, SampleStory, VideoModelID } from './types';
+import { Tone, StoryboardConfig, AspectRatio, VisualStyle, VideoLength, Mood, SampleProduct, SampleStory, VideoModelID, CameraType, ColorTone, LensType, LightingStyle } from './types';
 
 // Type helper for localized data
 type Localized<T> = {
@@ -445,6 +445,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         },
         ko: {
@@ -460,6 +465,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         }
     },
@@ -477,6 +487,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         },
         ko: {
@@ -492,6 +507,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         }
     },
@@ -509,6 +529,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         },
         ko: {
@@ -524,6 +549,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         }
     },
@@ -541,6 +571,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         },
         ko: {
@@ -556,6 +591,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         }
     },
@@ -573,6 +613,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         },
         ko: {
@@ -588,6 +633,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         }
     },
@@ -605,6 +655,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         },
         ko: {
@@ -620,6 +675,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         }
     },
@@ -637,6 +697,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         },
         ko: {
@@ -652,6 +717,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         }
     },
@@ -669,6 +739,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         },
         ko: {
@@ -684,6 +759,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         }
     },
@@ -701,6 +781,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         },
         ko: {
@@ -716,6 +801,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         }
     },
@@ -733,6 +823,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         },
         ko: {
@@ -748,6 +843,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         }
     },
@@ -765,6 +865,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         },
         ko: {
@@ -780,6 +885,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         }
     },
@@ -797,6 +907,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         },
         ko: {
@@ -812,6 +927,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         }
     },
@@ -829,6 +949,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         },
         ko: {
@@ -844,6 +969,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         }
     },
@@ -861,6 +991,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         },
         ko: {
@@ -876,6 +1011,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         }
     },
@@ -893,6 +1033,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         },
         ko: {
@@ -908,6 +1053,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         }
     },
@@ -925,6 +1075,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         },
         ko: {
@@ -940,6 +1095,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         }
     },
@@ -957,6 +1117,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         },
         ko: {
@@ -972,6 +1137,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         }
     },
@@ -989,6 +1159,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         },
         ko: {
@@ -1004,6 +1179,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         }
     },
@@ -1021,6 +1201,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         },
         ko: {
@@ -1036,6 +1221,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         }
     },
@@ -1053,6 +1243,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         },
         ko: {
@@ -1068,6 +1263,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         }
     },
@@ -1085,6 +1285,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         },
         ko: {
@@ -1100,6 +1305,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         }
     },
@@ -1117,6 +1327,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         },
         ko: {
@@ -1132,6 +1347,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         }
     },
@@ -1149,6 +1369,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         },
         ko: {
@@ -1164,6 +1389,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         }
     },
@@ -1181,6 +1411,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         },
         ko: {
@@ -1196,6 +1431,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         }
     },
@@ -1213,6 +1453,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         },
         ko: {
@@ -1228,6 +1473,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         }
     },
@@ -1245,6 +1495,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         },
         ko: {
@@ -1260,6 +1515,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         }
     },
@@ -1277,6 +1537,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         },
         ko: {
@@ -1292,6 +1557,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         }
     },
@@ -1309,6 +1579,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         },
         ko: {
@@ -1324,6 +1599,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         }
     },
@@ -1341,6 +1621,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         },
         ko: {
@@ -1356,6 +1641,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         }
     },
@@ -1373,6 +1663,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         },
         ko: {
@@ -1388,6 +1683,11 @@ export const sampleStoryIdeasData: { [key: string]: Localized<SampleStory> } = {
                 textModel: 'gemini-2.5-flash',
                 imageModel: 'imagen-4.0-generate-001',
                 videoModel: VideoModelID.STANDARD,
+                cameraType: CameraType.DEFAULT,
+                colorTone: ColorTone.NATURAL,
+                lensType: LensType.DEFAULT,
+                lightingStyle: LightingStyle.DEFAULT,
+                filmGrain: false,
             }
         }
     }
