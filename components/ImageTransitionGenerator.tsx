@@ -55,8 +55,8 @@ const MediaUploader: React.FC<{
         <div className="w-full max-w-lg mx-auto">
             <label htmlFor={id} className="w-full aspect-video flex flex-col items-center justify-center gap-3 bg-slate-900/70 hover:bg-slate-800/80 border-2 border-dashed border-slate-700 hover:border-blue-500 rounded-2xl p-6 cursor-pointer transition-colors">
                 <UploadIcon className="w-10 h-10 text-slate-500" />
-                <span className="font-semibold text-slate-300 text-center">{t('imageUploader.cta')}</span>
-                <span className="text-sm text-slate-500 text-center">{t('imageUploader.hint')}</span>
+                <span className="font-semibold text-slate-300 text-center">{t('mediaUploader.cta')}</span>
+                <span className="text-sm text-slate-500 text-center">{t('mediaUploader.hint')}</span>
             </label>
             <input id={id} type="file" accept="image/*,video/mp4,video/webm" className="hidden" onChange={handleFileChange} />
         </div>

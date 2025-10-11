@@ -323,6 +323,10 @@
     "asciiStorm": "아스키 스톰"
   },
   "imageUploader": {
+    "cta": "클릭하여 이미지 업로드",
+    "hint": "PNG, JPG, 또는 WEBP. 최대 5MB."
+  },
+  "mediaUploader": {
     "cta": "이미지 또는 비디오 업로드",
     "hint": "PNG, JPG, MP4, WEBM. 최대 10MB."
   },

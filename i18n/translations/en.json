@@ -323,6 +323,10 @@
     "asciiStorm": "ASCII Storm"
   },
   "imageUploader": {
+    "cta": "Click to upload an image",
+    "hint": "PNG, JPG, or WEBP. Max 5MB."
+  },
+  "mediaUploader": {
     "cta": "Click to upload an image or video",
     "hint": "PNG, JPG, MP4, WEBM. Max 10MB."
   },

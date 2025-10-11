@@ -221,22 +221,27 @@ export const generateDetailedStoryboard = async (originalScene: string, language
 };
 
 export const generateImageForPanel = async (description: string, config: StoryboardConfig): Promise<string> => {
-    // This is a simplified combination for the final image prompt. 
-    // The main heavy lifting of combining prompts is done in generateStoryboard.
-    // This ensures that even when regenerating a single image, some context is maintained.
     const visualStylePrompt = config.visualStyle === VisualStyle.PHOTOREALISTIC ? 'photorealistic, cinematic' : config.visualStyle;
     const negativePrompt = ', no text, no subtitles, no words, no letters, no characters, no watermark';
     let prompt = `${description}, ${visualStylePrompt} style, high detail${negativePrompt}`;
 
-    if (config.imageModel === 'gemini-2.5-flash-image') {
-        // Add aspect ratio to prompt as this model doesn't have a config for it in generateContent
+    const supportedImagenRatios = [
+        AspectRatio.LANDSCAPE,      // "16:9"
+        AspectRatio.PORTRAIT,       // "9:16"
+        AspectRatio.SQUARE,         // "1:1"
+        AspectRatio.VERTICAL,       // "3:4"
+        AspectRatio.CLASSIC,        // "4:3"
+    ];
+    
+    const useFlashModelForAspectRatio = !supportedImagenRatios.includes(config.aspectRatio);
+
+    if (config.imageModel === 'gemini-2.5-flash-image' || useFlashModelForAspectRatio) {
         prompt += `, aspect ratio ${aspectRatiosMap[config.aspectRatio]}`;
 
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash-image',
             contents: { parts: [{ text: prompt }] },
             config: {
-                // Per guidelines, image editing/generation with this model requires both modalities
                 responseModalities: [Modality.IMAGE, Modality.TEXT],
             },
         });
@@ -250,9 +255,8 @@ export const generateImageForPanel = async (description: string, config: Storybo
         }
         throw new Error("Image generation with gemini-2.5-flash-image failed, no image part in response.");
     } else {
-        // Corrected: Use ai.models.generateImages for image generation as per guidelines.
         const response = await ai.models.generateImages({
-            model: config.imageModel,
+            model: config.imageModel, // Assumes 'imagen-4.0-generate-001'
             prompt,
             config: {
                 numberOfImages: 1,
@@ -264,7 +268,6 @@ export const generateImageForPanel = async (description: string, config: Storybo
         if (!response.generatedImages || response.generatedImages.length === 0) {
             throw new Error("Image generation failed, no images returned.");
         }
-        // Corrected: Access generated image bytes from the correct response property.
         return response.generatedImages[0].image.imageBytes;
     }
 };

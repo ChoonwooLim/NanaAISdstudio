@@ -26,7 +26,8 @@ const StoryboardInputForm: React.FC<StoryboardInputFormProps> = ({ onGenerate, i
         }
     };
 
-    const estimatedCost = (config.sceneCount * COST_PER_IMAGEN_IMAGE).toFixed(2);
+    const imageCount = config.sceneCount * 2;
+    const estimatedCost = (imageCount * COST_PER_IMAGEN_IMAGE).toFixed(2);
     
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -83,7 +84,7 @@ const StoryboardInputForm: React.FC<StoryboardInputFormProps> = ({ onGenerate, i
             
             {!generateOneByOne && (
                  <div className="p-3 bg-yellow-900/30 border border-yellow-700/50 rounded-lg text-center text-xs text-yellow-300">
-                    {t('storyboardForm.costWarning', { cost: estimatedCost })}
+                    {t('storyboardForm.costWarning', { count: imageCount, cost: estimatedCost })}
                 </div>
             )}
 
