@@ -206,7 +206,7 @@ export const generateImageForPanel = async (description: string, config: { image
             model: 'gemini-2.5-flash-image',
             contents: { parts: [{ text: prompt }] },
             config: {
-                // Per guidelines, image editing requires both. Assume generation does too for safety.
+                // Per guidelines, image editing/generation with this model requires both modalities
                 responseModalities: [Modality.IMAGE, Modality.TEXT],
             },
         });
