@@ -196,24 +196,47 @@ export const generateDetailedStoryboard = async (originalScene: string, language
 
 export const generateImageForPanel = async (description: string, config: { imageModel: string, aspectRatio: AspectRatio, visualStyle?: VisualStyle }): Promise<string> => {
     const visualStylePrompt = config.visualStyle ? (config.visualStyle === VisualStyle.PHOTOREALISTIC ? 'photorealistic, cinematic' : config.visualStyle) : '';
-    const prompt = `${description}${visualStylePrompt ? `, ${visualStylePrompt} style` : ''}, high detail`;
+    let prompt = `${description}${visualStylePrompt ? `, ${visualStylePrompt} style` : ''}, high detail`;
 
-    // Corrected: Use ai.models.generateImages for image generation as per guidelines.
-    const response = await ai.models.generateImages({
-        model: config.imageModel,
-        prompt,
-        config: {
-            numberOfImages: 1,
-            aspectRatio: aspectRatiosMap[config.aspectRatio],
-            outputMimeType: 'image/jpeg',
+    if (config.imageModel === 'gemini-2.5-flash-image') {
+        // Add aspect ratio to prompt as this model doesn't have a config for it in generateContent
+        prompt += `, aspect ratio ${aspectRatiosMap[config.aspectRatio]}`;
+
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash-image',
+            contents: { parts: [{ text: prompt }] },
+            config: {
+                // Per guidelines, image editing requires both. Assume generation does too for safety.
+                responseModalities: [Modality.IMAGE, Modality.TEXT],
+            },
+        });
+
+        if (response.candidates && response.candidates.length > 0) {
+            for (const part of response.candidates[0].content.parts) {
+                if (part.inlineData) {
+                    return part.inlineData.data; // base64 string
+                }
+            }
         }
-    });
+        throw new Error("Image generation with gemini-2.5-flash-image failed, no image part in response.");
+    } else {
+        // Corrected: Use ai.models.generateImages for image generation as per guidelines.
+        const response = await ai.models.generateImages({
+            model: config.imageModel,
+            prompt,
+            config: {
+                numberOfImages: 1,
+                aspectRatio: aspectRatiosMap[config.aspectRatio],
+                outputMimeType: 'image/jpeg',
+            }
+        });
 
-    if (!response.generatedImages || response.generatedImages.length === 0) {
-        throw new Error("Image generation failed, no images returned.");
+        if (!response.generatedImages || response.generatedImages.length === 0) {
+            throw new Error("Image generation failed, no images returned.");
+        }
+        // Corrected: Access generated image bytes from the correct response property.
+        return response.generatedImages[0].image.imageBytes;
     }
-    // Corrected: Access generated image bytes from the correct response property.
-    return response.generatedImages[0].image.imageBytes;
 };
 
 export const generateVideoForPanel = async (prompt: string, imageBase64: string, videoModel: VideoModelID, isMediaArt: boolean = false): Promise<string> => {
